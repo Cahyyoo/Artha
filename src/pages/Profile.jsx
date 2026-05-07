@@ -1,0 +1,443 @@
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import {
+  FiUser, FiMail, FiPhone, FiBriefcase, FiMapPin,
+  FiCamera, FiSave, FiCheck, FiLoader, FiEdit3,
+  FiShield, FiStar, FiCalendar, FiTrendingUp
+} from "react-icons/fi";
+
+const businessCategories = [
+  "Kuliner & Makanan",
+  "Fashion & Pakaian",
+  "Perdagangan Umum",
+  "Jasa & Layanan",
+  "Teknologi & Digital",
+  "Pertanian & Perkebunan",
+  "Kesehatan & Kecantikan",
+  "Pendidikan",
+  "Otomotif",
+  "Lainnya",
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } },
+};
+
+const FormInput = ({ label, icon: Icon, type = "text", value, onChange, placeholder, disabled }) => (
+  <div className="space-y-1.5">
+    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+      <Icon size={11} />
+      {label}
+    </label>
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400
+          focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white
+          disabled:opacity-60 disabled:cursor-not-allowed
+          transition-all duration-200 shadow-sm focus:shadow-md focus:shadow-indigo-500/10"
+      />
+    </div>
+  </div>
+);
+
+const FormSelect = ({ label, icon: Icon, value, onChange, options }) => (
+  <div className="space-y-1.5">
+    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+      <Icon size={11} />
+      {label}
+    </label>
+    <select
+      value={value}
+      onChange={onChange}
+      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800
+        focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white
+        transition-all duration-200 shadow-sm focus:shadow-md focus:shadow-indigo-500/10
+        cursor-pointer appearance-none"
+    >
+      <option value="">Pilih Kategori...</option>
+      {options.map((opt) => (
+        <option key={opt} value={opt}>{opt}</option>
+      ))}
+    </select>
+  </div>
+);
+
+export default function Profile() {
+  const fileInputRef = useRef(null);
+  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
+  const [profile, setProfile] = useState({
+    namaLengkap: "",
+    email: "",
+    telepon: "",
+    namaUsaha: "",
+    kategoriUsaha: "",
+    alamatUsaha: "",
+    bio: "",
+    joinDate: "Mei 2026",
+  });
+
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setProfile((prev) => ({
+          ...prev,
+          namaLengkap: user?.user_metadata?.nama_lengkap || "",
+          email: user?.email || "",
+          namaUsaha: user?.user_metadata?.nama_usaha || "",
+          telepon: user?.user_metadata?.telepon || "",
+          kategoriUsaha: user?.user_metadata?.kategori_usaha || "",
+          alamatUsaha: user?.user_metadata?.alamat_usaha || "",
+          bio: user?.user_metadata?.bio || "",
+        }));
+        if (user?.user_metadata?.avatar) {
+          setAvatarPreview(user.user_metadata.avatar);
+        }
+      } catch (e) {
+        console.error("Failed to parse user data", e);
+      }
+    }
+  }, []);
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setAvatarPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleChange = (field) => (e) =>
+    setProfile((prev) => ({ ...prev, [field]: e.target.value }));
+
+  const handleSave = () => {
+    if (saveStatus === "saving") return;
+    setSaveStatus("saving");
+
+    // Simulate API call; persist to localStorage
+    setTimeout(() => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const updatedUser = {
+          ...user,
+          email: profile.email,
+          user_metadata: {
+            ...user.user_metadata,
+            nama_lengkap: profile.namaLengkap,
+            telepon: profile.telepon,
+            nama_usaha: profile.namaUsaha,
+            kategori_usaha: profile.kategoriUsaha,
+            alamat_usaha: profile.alamatUsaha,
+            bio: profile.bio,
+            ...(avatarPreview ? { avatar: avatarPreview } : {}),
+          },
+        };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    }, 1500);
+  };
+
+  const initials = profile.namaLengkap
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase() || "A";
+
+  const completionFields = [
+    profile.namaLengkap,
+    profile.email,
+    profile.telepon,
+    profile.namaUsaha,
+    profile.kategoriUsaha,
+    profile.alamatUsaha,
+  ];
+  const completionPercent = Math.round(
+    (completionFields.filter(Boolean).length / completionFields.length) * 100
+  );
+
+  return (
+    <motion.div
+      className="max-w-5xl mx-auto space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Page Title */}
+      <motion.div variants={cardVariants}>
+        <h1 className="text-2xl md:text-3xl font-black text-slate-800">Profil Akun</h1>
+        <p className="text-slate-500 text-sm font-medium mt-1">Kelola informasi pribadi dan data usaha Anda</p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ===== LEFT COLUMN ===== */}
+        <div className="lg:col-span-1 space-y-6">
+
+          {/* Profile Card */}
+          <motion.div variants={cardVariants} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Banner Gradient */}
+            <div className="h-24 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 relative">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(255,255,255,0.15),transparent_60%)]" />
+            </div>
+
+            {/* Avatar + Info */}
+            <div className="px-6 pb-6 -mt-12">
+              <div className="relative w-max mb-4">
+                <div className="w-20 h-20 rounded-2xl ring-4 ring-white shadow-lg overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl font-black text-white">{initials}</span>
+                  )}
+                </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute -bottom-1 -right-1 w-7 h-7 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors"
+                  title="Ganti foto profil"
+                >
+                  <FiCamera size={13} strokeWidth={2.5} />
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+              </div>
+
+              <h2 className="text-lg font-black text-slate-800 leading-tight">
+                {profile.namaLengkap || "Nama Belum Diisi"}
+              </h2>
+              <p className="text-sm text-slate-500 font-medium mt-0.5">{profile.email || "—"}</p>
+              {profile.namaUsaha && (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <FiBriefcase size={12} className="text-indigo-500" />
+                  <span className="text-xs font-bold text-indigo-600">{profile.namaUsaha}</span>
+                </div>
+              )}
+
+              {/* Inline Progress Bar */}
+              <div className="mt-5 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Kelengkapan Profil</span>
+                  <span className={`text-[11px] font-black ${
+                    completionPercent === 100 ? 'text-emerald-500' : 'text-indigo-500'
+                  }`}>{completionPercent}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <motion.div
+                    className={`h-1.5 rounded-full ${
+                      completionPercent === 100
+                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                    }`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${completionPercent}%` }}
+                    transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1], delay: 0.4 }}
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                  {[
+                    { label: "Nama", filled: !!profile.namaLengkap },
+                    { label: "Email", filled: !!profile.email },
+                    { label: "Telepon", filled: !!profile.telepon },
+                    { label: "Usaha", filled: !!profile.namaUsaha },
+                    { label: "Kategori", filled: !!profile.kategoriUsaha },
+                    { label: "Alamat", filled: !!profile.alamatUsaha },
+                  ].map(({ label, filled }) => (
+                    <span
+                      key={label}
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        filled
+                          ? 'bg-indigo-50 text-indigo-600'
+                          : 'bg-slate-100 text-slate-400'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${ filled ? 'bg-indigo-500' : 'bg-slate-300'}`} />
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+
+
+          {/* Stats Card */}
+          <motion.div variants={cardVariants} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ringkasan Akun</h3>
+            <div className="space-y-3">
+              {[
+                { icon: FiCalendar, label: "Bergabung Sejak", value: profile.joinDate, color: "text-indigo-500 bg-indigo-50" },
+                { icon: FiTrendingUp, label: "Status Akun", value: "Aktif", color: "text-emerald-500 bg-emerald-50" },
+                { icon: FiShield, label: "Keamanan", value: "Terverifikasi", color: "text-purple-500 bg-purple-50" },
+              ].map(({ icon: Icon, label, value, color }) => (
+                <div key={label} className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${color}`}>
+                    <Icon size={14} strokeWidth={2.5} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wide leading-none mb-0.5">{label}</p>
+                    <p className="text-sm font-bold text-slate-700">{value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ===== RIGHT COLUMN ===== */}
+        <div className="lg:col-span-2 space-y-6">
+
+          {/* Personal Info Card */}
+          <motion.div variants={cardVariants} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-500/30">
+                <FiUser size={15} className="text-white" strokeWidth={2.5} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-800">Informasi Pribadi</h3>
+                <p className="text-xs text-slate-500 font-medium">Data diri dan kontak Anda</p>
+              </div>
+            </div>
+
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <FormInput
+                label="Nama Lengkap"
+                icon={FiUser}
+                value={profile.namaLengkap}
+                onChange={handleChange("namaLengkap")}
+                placeholder="Masukkan nama lengkap Anda"
+              />
+              <FormInput
+                label="Alamat Email"
+                icon={FiMail}
+                type="email"
+                value={profile.email}
+                onChange={handleChange("email")}
+                placeholder="email@contoh.com"
+                disabled
+              />
+              <div className="sm:col-span-2">
+                <FormInput
+                  label="Nomor Telepon"
+                  icon={FiPhone}
+                  type="tel"
+                  value={profile.telepon}
+                  onChange={handleChange("telepon")}
+                  placeholder="08xxxxxxxxxx"
+                />
+              </div>
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <FiEdit3 size={11} />
+                  Bio Singkat
+                </label>
+                <textarea
+                  value={profile.bio}
+                  onChange={handleChange("bio")}
+                  placeholder="Ceritakan sedikit tentang Anda atau usaha Anda..."
+                  rows={3}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white
+                    transition-all duration-200 shadow-sm focus:shadow-md focus:shadow-indigo-500/10 resize-none"
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Business Info Card */}
+          <motion.div variants={cardVariants} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-sm shadow-purple-500/30">
+                <FiBriefcase size={15} className="text-white" strokeWidth={2.5} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-800">Informasi Usaha</h3>
+                <p className="text-xs text-slate-500 font-medium">Data usaha Anda di platform Artha</p>
+              </div>
+            </div>
+
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="sm:col-span-2">
+                <FormInput
+                  label="Nama Usaha"
+                  icon={FiBriefcase}
+                  value={profile.namaUsaha}
+                  onChange={handleChange("namaUsaha")}
+                  placeholder="Masukkan nama usaha Anda"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <FormSelect
+                  label="Kategori Usaha"
+                  icon={FiStar}
+                  value={profile.kategoriUsaha}
+                  onChange={handleChange("kategoriUsaha")}
+                  options={businessCategories}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <FiMapPin size={11} />
+                    Alamat Usaha
+                  </label>
+                  <textarea
+                    value={profile.alamatUsaha}
+                    onChange={handleChange("alamatUsaha")}
+                    placeholder="Masukkan alamat lengkap usaha Anda..."
+                    rows={3}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white
+                      transition-all duration-200 shadow-sm focus:shadow-md focus:shadow-indigo-500/10 resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Save Button */}
+          <motion.div variants={cardVariants} className="flex items-center justify-end">
+            <button
+              onClick={handleSave}
+              disabled={saveStatus === "saving" || saveStatus === "saved"}
+              className={`flex items-center gap-2.5 px-8 py-3.5 rounded-2xl font-black text-sm transition-all duration-300 shadow-md active:scale-95
+                ${saveStatus === "saved"
+                  ? "bg-emerald-500 text-white shadow-emerald-500/30"
+                  : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/30"
+                }
+                disabled:opacity-80 disabled:cursor-not-allowed`}
+            >
+              {saveStatus === "saving" && <FiLoader size={16} className="animate-spin" />}
+              {saveStatus === "saved" && <FiCheck size={16} strokeWidth={3} />}
+              {saveStatus === "idle" && <FiSave size={16} strokeWidth={2.5} />}
+
+              {saveStatus === "saving" && "Menyimpan..."}
+              {saveStatus === "saved" && "Tersimpan!"}
+              {saveStatus === "idle" && "Simpan Perubahan"}
+            </button>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
