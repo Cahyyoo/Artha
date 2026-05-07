@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/* 1. Definisikan Warna Kustom di sini (Pengganti tailwind.config.js) */
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+
+  --shadow-card:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* 2. Reset & Base Styles */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-50 text-slate-800 font-sans antialiased;
+  }
+}
+
+/* 3. Custom Scrollbar (v4 mendukung standar CSS) */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-300;
+}
+
+/* 4. Components */
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-slate-100 p-5;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white px-4 py-2 rounded-xl font-medium text-sm
+           hover:bg-primary-700 active:scale-95 transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ... masukkan class .btn-secondary, .input, dll tetap sama seperti kode kamu ... */
+
+  .btn-secondary {
+    @apply bg-white text-slate-700 px-4 py-2 rounded-xl font-medium text-sm
+           border border-slate-200 hover:bg-slate-50 active:scale-95
+           transition-all duration-150;
+  }
+
+  .input {
+    @apply w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm
+           bg-white text-slate-800 placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+           transition-all duration-150;
+  }
+}
+
+/* 5. Utilities */
+@layer utilities {
+  .income-text {
+    @apply text-emerald-600 font-medium;
+  }
+  .expense-text {
+    @apply text-red-500 font-medium;
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-emerald-500 bg-clip-text text-transparent;
+  }
+}
