@@ -1,7 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
+const authMiddleware = require("./middleware/authMiddleware");
 
 // Inisialisasi Express
 const app = express();
@@ -21,10 +23,18 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
+app.use(cookieParser());
+
 // ==========================================
 // 2. DAFTAR ROUTES
 // ==========================================
+
+// Auth routes (tidak dilindungi JWT — register, login, verify-otp, dsb)
 app.use("/api/auth", authRoutes);
+
+// Contoh: Rute yang dilindungi JWT middleware
+// app.use("/api/transactions", authMiddleware, transactionRoutes);
+// app.use("/api/reports", authMiddleware, reportRoutes);
 
 // Test Route Dasar
 app.get("/", (req, res) => {
@@ -45,7 +55,7 @@ app.get("/api/health", async (req, res, next) => {
       .limit(1)
       .maybeSingle();
 
-    if (error && error.code !== "PGRST116" && error.code !== "42P01") {
+    if (error && error.code !== "PGRST116" && error.code !== "42P01" && !error.message.includes("Could not find the table")) {
       throw error;
     }
 
@@ -56,6 +66,15 @@ app.get("/api/health", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+// Route terproteksi contoh — untuk test middleware JWT
+app.get("/api/me", authMiddleware, (req, res) => {
+  res.json({
+    status: "success",
+    message: "Data user terautentikasi",
+    data: { user: req.user },
+  });
 });
 
 // ==========================================

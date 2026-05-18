@@ -3,7 +3,7 @@ const supabase = require("../services/supabase");
 // --- REGISTRASI USER BARU ---
 const register = async (req, res) => {
   try {
-    const { email, password, nama, tipe_usaha } = req.body;
+    const { email, password, nama } = req.body;
 
     // Validasi dasar
     if (!email || !password) {
@@ -13,27 +13,166 @@ const register = async (req, res) => {
     }
 
     // Mendaftarkan user ke Supabase Auth
+    // Supabase akan otomatis mengirim email OTP jika email confirmation diaktifkan
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           nama_lengkap: nama,
-          tipe_usaha: tipe_usaha || "Lainnya",
         },
       },
     });
 
     if (error) throw error;
 
+    // Cek apakah user sudah pernah mendaftar dengan email yang sama
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      return res.status(409).json({
+        status: "error",
+        message: "Email sudah terdaftar. Silakan gunakan email lain atau login.",
+      });
+    }
+
     res.status(201).json({
       status: "success",
-      message:
-        "Registrasi berhasil. Silakan cek email untuk verifikasi (jika diaktifkan di Supabase).",
-      data: { user: data.user },
+      message: "Registrasi berhasil. Silakan cek email Anda untuk kode verifikasi OTP.",
+      data: {
+        user: data.user,
+        requiresVerification: true,
+        email: email,
+      },
     });
   } catch (error) {
+    console.error("❌ Register Error:", error.message);
     res.status(400).json({ status: "error", message: error.message });
+  }
+};
+
+// --- VERIFIKASI OTP ---
+const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        status: "error",
+        message: "Email dan kode OTP wajib diisi",
+      });
+    }
+
+    // Verifikasi OTP menggunakan Supabase
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: "signup",
+    });
+
+    if (error) throw error;
+
+    if (!data.session) {
+      return res.status(400).json({
+        status: "error",
+        message: "Verifikasi gagal. Kode OTP tidak valid atau sudah expired.",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Verifikasi email berhasil! Akun Anda sudah aktif.",
+      data: {
+        user: data.user,
+        token: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Verify OTP Error:", error.message);
+
+    let message = "Kode OTP tidak valid atau sudah expired.";
+    if (error.message?.includes("Token has expired")) {
+      message = "Kode OTP sudah expired. Silakan minta kode baru.";
+    }
+
+    res.status(400).json({ status: "error", message });
+  }
+};
+
+// --- KIRIM ULANG OTP ---
+const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        status: "error",
+        message: "Email wajib diisi",
+      });
+    }
+
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+
+    if (error) throw error;
+
+    res.status(200).json({
+      status: "success",
+      message: "Kode OTP baru telah dikirim ke email Anda.",
+    });
+  } catch (error) {
+    console.error("❌ Resend OTP Error:", error.message);
+
+    let message = "Gagal mengirim ulang kode OTP.";
+    if (error.message?.includes("rate")) {
+      message = "Terlalu banyak permintaan. Silakan tunggu beberapa saat.";
+    }
+
+    res.status(400).json({ status: "error", message });
+  }
+};
+
+// --- REFRESH TOKEN ---
+const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken: token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        status: "error",
+        message: "Refresh token wajib disertakan",
+      });
+    }
+
+    // Rotasi token: Supabase mengeluarkan access token baru + refresh token baru
+    const { data, error } = await supabase.auth.refreshSession({
+      refresh_token: token,
+    });
+
+    if (error) throw error;
+
+    if (!data.session) {
+      return res.status(401).json({
+        status: "error",
+        message: "Refresh token tidak valid. Silakan login ulang.",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Token berhasil diperbarui",
+      data: {
+        token: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Refresh Token Error:", error.message);
+    res.status(401).json({
+      status: "error",
+      message: "Refresh token tidak valid atau sudah expired. Silakan login ulang.",
+    });
   }
 };
 
@@ -78,7 +217,7 @@ const login = async (req, res) => {
     
     let message = "Email atau password salah";
     if (error.message === "Email not confirmed") {
-      message = "Email belum dikonfirmasi. Silakan cek kotak masuk email Anda atau matikan konfirmasi email di dashboard Supabase.";
+      message = "Email belum dikonfirmasi. Silakan cek kotak masuk email Anda untuk kode verifikasi OTP.";
     } else if (error.message === "Invalid login credentials") {
       message = "Email atau password salah";
     }
@@ -91,5 +230,8 @@ const login = async (req, res) => {
 
 module.exports = {
   register,
+  verifyOtp,
+  resendOtp,
+  refreshToken,
   login,
 };
