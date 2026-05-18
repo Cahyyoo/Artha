@@ -8,6 +8,50 @@ import {
 } from "framer-motion";
 import logoImg from "../assets/logo.png";
 import logo2Img from "../assets/logo-2.png";
+import iconDigitalCashbook from "../assets/icons/digital-cashbook.png";
+import iconAiRekomendasi from "../assets/icons/ai-rekomendasi.png";
+import iconGeneratedReport from "../assets/icons/generated-report.png";
+import iconForecasting from "../assets/icons/forecasting.png";
+import iconVisualData from "../assets/icons/visual-data.png";
+import iconOnboarding from "../assets/icons/onboarding.png";
+import iconKeamanan from "../assets/icons/keamanan.png";
+import iconCloudBased from "../assets/icons/cloud-based.png";
+import iconBukuKas from "../assets/icons/buku-kas.png";
+import iconNotaTransaksi from "../assets/icons/nota-transaksi.png";
+import iconWarning from "../assets/icons/warning.png";
+import iconDowntrend from "../assets/icons/downtrend.png";
+import iconLaporanNeraca from "../assets/icons/laporan-neraca.png";
+import iconTrend from "../assets/icons/trend.png";
+import iconRealTime from "../assets/icons/real-time.png";
+import iconPerintis from "../assets/icons/perintis.png";
+import iconPengusaha from "../assets/icons/pengusaha.png";
+import iconWeb from "../assets/icons/web.png";
+import iconPhone from "../assets/icons/phone.png";
+import iconEmail from "../assets/icons/email.png";
+import iconMessage from "../assets/icons/message.png";
+import {
+  FiX,
+  FiCheck,
+  FiFileText,
+  FiAlertTriangle,
+  FiBook,
+  FiTrendingDown,
+  FiMonitor,
+  FiPieChart,
+  FiTrendingUp,
+  FiZap,
+  FiArrowRight,
+  FiBriefcase,
+  FiTarget,
+  FiCompass,
+  FiDownload,
+  FiPackage,
+  FiHelpCircle,
+  FiTwitter,
+  FiLinkedin,
+  FiInstagram,
+  FiYoutube,
+} from "react-icons/fi";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -15,13 +59,13 @@ const Landing = () => {
   const [hoveredPath, setHoveredPath] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showReviewsModal, setShowReviewsModal] = useState(false);
-  const [activeSection, setActiveSection] = useState("beranda");
+  const [activeSection, setActiveSection] = useState("layanan");
 
   const navItems = [
-    { id: "beranda", name: "Beranda" },
-    { id: "fitur", name: "Fitur" },
-    { id: "layanan", name: "Layanan" },
+    { id: "layanan", name: "Fitur" },
+    { id: "cara-kerja", name: "Cara Kerja" },
     { id: "testimoni", name: "Testimoni" },
+    { id: "faq", name: "FAQ" },
     { id: "kontak", name: "Kontak" },
   ];
 
@@ -29,24 +73,50 @@ const Landing = () => {
     setIsMobileMenuOpen(false);
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+      setActiveSection(id);
     }
   };
 
   useEffect(() => {
+    const visibleSections = new Map();
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+          visibleSections.set(entry.target.id, entry.intersectionRatio);
+        });
+
+        let maxRatio = 0;
+        let mostVisible = "";
+
+        visibleSections.forEach((ratio, id) => {
+          if (ratio > maxRatio) {
+            maxRatio = ratio;
+            mostVisible = id;
           }
         });
-      },
-      { threshold: 0.3 },
-    ); // Adjust threshold as needed
 
-    navItems.forEach((item) => {
-      const el = document.getElementById(item.id);
+        if (mostVisible && maxRatio > 0.1) {
+          setActiveSection(mostVisible);
+        }
+      },
+      {
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        rootMargin: "-10% 0px -40% 0px",
+      },
+    );
+
+    const sections = ["layanan", "cara-kerja", "testimoni", "faq", "kontak"];
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
 
@@ -202,23 +272,23 @@ const Landing = () => {
       </div>
 
       {/* Navbar Container */}
-      <div className="fixed top-4 md:top-8 left-0 w-full flex justify-center z-50 px-4 md:px-6">
+      <div className="fixed top-4 md:top-6 left-0 w-full flex justify-center z-50 px-4 md:px-6 pointer-events-none">
         <motion.nav
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="bg-[#111827]/60 backdrop-blur-2xl border border-white/[0.08] px-3 md:px-4 py-2 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-between md:justify-start gap-4 md:gap-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] ring-1 ring-white/[0.05] w-full max-w-5xl"
+          className="pointer-events-auto bg-[#0a0f1c]/70 backdrop-blur-2xl border border-white/10 px-3 md:px-4 py-2 rounded-2xl md:rounded-[1.25rem] flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.4)] w-full max-w-4xl"
         >
           {/* Logo */}
-          <div className="flex items-center gap-2 md:gap-2.5 pl-2 md:pl-4 md:pr-6 md:border-r border-white/10 group cursor-pointer shrink-0">
+          <div className="flex items-center pl-2 md:pl-1 pr-4 md:pr-0 shrink-0">
             <img
               src={logo2Img}
               alt="Arta Logo"
-              className="h-6 md:h-10 w-auto object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+              className="h-6 md:h-8 w-auto object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
             />
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center justify-center flex-1 gap-1 lg:gap-2 px-4">
             {navItems.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -227,23 +297,42 @@ const Landing = () => {
                   onClick={() => scrollToSection(item.id)}
                   onMouseEnter={() => setHoveredPath(item.id)}
                   onMouseLeave={() => setHoveredPath(null)}
-                  className={`relative px-5 py-2.5 text-[13px] font-bold transition-all duration-300 rounded-xl ${
-                    isActive ? "text-white" : "text-slate-400 hover:text-white"
+                  className={`relative px-4 py-2 text-[12px] font-semibold transition-all duration-300 rounded-lg ${
+                    isActive
+                      ? "text-indigo-300"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <span className="relative z-10">{item.name}</span>
+                  <span className="relative z-10 tracking-wide">
+                    {item.name}
+                  </span>
+
+                  {/* Active State Background */}
+                  {isActive && (
+                    <motion.span
+                      layoutId="active-nav-pill"
+                      className="absolute inset-0 rounded-lg bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_10px_rgba(99,102,241,0.1)] z-0"
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+
+                  {/* Hover State Background */}
                   <AnimatePresence>
-                    {(hoveredPath === item.id || isActive) && (
+                    {hoveredPath === item.id && !isActive && (
                       <motion.span
-                        layoutId="nav-pill"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: isActive ? 1 : 0.5, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="absolute inset-0 bg-white/[0.08] rounded-xl -z-0 border border-white/[0.05] shadow-inner"
+                        layoutId="hover-nav-pill"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 rounded-lg bg-white/[0.05] border border-white/[0.05] z-0"
                         transition={{
                           type: "spring",
-                          stiffness: 450,
-                          damping: 35,
+                          stiffness: 400,
+                          damping: 30,
                         }}
                       />
                     )}
@@ -254,11 +343,11 @@ const Landing = () => {
           </div>
 
           {/* Auth Actions (Desktop) */}
-          <div className="hidden md:flex items-center gap-4 lg:gap-6 pl-4 border-l border-white/10 ml-auto">
+          <div className="hidden md:flex items-center gap-4 shrink-0">
             {isLoggedIn ? (
               <button
                 onClick={() => navigate("/dashboard")}
-                className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#4f46e5] hover:to-[#7c3aed] text-white px-5 lg:px-7 py-2.5 md:py-3 rounded-2xl text-xs font-black transition-all active:scale-95 shadow-xl shadow-indigo-500/25 border border-white/10"
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white px-5 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 shadow-lg shadow-indigo-500/20 border border-indigo-400/20"
               >
                 Dashboard
               </button>
@@ -356,28 +445,12 @@ const Landing = () => {
       {/* Hero Section */}
       <main
         id="beranda"
-        className="container mx-auto px-6 lg:px-12 pt-32 md:pt-48 xl:pt-56 pb-20 flex flex-col lg:flex-row items-center justify-between relative z-10 min-h-screen lg:min-h-[calc(100vh-104px)] gap-12 lg:gap-8 xl:gap-20"
+        className="container mx-auto px-6 lg:px-12 pt-32 md:pt-48 xl:pt-56 pb-20 flex flex-col lg:flex-row items-center justify-between relative z-10 min-h-screen lg:min-h-[calc(100vh-104px)] gap-12 lg:gap-8 xl:gap-16"
       >
-
-
         {/* Left Content */}
-        <div className="w-full lg:w-[50%] xl:w-[55%] space-y-6 md:space-y-8 animate-in fade-in slide-in-from-left-8 duration-1000 text-center lg:text-left">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/[0.03] border border-white/10 text-[10px] md:text-xs font-semibold text-slate-300 backdrop-blur-md mx-auto lg:mx-0 shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-            </span>
-            Platform #1 Pengelolaan Keuangan UMKM Terintegrasi AI
-          </motion.div>
-
+        <div className="w-full lg:w-[50%] xl:w-[45%] space-y-6 md:space-y-8 animate-in fade-in slide-in-from-left-8 duration-1000 text-center lg:text-left">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] xl:text-[5.5rem] font-black leading-[1.15] tracking-tight relative text-white">
-            Kembangkan <br className="hidden sm:block" />
-            Usaha dengan <br className="hidden sm:block" />
+            Berhenti Catat Manual. <br className="hidden sm:block" />
             {/* Elegant Text Glow Effect */}
             <span className="relative inline-block py-1 md:py-2">
               {/* Soft animated background glow */}
@@ -385,17 +458,17 @@ const Landing = () => {
 
               {/* Text with dynamic gradient */}
               <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">
-                Pengelolaan Keuangan
+                Mulai Kelola Cerdas
               </span>
             </span>
             <br className="hidden sm:block" />
-            Cerdas & Efisien
+            dengan Arta
           </h1>
 
           <p className="text-base md:text-lg text-slate-400 max-w-lg lg:max-w-md xl:max-w-lg leading-relaxed font-medium mx-auto lg:mx-0">
-            Jembatan digital untuk UMKM muda. Mulai dari pencatatan kas digital,
-            prediksi masa depan keuangan, hingga rekomendasi bisnis berbasis AI
-            dalam satu platform.
+            Arta hadir untuk membantu pelaku UMKM. Dari pencatatan transaksi
+            hingga prediksi arus kas, semua dalam satu platform cerdas yang
+            dirancang khusus untuk wirausaha muda Indonesia.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
@@ -425,7 +498,7 @@ const Landing = () => {
                   }}
                 />
 
-                <span className="relative z-10">Mulai Sekarang</span>
+                <span className="relative z-10">Mulai Kelola Keuangan</span>
                 <motion.span
                   className="relative z-10"
                   animate={{ x: [0, 5, 0] }}
@@ -439,358 +512,1053 @@ const Landing = () => {
                 </motion.span>
               </button>
             </motion.div>
-
-            {/* Magnetic Secondary Button */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto"
-            >
-              <button
-                onMouseMove={(e) => {
-                  const btn = e.currentTarget;
-                  const rect = btn.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  btn.style.setProperty("--mouse-x", `${x}px`);
-                  btn.style.setProperty("--mouse-y", `${y}px`);
-                }}
-                className="relative w-full sm:w-auto group overflow-hidden bg-white/[0.03] hover:bg-white/[0.08] text-white px-10 py-4 rounded-2xl text-base font-bold transition-colors border border-white/10 backdrop-blur-md"
-              >
-                {/* Cursor Glow Layer */}
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle 80px at var(--mouse-x) var(--mouse-y), rgba(99,102,241,0.15), transparent)`,
-                  }}
-                />
-                <span className="relative z-10">Pelajari Fitur</span>
-              </button>
-            </motion.div>
           </div>
         </div>
 
-        {/* Right Content - Decorative Composition */}
-        <div className="w-full lg:w-[45%] xl:w-[40%] relative mt-20 lg:mt-0 h-[400px] md:h-[500px] animate-in fade-in zoom-in-95 duration-1000 scale-[0.8] sm:scale-90 xl:scale-100 origin-center lg:origin-right">
-          <div className="relative w-full h-full max-w-[500px] mx-auto lg:ml-auto">
-            {/* 1. Main Chart Card (Pertumbuhan Omzet) */}
-            <div className="absolute top-[5%] right-0 w-[300px] md:w-[360px] z-20 bg-[#161F33]/80 backdrop-blur-xl border border-white/10 p-5 md:p-7 rounded-[2.5rem] shadow-2xl animate-float">
-              <div className="flex items-center gap-3 mb-6 md:mb-8">
-                <div className="w-9 h-9 md:w-11 md:h-11 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-5 h-5 md:w-6 md:h-6 text-emerald-400 fill-none stroke-current stroke-2"
-                  >
-                    <path d="M23 6l-9.5 9.5-5-5L1 18"></path>
-                    <path d="M17 6h6v6"></path>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[10px] md:text-[11px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">
-                    Pertumbuhan Omzet
-                  </p>
-                  <p className="text-xl md:text-2xl font-black text-white leading-none">
-                    +45%{" "}
-                    <span className="text-[9px] md:text-[10px] text-emerald-400 font-medium normal-case tracking-normal">
-                      rata-rata
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-end justify-between h-24 md:h-32 gap-2 md:gap-2.5">
-                {[40, 65, 45, 80, 55, 90, 70, 95, 85, 100].map((h, i) => (
-                  <div
-                    key={i}
-                    className="w-full bg-gradient-to-t from-emerald-600/40 to-emerald-400 rounded-t-lg hover:brightness-125 transition-all shadow-sm shadow-emerald-500/20"
-                    style={{ height: `${h}%` }}
-                  ></div>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. Sesi Selesai Card */}
-            <div className="absolute top-[40%] left-[-2%] md:left-[-5%] z-30 bg-[#1e2336]/90 backdrop-blur-xl border border-white/10 p-4 md:p-5 rounded-3xl shadow-2xl w-48 md:w-60 animate-bounce-slow">
-              <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-5">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-[#6366f1] rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-5 h-5 md:w-6 md:h-6 text-white fill-none stroke-current stroke-2"
-                  >
-                    <path d="M20 6L9 17l-5-5"></path>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Sesi Selesai
-                  </p>
-                  <p className="text-base md:text-lg font-black text-white">
-                    2,450 sesi
-                  </p>
-                </div>
-              </div>
-              <div className="w-full bg-slate-800 h-2 md:h-2.5 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] h-full w-[75%] rounded-full shadow-inner"></div>
-              </div>
-            </div>
-
-            {/* 3. UMKM Bergabung Card */}
+        {/* Right Content - Screenshot Mockup */}
+        <div
+          className="w-full lg:w-[50%] xl:w-[55%] relative mt-12 lg:mt-0 flex justify-center lg:justify-end items-center"
+          style={{ perspective: "1400px" }}
+        >
+          <motion.div
+            className="relative w-full max-w-[500px] sm:max-w-[550px] lg:max-w-[600px] xl:max-w-[750px] 2xl:max-w-[900px] group cursor-pointer"
+            initial={{ rotateY: -15, rotateX: 5, scale: 0.9, opacity: 0 }}
+            animate={{ rotateY: -10, rotateX: 5, scale: 1, opacity: 1 }}
+            whileHover={{ rotateY: 0, rotateX: 0, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            style={{ transformStyle: "preserve-3d" }}
+          >
+            {/* Glow/Shadow behind the image */}
             <div
-              className="absolute bottom-[10%] right-[5%] z-40 bg-[#1a2035]/90 backdrop-blur-xl border border-white/10 py-4 md:py-5 px-5 md:px-6 rounded-3xl shadow-2xl animate-float"
-              style={{ animationDelay: "1.5s" }}
-            >
-              <div className="flex items-center gap-4 md:gap-5">
-                <div className="flex -space-x-3 md:-space-x-3.5">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#1a2035] bg-blue-500 flex items-center justify-center text-xs md:text-sm font-black shadow-lg">
-                    S
-                  </div>
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#1a2035] bg-emerald-500 flex items-center justify-center text-xs md:text-sm font-black shadow-lg">
-                    B
-                  </div>
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#1a2035] bg-orange-500 flex items-center justify-center text-xs md:text-sm font-black shadow-lg">
-                    R
-                  </div>
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#1a2035] bg-slate-800 flex items-center justify-center text-[9px] md:text-[10px] font-extrabold shadow-lg">
-                    +497
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[10px] md:text-[11px] text-slate-300 font-bold leading-tight uppercase tracking-widest">
-                    497+ UMKM
-                  </p>
-                  <p className="text-[8px] md:text-[9px] text-slate-500 font-medium uppercase tracking-tighter">
-                    Bergabung
-                  </p>
-                </div>
-              </div>
-            </div>
+              className="absolute -inset-4 bg-gradient-to-tr from-indigo-500/40 via-purple-500/20 to-transparent blur-3xl opacity-50 group-hover:opacity-80 transition-opacity duration-500 rounded-[3rem]"
+              style={{ transform: "translateZ(-20px)" }}
+            ></div>
 
-            {/* 4. Powered by Arta Badge */}
-            <div
-              className="absolute top-[-5%] left-[10%] md:left-[15%] z-50 bg-white/[0.03] backdrop-blur-xl border border-white/10 p-2 md:p-3 rounded-2xl md:rounded-[1.5rem] shadow-2xl animate-float cursor-pointer group"
-              style={{ animationDelay: "0.5s" }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl md:rounded-[1.5rem]"></div>
-              <div className="flex items-center gap-2 md:gap-3 relative z-10">
-                <div className="bg-[#111827]/80 backdrop-blur-md p-1.5 md:p-2 rounded-xl shadow-inner border border-white/5">
-                  <img src={logoImg} alt="Arta AI" className="h-5 md:h-6 w-auto object-contain drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] group-hover:drop-shadow-[0_0_15px_rgba(99,102,241,0.8)] transition-all" />
-                </div>
-                <div className="pr-2 md:pr-3">
-                  <p className="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-0.5">Powered by</p>
-                  <p className="text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Arta AI Engine</p>
+            {/* The Screenshot Image Wrapper */}
+            <div className="relative rounded-[1.25rem] md:rounded-[1.75rem] overflow-hidden border border-white/10 bg-[#0a0f1c] shadow-[0_30px_60px_rgba(0,0,0,0.7)] group-hover:shadow-[0_40px_80px_rgba(99,102,241,0.3)] transition-all duration-500 ring-1 ring-white/5">
+              {/* Fake Mac Window Bar */}
+              <div className="absolute top-0 left-0 right-0 h-7 md:h-8 bg-[#0a0f1c]/90 backdrop-blur-md flex items-center px-3 md:px-4 gap-1.5 border-b border-white/5 z-20">
+                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                <div className="ml-auto text-[8px] md:text-[9px] text-slate-500 font-medium tracking-wider">
+                  Laporan Keuangan Arta
                 </div>
               </div>
+
+              {/* The Actual Image */}
+              <div className="pt-7 md:pt-8 relative bg-white">
+                {/* Gunakan gambar dari folder public */}
+                <img
+                  src="/laporan-mockup.jpg"
+                  alt="Dashboard Laporan Arta"
+                  className="w-full h-auto object-cover opacity-95 group-hover:opacity-100 transition-opacity duration-500"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "flex";
+                  }}
+                />
+              </div>
+
+              {/* Glossy Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </main>
 
-      {/* Showcase Section */}
-      <section
-        id="fitur"
-        className="relative py-24 lg:py-32 xl:py-48 px-6 overflow-hidden"
-      >
-        <div className="container mx-auto px-4 lg:px-8 xl:px-12">
-          {/* Section Header */}
-          <div className="max-w-3xl mx-auto text-center mb-16 lg:mb-24">
-            <motion.div
+      {/* Problem Statement Section */}
+      <section className="relative py-24 lg:py-32 px-6 overflow-hidden bg-[#0a0f1c]">
+        {/* Ambient Background Glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-rose-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[150px] rounded-full pointer-events-none"></div>
+
+        <div className="container mx-auto max-w-6xl relative z-10">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-400 mb-6"
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6 leading-tight tracking-tight"
             >
-              Dashboard & Mobile App
+              Banyak usaha muda gagal bukan karena ide yang buruk, tapi karena
+              keuangan yang tidak terkelola.
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-base md:text-lg text-slate-400 font-medium leading-relaxed"
+            >
+              Sebagian besar pelaku UMKM muda masih bergantung pada buku kas
+              manual dan nota yang menumpuk — jauh dari laporan keuangan formal
+              yang seharusnya.
+            </motion.p>
+          </div>
+
+          {/* Before vs After Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 relative mb-20">
+            {/* Sebelum Arta Card Wrapper */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative p-[1px] rounded-[2rem] bg-gradient-to-br from-rose-500/30 via-rose-500/5 to-transparent hover:from-rose-500/40 transition-colors duration-500"
+            >
+              {/* Card Content */}
+              <div className="bg-[#0b101e] rounded-[2rem] h-full p-6 md:p-8 lg:p-10 relative overflow-hidden">
+                {/* Subtle Grid Background */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] opacity-20 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-72 h-72 bg-rose-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 text-rose-400 font-bold text-sm mb-8 border border-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.15)]">
+                    <FiX strokeWidth={3} className="text-rose-500" />
+                    Sebelum Arta
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 tracking-tight">
+                    Catatan manual yang berantakan
+                  </h3>
+
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: iconBukuKas,
+                        text: "Buku kas fisik penuh coretan, sulit ditelusuri kembali",
+                      },
+                      {
+                        icon: iconNotaTransaksi,
+                        text: "Nota transaksi bertumpuk, hilang, atau rusak",
+                      },
+                      {
+                        icon: iconWarning,
+                        text: "Tidak ada laporan neraca atau laba rugi formal",
+                      },
+                      {
+                        icon: iconDowntrend,
+                        text: "Sulit memprediksi arus kas atau keuntungan",
+                      },
+                    ].map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-5 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-rose-500/10 hover:border-rose-500/20 hover:scale-[1.02] transition-all duration-300 group cursor-default shadow-sm"
+                      >
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500/20 to-rose-500/5 border border-rose-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner p-2.5">
+                          <img
+                            src={item.icon}
+                            alt=""
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <p className="text-slate-300 text-sm font-medium leading-relaxed pt-1.5">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Decorative arrow pointing right on desktop, down on mobile */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 hidden lg:flex w-14 h-14 bg-[#0b101e] rounded-full border border-slate-700/50 items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+              <div className="w-10 h-10 bg-slate-800/80 rounded-full flex items-center justify-center border border-white/10 shadow-inner">
+                <FiArrowRight className="text-slate-400" size={20} />
+              </div>
+            </div>
+
+            {/* Dengan Arta Card Wrapper */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative p-[1px] rounded-[2rem] bg-gradient-to-br from-emerald-500/40 via-emerald-500/5 to-transparent hover:from-emerald-500/50 transition-colors duration-500 shadow-[0_0_50px_rgba(16,185,129,0.1)]"
+            >
+              {/* Card Content */}
+              <div className="bg-[#0b101e] rounded-[2rem] h-full p-6 md:p-8 lg:p-10 relative overflow-hidden">
+                {/* Subtle Grid Background */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] opacity-20 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 font-bold text-sm mb-8 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                    <FiCheck strokeWidth={3} className="text-emerald-500" />
+                    Dengan Arta
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 tracking-tight">
+                    Dashboard digital yang terstruktur
+                  </h3>
+
+                  <div className="space-y-4 mb-8">
+                    {[
+                      {
+                        icon: iconLaporanNeraca,
+                        text: "Laporan neraca & laba rugi dibuat otomatis dari data input",
+                      },
+                      {
+                        icon: iconTrend,
+                        text: "AI forecasting memprediksi arus kas ke depan",
+                      },
+                      {
+                        icon: iconRealTime,
+                        text: "Visualisasi performa keuangan real-time & interaktif",
+                      },
+                    ].map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-5 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:scale-[1.02] transition-all duration-300 group cursor-default shadow-sm"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner mt-0.5 p-2">
+                          <img
+                            src={item.icon}
+                            alt=""
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <p className="text-emerald-50/90 text-sm font-medium leading-relaxed pt-1">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Image Preview - Enhanced */}
+                  <div className="rounded-2xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4)] overflow-hidden relative group bg-[#0b101e] mt-6 ring-1 ring-white/5 transform transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_30px_60px_rgba(16,185,129,0.2)]">
+                    {/* Fake Window Controls */}
+                    <div className="bg-[#111827]/90 backdrop-blur-md px-4 py-2.5 border-b border-white/5 flex items-center gap-1.5 z-20 absolute top-0 left-0 right-0">
+                      <div className="w-2 h-2 rounded-full bg-rose-500/80"></div>
+                      <div className="w-2 h-2 rounded-full bg-amber-500/80"></div>
+                      <div className="w-2 h-2 rounded-full bg-emerald-500/80"></div>
+                      <div className="ml-auto text-[8px] text-slate-500 font-medium tracking-wider">
+                        cashbook
+                      </div>
+                    </div>
+
+                    {/* The Image */}
+                    <div className="pt-8 relative bg-[#0b101e]">
+                      <img
+                        src="/cashbook.jpg"
+                        alt="Digital Cashbook Preview"
+                        className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "flex";
+                        }}
+                      />
+                    </div>
+
+                    {/* Glossy Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-30"></div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Statistics / Urgency Premium Card */}
+          <div className="relative p-8 md:p-12 lg:p-14 rounded-[2.5rem] bg-gradient-to-b from-white/[0.04] to-transparent border border-white/5 mb-16 mt-16 overflow-hidden shadow-2xl">
+            {/* Inner Glows */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-rose-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 relative z-10 divide-y md:divide-y-0 md:divide-x divide-white/10">
+              {[
+                {
+                  value: "60%+",
+                  label: "Tingkat Kegagalan",
+                  desc: "UMKM muda gagal dalam 5 tahun pertama akibat masalah arus kas dan tata kelola.",
+                },
+                {
+                  value: "8/10",
+                  label: "Tanpa Laporan Formal",
+                  desc: "Pelaku UMKM belum mampu menyusun laporan keuangan formal untuk usahanya.",
+                },
+                {
+                  value: "0",
+                  label: "Kebutaan Prediksi",
+                  desc: "Dari mereka yang masih catat di buku fisik, hampir tidak ada yang bisa memprediksi tren.",
+                },
+              ].map((stat, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 * idx }}
+                  className="text-center px-6 pt-8 md:pt-0 flex flex-col items-center justify-start group cursor-default"
+                >
+                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-4 group-hover:text-rose-400/80 transition-colors duration-300">
+                    {stat.label}
+                  </p>
+                  <h4 className="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 mb-5 drop-shadow-sm group-hover:from-orange-400 group-hover:to-rose-400 transition-all duration-500 scale-95 group-hover:scale-100">
+                    {stat.value}
+                  </h4>
+                  <p className="text-slate-400 text-sm leading-relaxed max-w-[260px] mx-auto group-hover:text-slate-200 transition-colors duration-300">
+                    {stat.desc}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA Area */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-white/5"
+          >
+            <Link
+              to="/register"
+              className="px-8 py-4 bg-white text-slate-900 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
+            >
+              Lihat Solusi Arta <FiArrowRight />
+            </Link>
+            <a
+              href="#layanan"
+              className="px-8 py-4 text-slate-400 font-medium hover:text-white transition-colors flex items-center gap-2"
+            >
+              Pelajari bagaimana fitur kami bekerja
+            </a>
+          </motion.div>
+        </div>
+      </section>
+      {/* Key Features Section - Refined Tech Grid */}
+      <section
+        id="layanan"
+        className="relative py-32 overflow-hidden bg-[#020617]"
+      >
+        {/* Section Glow Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-16 md:mb-20">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight"
+            >
+              Fitur Utama{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
+                Arta
+              </span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-slate-500 text-base md:text-lg max-w-2xl mx-auto"
+            >
+              Solusi komprehensif yang dirancang khusus untuk membantu UMKM muda
+              mengelola keuangan dengan sehat dan berkelanjutan.
+            </motion.p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-white/5 rounded-[3rem] overflow-hidden bg-white/[0.01] backdrop-blur-3xl shadow-2xl shadow-indigo-500/5">
+            {[
+              {
+                title: "Digital Cashbook",
+                desc: "Pencatatan kas masuk dan keluar secara digital dengan antarmuka yang sangat intuitif dan responsif.",
+                icon: iconDigitalCashbook,
+              },
+              {
+                title: "AI Rekomendasi",
+                desc: "Sistem cerdas untuk klasifikasi dan evaluasi kelayakan bisnis bagi calon pengusaha baru.",
+                icon: iconAiRekomendasi,
+              },
+              {
+                title: "Generated Report",
+                desc: "Laporan neraca dan laba rugi instan yang dihasilkan otomatis tanpa perlu keahlian akuntansi khusus.",
+                icon: iconGeneratedReport,
+              },
+              {
+                title: "AI Forecasting",
+                desc: "Prediksi tren finansial (Time-Series) untuk mengantisipasi kondisi arus kas usaha Anda di masa depan.",
+                icon: iconForecasting,
+              },
+              {
+                title: "Visualisasi Data",
+                desc: "Analisis performa keuangan melalui grafik interaktif yang mudah dipahami dalam satu dashboard.",
+                icon: iconVisualData,
+              },
+              {
+                title: "Onboarding Adaptif",
+                desc: "Alur registrasi yang menyesuaikan kebutuhan Anda, baik yang baru merintis maupun yang sudah memiliki usaha.",
+                icon: iconOnboarding,
+              },
+              {
+                title: "Keamanan Terjamin",
+                desc: "Data finansial Anda dilindungi dengan enkripsi tingkat tinggi untuk memastikan privasi.",
+                icon: iconKeamanan,
+              },
+              {
+                title: "Cloud Based",
+                desc: "Akses data UMKM Anda kapan saja dan di mana saja tanpa khawatir kehilangan riwayat transaksi.",
+                icon: iconCloudBased,
+              },
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: i * 0.05 }}
+                className="relative p-10 border-r border-b border-white/5 group cursor-default hover:bg-white/[0.03] transition-all duration-500"
+              >
+                {/* Dynamic Beam Indicator */}
+                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-indigo-500 opacity-0 group-hover:opacity-100 group-hover:shadow-[0_0_15px_rgba(99,102,241,1)] transition-all duration-500"></div>
+
+                <div className="relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.05] flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/30 transition-all duration-500 p-3.5 relative">
+                    <img
+                      src={feature.icon}
+                      alt={feature.title}
+                      className="w-full h-full object-contain relative z-10 drop-shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-500"
+                    />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3 tracking-tight group-hover:text-indigo-300 transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed font-medium group-hover:text-slate-400 transition-colors">
+                    {feature.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - User Flow Journey */}
+      <section
+        id="cara-kerja"
+        className="relative py-24 md:py-32 overflow-hidden bg-[#030617]"
+      >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-600/[0.03] blur-[150px] rounded-full pointer-events-none"></div>
+
+        <div className="container mx-auto px-6 relative z-10 max-w-5xl">
+          {/* Header */}
+          <div className="text-center mb-16 md:mb-24">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-6"
+            >
+              How It Works
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-4xl xl:text-5xl font-black mb-6 tracking-tight"
+              viewport={{ once: true }}
+              className="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight"
             >
-              Solusi Terpadu <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400">
-                Keuangan Bisnis Anda
+              Mulai Perjalanan Anda{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
+                dengan Arta
+              </span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-slate-500 text-base md:text-lg max-w-2xl mx-auto"
+            >
+              Dari pendaftaran hingga pengelolaan keuangan penuh — ikuti alur
+              sederhana ini.
+            </motion.p>
+          </div>
+
+          {/* Steps */}
+          <div className="relative">
+            {/* Vertical connecting line */}
+            <div className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500/30 via-emerald-500/20 to-violet-500/20 hidden md:block"></div>
+
+            {/* Step 1: Daftar Akun */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative flex flex-col md:flex-row items-center gap-8 md:gap-16 mb-16 md:mb-20"
+            >
+              {/* Left content */}
+              <div className="flex-1 md:text-right">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-4">
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></div>
+                  Langkah 01
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
+                  Daftar atau Masuk
+                </h3>
+                <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md md:ml-auto">
+                  Buat akun baru dengan nama, email, dan password — atau
+                  langsung masuk jika sudah punya akun. Proses cepat dalam 60
+                  detik.
+                </p>
+              </div>
+              {/* Center dot */}
+              <div className="hidden md:flex w-10 h-10 rounded-full bg-indigo-500 items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30 z-10">
+                <span className="text-white text-xs font-black">1</span>
+              </div>
+              {/* Right visual - Login page mockup */}
+              <div className="flex-1 flex justify-start">
+                <div className="relative overflow-hidden bg-white rounded-2xl p-5 w-[280px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] border border-slate-100/50">
+                  {/* Top gradient */}
+                  <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none"></div>
+
+                  {/* Logo + Title */}
+                  <div className="flex flex-col items-center mb-4 relative z-10">
+                    <img
+                      src={logoImg}
+                      alt="Arta"
+                      className="h-10 w-auto mb-2"
+                    />
+                    <h4 className="text-sm font-extrabold text-slate-800">
+                      Welcome Back!
+                    </h4>
+                    <p className="text-[9px] text-slate-400 mt-0.5">
+                      Sign in to manage your finances
+                    </p>
+                  </div>
+
+                  {/* Form */}
+                  <div className="space-y-2 mb-3 relative z-10">
+                    <div>
+                      <span className="text-[8px] font-semibold text-slate-500 ml-0.5 block mb-0.5">
+                        Email
+                      </span>
+                      <div className="h-8 bg-slate-50 border border-slate-100 rounded-lg flex items-center px-3 text-[9px] text-slate-400">
+                        Input your email
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-[8px] font-semibold text-slate-500 ml-0.5 block mb-0.5">
+                        Password
+                      </span>
+                      <div className="h-8 bg-slate-50 border border-slate-100 rounded-lg flex items-center px-3 text-[9px] text-slate-400">
+                        ••••••••
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sign In */}
+                  <div className="h-8 bg-gradient-to-r from-orange-400 to-orange-500 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm shadow-orange-500/20 mb-3 relative z-10">
+                    Sign In
+                  </div>
+
+                  {/* Divider */}
+                  <div className="relative flex items-center justify-center mb-2.5">
+                    <div className="w-full h-px bg-slate-100"></div>
+                    <span className="absolute bg-white px-2 text-[7px] text-slate-400">
+                      or continue with
+                    </span>
+                  </div>
+
+                  {/* Social */}
+                  <div className="flex gap-2 mb-2.5">
+                    <div className="flex-1 h-7 border border-slate-200 rounded-lg flex items-center justify-center gap-1 text-[9px] font-semibold text-slate-600">
+                      <svg className="w-2.5 h-2.5" viewBox="0 0 24 24">
+                        <path
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                          fill="#4285F4"
+                        />
+                        <path
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          fill="#34A853"
+                        />
+                        <path
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                          fill="#FBBC05"
+                        />
+                        <path
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          fill="#EA4335"
+                        />
+                      </svg>
+                      Google
+                    </div>
+                    <div className="flex-1 h-7 border border-slate-200 rounded-lg flex items-center justify-center gap-1 text-[9px] font-semibold text-slate-600">
+                      <svg
+                        className="w-2.5 h-2.5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                      </svg>
+                      Apple
+                    </div>
+                  </div>
+
+                  {/* Bottom */}
+                  <p className="text-center text-[8px] text-slate-400">
+                    Don't have an account?{" "}
+                    <span className="font-bold text-slate-700">Sign Up</span>
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Step 2: Onboarding Adaptif */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative flex flex-col md:flex-row-reverse items-start gap-8 md:gap-16 mb-16 md:mb-20"
+            >
+              {/* Right content */}
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-4">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></div>
+                  Langkah 02
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
+                  Onboarding Adaptif
+                </h3>
+                <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md">
+                  Sistem menyesuaikan pengalaman Anda berdasarkan status bisnis.
+                  Pilih jalur yang sesuai untuk memulai.
+                </p>
+              </div>
+              {/* Center dot */}
+              <div className="hidden md:flex w-10 h-10 rounded-full bg-orange-500 items-center justify-center shrink-0 shadow-lg shadow-orange-500/30 z-10">
+                <span className="text-white text-xs font-black">2</span>
+              </div>
+              {/* Left visual */}
+              <div className="flex-1 md:flex md:justify-end">
+                <div className="max-w-sm w-full space-y-3">
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 hover:border-emerald-500/30 transition-colors duration-300 group cursor-default">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <FiBriefcase size={18} className="text-emerald-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">
+                          Sudah Punya Usaha
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          Setup profil bisnis & mulai catat
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 hover:border-violet-500/30 transition-colors duration-300 group cursor-default">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
+                        <FiCompass size={18} className="text-violet-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">
+                          Calon Pengusaha
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          AI analisis kelayakan bisnis Anda
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Step 3: Main Dashboard */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative flex flex-col md:flex-row items-start gap-8 md:gap-16 mb-16 md:mb-20"
+            >
+              {/* Left content */}
+              <div className="flex-1 md:text-right">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-4">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                  Langkah 03
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
+                  Kelola di Dashboard
+                </h3>
+                <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md md:ml-auto">
+                  Akses semua fitur utama Arta dari satu dashboard terpusat —
+                  pencatatan, laporan, prediksi, hingga konsultasi AI.
+                </p>
+              </div>
+              {/* Center dot */}
+              <div className="hidden md:flex w-10 h-10 rounded-full bg-emerald-500 items-center justify-center shrink-0 shadow-lg shadow-emerald-500/30 z-10">
+                <span className="text-white text-xs font-black">3</span>
+              </div>
+              {/* Right visual - feature pills */}
+              <div className="flex-1">
+                <div className="grid grid-cols-2 gap-3 max-w-sm">
+                  {[
+                    {
+                      name: "Cashbook",
+                      desc: "Catat pemasukan & pengeluaran",
+                      color: "emerald",
+                    },
+                    {
+                      name: "Reports",
+                      desc: "Neraca & laba rugi otomatis",
+                      color: "blue",
+                    },
+                    {
+                      name: "AI Forecast",
+                      desc: "Prediksi arus kas",
+                      color: "violet",
+                    },
+                    {
+                      name: "AI Consult",
+                      desc: "Konsultasi bisnis interaktif",
+                      color: "amber",
+                    },
+                  ].map((f, i) => {
+                    const colors = {
+                      emerald:
+                        "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+                      blue: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+                      violet:
+                        "bg-violet-500/10 border-violet-500/20 text-violet-400",
+                      amber:
+                        "bg-amber-500/10 border-amber-500/20 text-amber-400",
+                    };
+                    return (
+                      <div
+                        key={i}
+                        className={`${colors[f.color]} border rounded-xl p-4 hover:scale-[1.03] transition-transform duration-200 cursor-default`}
+                      >
+                        <h4 className="text-xs font-bold mb-1">{f.name}</h4>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">
+                          {f.desc}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Step 4: Pantau & Kembangkan */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative flex flex-col md:flex-row-reverse items-start gap-8 md:gap-16"
+            >
+              {/* Right content */}
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-bold text-violet-400 uppercase tracking-widest mb-4">
+                  <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></div>
+                  Langkah 04
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
+                  Pantau & Kembangkan
+                </h3>
+                <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md">
+                  Kelola profil bisnis, terima notifikasi penting, dan gunakan
+                  data visual untuk mengembangkan usaha Anda.
+                </p>
+              </div>
+              {/* Center dot */}
+              <div className="hidden md:flex w-10 h-10 rounded-full bg-violet-500 items-center justify-center shrink-0 shadow-lg shadow-violet-500/30 z-10">
+                <span className="text-white text-xs font-black">4</span>
+              </div>
+              {/* Left visual */}
+              <div className="flex-1 md:flex md:justify-end">
+                <div className="max-w-sm w-full space-y-3">
+                  {[
+                    { label: "Profil Akun", desc: "Nama, password, avatar" },
+                    { label: "Profil Bisnis", desc: "Kategori, modal, tujuan" },
+                    { label: "Notifikasi", desc: "Alert & pengingat" },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-4 bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-3.5 hover:border-violet-500/30 transition-colors duration-300"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-violet-400 shrink-0"></div>
+                      <div>
+                        <span className="text-sm font-bold text-white">
+                          {item.label}
+                        </span>
+                        <span className="text-xs text-slate-500 ml-2">
+                          {item.desc}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ADAPTIVE SOLUTIONS SECTION (Concept 2: Split-Screen Hover Expand) */}
+      <section className="relative py-24 bg-[#0a0f1c] overflow-hidden border-t border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.05)_0%,transparent_70%)] pointer-events-none"></div>
+
+        <div className="container mx-auto max-w-7xl relative z-10 px-4 md:px-6">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight tracking-tight"
+            >
+              Mulai dari mana kamu berada —{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+                Arta yang menyesuaikan.
               </span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg text-slate-400 font-medium max-w-2xl mx-auto"
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-lg md:text-xl text-slate-400 font-medium leading-relaxed"
             >
-              Kelola transaksi, pantau pertumbuhan omzet, dan dapatkan insight
-              profesional langsung dari genggaman Anda.
+              Tidak semua orang berada di titik yang sama. Arta hadir dengan dua
+              jalur berbeda agar pengalaman kamu terasa relevan, personal, dan
+              tepat sasaran.
             </motion.p>
           </div>
 
-          <div className="relative flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 xl:gap-24">
-            {/* Left Side: Animated Features */}
-            <div className="w-full lg:w-[45%] xl:w-[40%] space-y-4 md:space-y-6 relative z-20">
-              {[
-                {
-                  id: "feat-1",
-                  title: "Real-time Tracking",
-                  desc: "Pantau setiap rupiah yang masuk dan keluar secara instan.",
-                  icon: "📊",
-                  color: "from-blue-500 to-indigo-500",
-                },
-                {
-                  id: "feat-2",
-                  title: "Laporan Otomatis",
-                  desc: "Laporan keuangan standar profesional siap diunduh kapan saja.",
-                  icon: "📄",
-                  color: "from-emerald-500 to-teal-500",
-                },
-                {
-                  id: "feat-3",
-                  title: "AI Financial Insights",
-                  desc: "Dapatkan rekomendasi cerdas untuk efisiensi pengeluaran.",
-                  icon: "🧠",
-                  color: "from-purple-500 to-pink-500",
-                },
-              ].map((feature, i) => (
-                <motion.div
-                  key={feature.id}
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  whileHover={{ x: 10 }}
-                  className="group relative bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-3xl p-5 md:p-6 transition-all backdrop-blur-md"
-                >
-                  <div
-                    className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${feature.color} rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-2xl mb-4 shadow-lg group-hover:scale-110 transition-transform`}
-                  >
-                    {feature.icon}
+          {/* ADAPTIVE SOLUTIONS - FLEXBOX LAYOUT */}
+          <div className="flex flex-col md:flex-row gap-10 md:gap-16 mt-16">
+            {/* LEFT: SCROLLING TEXT BLOCKS */}
+            <div className="w-full md:w-1/2 space-y-32 md:space-y-[35vh] pb-72">
+              {/* TEXT BLOCK A (PERINTIS) */}
+              <motion.div
+                onViewportEnter={() => setHoveredPath("A")}
+                viewport={{ margin: "-30% 0px -30% 0px", amount: "some" }}
+                className={`transition-all duration-700 ease-out ${hoveredPath === "A" ? "opacity-100 translate-y-0" : "opacity-30 translate-y-4 blur-[1px]"}`}
+              >
+                <div className="inline-flex items-center gap-3 px-2.5 py-2.5 pr-6 rounded-full bg-[#0b101e] border border-indigo-500/30 text-indigo-400 font-bold text-xs uppercase tracking-widest mb-6 w-max shadow-[0_0_30px_rgba(99,102,241,0.2)] ring-1 ring-white/10 transition-all duration-300 hover:scale-105 hover:bg-indigo-900/30">
+                  <div className="w-12 h-12 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center shrink-0 p-2 shadow-inner">
+                    <img
+                      src={iconPerintis}
+                      alt="Jalur Perintis"
+                      className="w-full h-full object-contain drop-shadow-lg scale-110"
+                    />
                   </div>
-                  <h3 className="text-lg md:text-xl font-bold mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    {feature.desc}
-                  </p>
-                </motion.div>
-              ))}
+                  <span className="pt-0.5">Jalur Perintis</span>
+                </div>
+                <h3 className="text-3xl md:text-5xl font-black text-white mb-5 leading-[1.1] tracking-tight">
+                  Saya baru ingin <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">
+                    memulai usaha
+                  </span>
+                </h3>
+                <p className="text-slate-400 text-base md:text-lg mb-8 leading-relaxed font-medium max-w-md">
+                  Belum punya usaha tapi semangat memulai? Arta akan memandumu
+                  langkah demi langkah lewat kuesioner interaktif untuk
+                  memetakan potensimu.
+                </p>
+                <div className="space-y-4">
+                  {[
+                    "Kuesioner profiling calon pengusaha",
+                    "Rekomendasi model bisnis dari AI",
+                    "Simulasi alokasi modal awal",
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                        <FiCheck className="text-indigo-400" size={14} />
+                      </div>
+                      <p className="text-slate-300 font-medium">{feat}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
 
-              {/* Animated Connectors (Decorative) */}
-              <svg className="absolute -right-20 top-0 w-20 h-full hidden xl:block pointer-events-none overflow-visible">
-                <motion.path
-                  d="M 0 100 Q 50 100 100 150"
-                  fill="none"
-                  stroke="url(#grad-line)"
-                  strokeWidth="2"
-                  strokeDasharray="4 4"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 0.3 }}
-                  transition={{ duration: 1.5, delay: 0.5 }}
-                />
-                <defs>
-                  <linearGradient
-                    id="grad-line"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="0%"
-                  >
-                    <stop offset="0%" stopColor="rgba(99,102,241,0)" />
-                    <stop offset="100%" stopColor="rgba(99,102,241,0.5)" />
-                  </linearGradient>
-                </defs>
-              </svg>
+              {/* TEXT BLOCK B (PENGUSAHA) */}
+              <motion.div
+                onViewportEnter={() => setHoveredPath("B")}
+                viewport={{ margin: "-30% 0px -30% 0px", amount: "some" }}
+                className={`transition-all duration-700 ease-out ${hoveredPath === "B" ? "opacity-100 translate-y-0" : "opacity-30 translate-y-4 blur-[1px]"}`}
+              >
+                <div className="inline-flex items-center gap-3 px-2.5 py-2.5 pr-6 rounded-full bg-[#0b101e] border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-widest mb-6 w-max shadow-[0_0_30px_rgba(16,185,129,0.2)] ring-1 ring-white/10 transition-all duration-300 hover:scale-105 hover:bg-emerald-900/30">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0 p-2 shadow-inner">
+                    <img
+                      src={iconPengusaha}
+                      alt="Jalur Pengusaha"
+                      className="w-full h-full object-contain drop-shadow-lg scale-110"
+                    />
+                  </div>
+                  <span className="pt-0.5">Jalur Pengusaha</span>
+                </div>
+                <h3 className="text-3xl md:text-5xl font-black text-white mb-5 leading-[1.1] tracking-tight">
+                  Usaha saya sudah <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
+                    berjalan lancar
+                  </span>
+                </h3>
+                <p className="text-slate-400 text-base md:text-lg mb-8 leading-relaxed font-medium max-w-md">
+                  Pencatatan arus kas masih manual? Beralih ke Digital Cashbook
+                  Arta sekarang dan biarkan AI menyusun laporan keuangan
+                  otomatis untukmu.
+                </p>
+                <div className="space-y-4">
+                  {[
+                    "Pencatatan transaksi real-time",
+                    "Generate neraca & laba rugi otomatis",
+                    "AI insight & visualisasi performa",
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <FiCheck className="text-emerald-400" size={14} />
+                      </div>
+                      <p className="text-slate-300 font-medium">{feat}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
             </div>
 
-            {/* Right Side: 3D Tilt Mockup Illustration */}
-            <motion.div
-              className="w-full lg:w-[50%] xl:w-[55%] relative group perspective-1000"
-              style={{
-                perspective: "1200px",
-              }}
-            >
-              {/* Background Glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none group-hover:bg-indigo-500/30 transition-colors duration-700"></div>
-
-              <motion.div
-                style={{
-                  rotateX: useTransform(
-                    useScroll().scrollYProgress,
-                    [0.3, 0.6],
-                    [10, 0],
-                  ),
-                  rotateY: useTransform(
-                    useScroll().scrollYProgress,
-                    [0.3, 0.6],
-                    [5, 0],
-                  ),
-                }}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="relative z-10 preserve-3d"
+            {/* RIGHT: STICKY DEVICE */}
+            <div className="hidden md:flex w-full md:w-1/2 md:sticky md:top-24 md:self-start justify-center items-start">
+              <div
+                className={`relative w-full max-w-[280px] aspect-[9/18] rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-[1000ms] ease-[cubic-bezier(0.22,1,0.36,1)] border-[7px] border-[#1a2333] ${hoveredPath === "A" ? "bg-[#0b1120] shadow-[0_0_60px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30 translate-y-0" : "bg-[#081218] shadow-[0_0_60px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30 translate-y-[780px]"}`}
               >
-                <motion.img
-                  src="/app_mockup_mobile_desktop.png"
-                  alt="App Mockup"
-                  className="w-full h-auto drop-shadow-[0_35px_60px_rgba(0,0,0,0.6)] rounded-[2rem] md:rounded-[3rem] border border-white/5"
-                  whileHover={{ rotateY: -5, rotateX: 5 }}
-                  transition={{ type: "spring", stiffness: 100 }}
-                />
+                {/* Notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1a2333] rounded-b-2xl z-50 flex justify-center items-end pb-1.5 gap-2">
+                  <div className="w-8 h-1 rounded-full bg-black/50"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
+                </div>
 
-                {/* Floating Elements with Parallax */}
-                <motion.div
-                  style={{
-                    y: useTransform(
-                      useScroll().scrollYProgress,
-                      [0.3, 0.7],
-                      [-20, 40],
-                    ),
-                  }}
-                  className="absolute -top-6 lg:-top-10 -right-4 lg:-right-10 hidden sm:block bg-[#1E293B]/90 border border-white/10 p-3 lg:p-4 rounded-xl lg:rounded-2xl backdrop-blur-xl shadow-2xl z-20"
+                {/* Glow */}
+                <div
+                  className={`absolute -top-16 -right-16 w-56 h-56 blur-[80px] rounded-full transition-colors duration-[1200ms] ${hoveredPath === "A" ? "bg-indigo-500/25" : "bg-emerald-500/25"}`}
+                ></div>
+                <div
+                  className={`absolute -bottom-16 -left-16 w-56 h-56 blur-[80px] rounded-full transition-colors duration-[1200ms] ${hoveredPath === "A" ? "bg-blue-500/15" : "bg-teal-500/15"}`}
+                ></div>
+
+                {/* MOCKUP A: KUESIONER */}
+                <div
+                  className={`absolute inset-0 pt-14 px-5 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${hoveredPath === "A" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"}`}
                 >
-                  <div className="flex items-center gap-2 lg:gap-3">
-                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-emerald-500 rounded-full flex items-center justify-center text-xs">
-                      ✓
+                  <div className="flex items-center gap-2 mb-6 bg-white/5 w-max px-3 py-1.5 rounded-full border border-white/10">
+                    <div className="p-1 bg-indigo-500/20 rounded-full">
+                      <FiTarget className="text-indigo-400" size={12} />
                     </div>
-                    <p className="text-[10px] lg:text-xs font-bold text-white">
-                      Target Tercapai!
-                    </p>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-indigo-200">
+                      Arta AI Profiling
+                    </span>
                   </div>
-                </motion.div>
+                  <p className="text-white text-lg font-bold mb-6 leading-snug">
+                    Berapa perkiraan
+                    <br />
+                    modal awal usahamu?
+                  </p>
+                  <div className="space-y-3 mb-auto">
+                    <div className="px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600/20 to-indigo-500/5 border border-indigo-500/40 text-indigo-200 font-bold flex items-center justify-between relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-400"></div>
+                      <span className="text-sm">Rp 1 Jt - Rp 5 Jt</span>
+                      <div className="w-4 h-4 rounded-full border-2 border-indigo-400 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-slate-400 font-medium flex items-center justify-between">
+                      <span className="text-sm">Rp 5 Jt - Rp 20 Jt</span>
+                      <div className="w-4 h-4 rounded-full border-2 border-slate-600"></div>
+                    </div>
+                    <div className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-slate-400 font-medium flex items-center justify-between">
+                      <span className="text-sm">Di atas Rp 20 Jt</span>
+                      <div className="w-4 h-4 rounded-full border-2 border-slate-600"></div>
+                    </div>
+                  </div>
+                  <button className="w-full py-3 mt-4 mb-6 bg-white text-indigo-950 font-black rounded-xl text-sm flex justify-center items-center gap-2">
+                    Lanjutkan <FiArrowRight size={14} />
+                  </button>
+                </div>
 
-                <motion.div
-                  style={{
-                    y: useTransform(
-                      useScroll().scrollYProgress,
-                      [0.3, 0.7],
-                      [40, -40],
-                    ),
-                  }}
-                  className="absolute -bottom-6 lg:-bottom-10 -left-4 lg:-left-10 hidden sm:block bg-indigo-600 p-4 lg:p-5 rounded-xl lg:rounded-2xl shadow-2xl border border-white/20 z-20"
+                {/* MOCKUP B: DASHBOARD */}
+                <div
+                  className={`absolute inset-0 pt-14 px-5 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${hoveredPath === "B" ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8 pointer-events-none"}`}
                 >
-                  <p className="text-[8px] lg:text-[10px] uppercase font-black tracking-widest text-indigo-200 mb-1">
-                    Total Saldo
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>{" "}
+                      Digital Cashbook
+                    </span>
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 p-[2px]">
+                      <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
+                        <span className="text-[8px] text-white font-bold">
+                          Us
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/20 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-3 opacity-20">
+                      <FiTrendingUp size={36} className="text-emerald-500" />
+                    </div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 mb-1 relative z-10">
+                      Laba Bersih Mei
+                    </p>
+                    <p className="text-2xl font-black text-white mb-1 relative z-10">
+                      Rp 4.250
+                      <span className="text-slate-400 text-lg">.000</span>
+                    </p>
+                    <div className="inline-flex items-center gap-1 text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded text-[9px] font-bold relative z-10">
+                      <FiTrendingUp size={9} /> +24%
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-wider">
+                    Transaksi Terbaru
                   </p>
-                  <p className="text-lg lg:text-xl font-black text-white leading-none">
-                    Rp 128.450.000
-                  </p>
-                </motion.div>
-
-                {/* Additional Decorative Floating Orb */}
-                <motion.div
-                  style={{
-                    x: useTransform(
-                      useScroll().scrollYProgress,
-                      [0.3, 0.7],
-                      [-100, 100],
-                    ),
-                    opacity: useTransform(
-                      useScroll().scrollYProgress,
-                      [0.4, 0.6],
-                      [0, 0.5],
-                    ),
-                  }}
-                  className="absolute top-1/4 -left-20 w-32 h-32 bg-emerald-500/20 blur-3xl rounded-full"
-                />
-              </motion.div>
-            </motion.div>
+                  <div className="space-y-2 mb-auto">
+                    {[
+                      {
+                        label: "Invoice Client A",
+                        val: "+Rp 2.400k",
+                        isPos: true,
+                        Icon: FiDownload,
+                      },
+                      {
+                        label: "Bahan Baku",
+                        val: "-Rp 650k",
+                        isPos: false,
+                        Icon: FiPackage,
+                      },
+                      {
+                        label: "Langganan SaaS",
+                        val: "-Rp 150k",
+                        isPos: false,
+                        Icon: FiMonitor,
+                      },
+                    ].map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5"
+                      >
+                        <div
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${item.isPos ? "bg-emerald-500/10" : "bg-rose-500/10"}`}
+                        >
+                          <item.Icon
+                            size={13}
+                            className={
+                              item.isPos ? "text-emerald-400" : "text-rose-400"
+                            }
+                          />
+                        </div>
+                        <span className="text-slate-200 text-xs font-medium flex-1">
+                          {item.label}
+                        </span>
+                        <span
+                          className={`text-xs font-bold ${item.isPos ? "text-emerald-400" : "text-rose-400"}`}
+                        >
+                          {item.val}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -839,495 +1607,6 @@ const Landing = () => {
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-bounce-slow { animation: bounce-slow 5s ease-in-out infinite; }
       `}</style>
-      {/* Brands with a Spotlight Section */}
-      <section className="relative py-32 overflow-hidden">
-        {/* Seamless Transition Gradient Top */}
-        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#020617] to-transparent pointer-events-none z-0"></div>
-
-        {/* Background Spotlight - Increased Blur for Seamless Blending */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[800px] bg-indigo-500/10 blur-[160px] rounded-full pointer-events-none z-0"></div>
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter"
-            >
-              Brands with a spotlight
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-slate-500 font-medium max-w-2xl mx-auto text-lg"
-            >
-              Brands who funded us deserve more than a spotlight.{" "}
-              <br className="hidden md:block" />
-              Check out what they are saying.
-            </motion.p>
-          </div>
-
-          <div className="max-w-5xl mx-auto space-y-12">
-            {/* Row 1 */}
-            <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-              {[
-                { name: "Aceternity UI", icon: "💎" },
-                { name: "Gamity", icon: "🎮" },
-                { name: "Host IT", icon: "🌐" },
-                { name: "Asteroid Kit", icon: "☄️" },
-              ].map((logo, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, filter: "blur(0px)" }}
-                  transition={{ duration: 0.8, delay: i * 0.1 }}
-                  whileHover={{ scale: 1.1, color: "#fff" }}
-                  className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all group"
-                >
-                  <span className="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">
-                    {logo.icon}
-                  </span>
-                  <span className="text-xl font-bold text-slate-500 group-hover:text-white transition-colors">
-                    {logo.name}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Row 2 */}
-            <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-              {[
-                { name: "Asteroid Kit", icon: "☄️" },
-                { name: "Host IT", icon: "🌐" },
-                { name: "Aceternity UI", icon: "💎" },
-                { name: "Gamity", icon: "🎮" },
-              ].map((logo, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, filter: "blur(0px)" }}
-                  transition={{ duration: 0.8, delay: (i + 4) * 0.1 }}
-                  whileHover={{ scale: 1.1, color: "#fff" }}
-                  className="flex items-center gap-3 px-4 py-2 cursor-pointer transition-all group"
-                >
-                  <span className="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">
-                    {logo.icon}
-                  </span>
-                  <span className="text-xl font-bold text-slate-500 group-hover:text-white transition-colors">
-                    {logo.name}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Problem & Solution (Pain Points) Section */}
-      <section className="relative py-32 overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter"
-            >
-              Solusi Tepat untuk <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
-                Masalah Keuangan Anda
-              </span>
-            </motion.h2>
-            <p className="text-slate-500 font-medium max-w-2xl mx-auto text-lg">
-              Kami memahami kesulitan Anda dalam mengelola UMKM. Biarkan Arta
-              menyelesaikan kerumitan tersebut dengan pendekatan cerdas berbasis
-              AI.
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto space-y-4">
-            {[
-              {
-                problem: "Masih bergantung pada pencatatan manual di buku kas?",
-                solution:
-                  "Digital Cashbook Arta memungkinkan pencatatan transaksi digital yang rapi dan terstruktur, cocok untuk usaha pemula maupun aktif.",
-              },
-              {
-                problem: "Bingung mengalokasikan anggaran untuk usaha baru?",
-                solution:
-                  "Dapatkan analisis kelayakan usaha dan saran alokasi anggaran awal melalui sistem kecerdasan buatan (AI Rekomendasi) kami.",
-              },
-              {
-                problem: "Sulit menyusun laporan neraca & laba rugi?",
-                solution:
-                  "Fitur Generated Report kami menyusun laporan keuangan formal secara otomatis hanya berdasarkan input arus kas harian Anda.",
-              },
-              {
-                problem: "Khawatir arus kas berantakan di bulan depan?",
-                solution:
-                  "Model AI Time-Series Forecasting kami memprediksi tren arus kas di masa depan untuk mendukung pengambilan keputusan finansial Anda.",
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="group"
-              >
-                <details className="bg-white/[0.02] border border-white/[0.05] rounded-3xl overflow-hidden hover:border-indigo-500/30 transition-all">
-                  <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                    <span className="text-lg md:text-xl font-bold text-white/90 group-hover:text-white transition-colors pr-8">
-                      {item.problem}
-                    </span>
-                    <span className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-indigo-400 transition-transform group-open:rotate-180">
-                      ↓
-                    </span>
-                  </summary>
-                  <div className="px-8 pb-8 text-slate-400 font-medium leading-relaxed border-t border-white/5 pt-6 bg-gradient-to-b from-white/[0.01] to-transparent">
-                    {item.solution}
-                  </div>
-                </details>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Key Features Section - Refined Tech Grid */}
-      <section
-        id="layanan"
-        className="relative py-32 overflow-hidden bg-[#020617]"
-      >
-        {/* Section Glow Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="mb-20">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-6"
-            >
-              Powerful Capabilities
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter"
-            >
-              Fitur Utama Artha
-            </motion.h2>
-            <p className="text-slate-500 font-medium max-w-xl text-lg border-l-2 border-indigo-500/30 pl-6">
-              Solusi komprehensif yang dirancang khusus untuk membantu UMKM muda
-              mengelola keuangan dengan sehat dan berkelanjutan.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-white/5 rounded-[3rem] overflow-hidden bg-white/[0.01] backdrop-blur-3xl shadow-2xl shadow-indigo-500/5">
-            {[
-              {
-                title: "Digital Cashbook",
-                desc: "Pencatatan kas masuk dan keluar secara digital dengan antarmuka yang sangat intuitif dan responsif.",
-                icon: "📒",
-              },
-              {
-                title: "AI Rekomendasi",
-                desc: "Sistem cerdas untuk klasifikasi dan evaluasi kelayakan bisnis bagi calon pengusaha baru.",
-                icon: "🧠",
-              },
-              {
-                title: "Generated Report",
-                desc: "Laporan neraca dan laba rugi instan yang dihasilkan otomatis tanpa perlu keahlian akuntansi khusus.",
-                icon: "📄",
-              },
-              {
-                title: "AI Forecasting",
-                desc: "Prediksi tren finansial (Time-Series) untuk mengantisipasi kondisi arus kas usaha Anda di masa depan.",
-                icon: "📈",
-              },
-              {
-                title: "Visualisasi Data",
-                desc: "Analisis performa keuangan melalui grafik interaktif yang mudah dipahami dalam satu dashboard.",
-                icon: "📊",
-              },
-              {
-                title: "Onboarding Adaptif",
-                desc: "Alur registrasi yang menyesuaikan kebutuhan Anda, baik yang baru merintis maupun yang sudah memiliki usaha.",
-                icon: "🎯",
-              },
-              {
-                title: "Keamanan Terjamin",
-                desc: "Data finansial Anda dilindungi dengan enkripsi tingkat tinggi untuk memastikan privasi.",
-                icon: "🔒",
-              },
-              {
-                title: "Cloud Based",
-                desc: "Akses data UMKM Anda kapan saja dan di mana saja tanpa khawatir kehilangan riwayat transaksi.",
-                icon: "☁️",
-              },
-            ].map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: i * 0.05 }}
-                className="relative p-10 border-r border-b border-white/5 group cursor-default hover:bg-white/[0.03] transition-all duration-500"
-              >
-                {/* Dynamic Beam Indicator */}
-                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-indigo-500 opacity-0 group-hover:opacity-100 group-hover:shadow-[0_0_15px_rgba(99,102,241,1)] transition-all duration-500"></div>
-
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl mb-8 group-hover:scale-110 group-hover:bg-indigo-500/10 transition-all duration-500">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3 tracking-tight group-hover:text-indigo-300 transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm text-slate-500 leading-relaxed font-medium group-hover:text-slate-400 transition-colors">
-                    {feature.desc}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section - World Class Refinement */}
-      <section
-        id="cara-kerja"
-        className="relative py-32 overflow-hidden bg-[#030617]"
-      >
-        {/* Premium Noise Texture */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-
-        {/* Animated Connecting Flow Path - More subtle & cinematic */}
-        <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/10 to-transparent z-0 hidden lg:block">
-          <motion.div
-            animate={{ x: ["-100%", "100%"] }}
-            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-            className="w-1/3 h-full bg-gradient-to-r from-transparent via-indigo-400 to-transparent blur-[2px]"
-          />
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-28">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-8"
-            >
-              The Seamless Journey
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-none"
-            >
-              Mulai dalam <br className="md:hidden" />
-              <span className="relative inline-block">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-[size:200%] animate-gradient-x">
-                  3 Langkah
-                </span>
-                <div className="absolute -bottom-4 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent blur-sm"></div>
-              </span>{" "}
-              Mudah
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {/* Step 1: Daftar Akun (The Glass Master) */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="lg:col-span-2 p-12 rounded-[4rem] bg-white/[0.02] border border-white/[0.05] relative overflow-hidden group min-h-[500px] backdrop-blur-3xl"
-            >
-              {/* Atmospheric Background Orb */}
-              <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full group-hover:bg-indigo-500/10 transition-colors duration-700"></div>
-
-              <div className="relative z-10">
-                {/* Integrated Step Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
-                  <div className="w-1 h-1 rounded-full bg-indigo-500 animate-pulse"></div>
-                  <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em]">
-                    Langkah 01
-                  </span>
-                </div>
-
-                <h3 className="text-4xl font-black text-white mb-6 tracking-tight">
-                  Daftar Akun
-                </h3>
-                <p className="text-slate-400 text-xl max-w-xs font-medium leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
-                  Buat akun dalam 60 detik. <br /> Tanpa kartu kredit, <br />{" "}
-                  Tanpa ribet.
-                </p>
-              </div>
-
-              {/* Ultra-High-End Mockup Form */}
-              <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[85%] bg-gradient-to-b from-[#111827] to-[#0B1120] border border-white/10 rounded-[2.5rem] p-10 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.7)] group-hover:bottom-[-2%] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]">
-                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-                <div className="space-y-6 relative z-10">
-                  <div className="h-14 w-full bg-white/[0.03] rounded-2xl border border-white/[0.05] flex items-center px-6 text-sm text-slate-500 shadow-inner">
-                    Email Bisnis
-                  </div>
-                  <div className="h-14 w-full bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl flex items-center justify-center text-sm font-black text-white shadow-xl shadow-indigo-600/30 active:scale-95 transition-transform">
-                    Mulai Gratis Sekarang
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Middle Column */}
-            <div className="lg:col-span-1 grid grid-rows-2 gap-6">
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="p-10 rounded-[3.5rem] bg-emerald-500/[0.02] border border-white/[0.05] relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-700"
-              >
-                <div className="relative z-10">
-                  {/* Integrated Step Badge */}
-                  <div className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
-                    <span className="text-[8px] font-black text-emerald-400 uppercase tracking-[0.2em]">
-                      Langkah 02
-                    </span>
-                  </div>
-
-                  <h3 className="text-2xl font-black text-white mb-3">
-                    Input Data
-                  </h3>
-                  <p className="text-slate-500 text-sm font-medium leading-relaxed">
-                    Catat pemasukan & pengeluaran UMKM dengan satu sentuhan.
-                  </p>
-                </div>
-                <div className="absolute -bottom-2 -right-2 p-6 bg-emerald-500/20 border border-emerald-500/20 rounded-[2rem] backdrop-blur-xl group-hover:scale-110 group-hover:-rotate-6 transition-all duration-700 shadow-2xl shadow-emerald-500/20">
-                  <span className="text-emerald-400 text-sm font-black tabular-nums tracking-tighter">
-                    + Rp 1.250.000
-                  </span>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="p-10 rounded-[3.5rem] bg-white/[0.02] border border-white/[0.05] relative overflow-hidden group flex flex-col justify-center items-center text-center hover:bg-white/[0.04] transition-all duration-500"
-              >
-                {/* High-End Laser Scanning Beam */}
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent shadow-[0_0_15px_rgba(99,102,241,0.5)] opacity-0 group-hover:opacity-100 group-hover:top-full transition-all duration-[2000ms] ease-linear"></div>
-
-                {/* Ambient Protection Glow */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.05)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-
-                <div className="w-20 h-20 rounded-[2rem] bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-4xl mb-6 relative z-10 group-hover:scale-110 transition-transform duration-700">
-                  <div className="absolute inset-0 rounded-[2rem] bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  🛡️
-                </div>
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.5em] opacity-80 relative z-10">
-                  Security First
-                </h3>
-                <p className="text-[9px] text-slate-500 mt-3 font-bold opacity-40 uppercase tracking-tighter relative z-10">
-                  End-to-End Encryption
-                </p>
-              </motion.div>
-            </div>
-
-            {/* Step 3: Hasil Nyata (The Visualizer) */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="lg:col-span-1 p-10 rounded-[4rem] bg-indigo-600/[0.04] border border-white/[0.05] relative overflow-hidden group min-h-[500px] hover:border-indigo-500/40 transition-all duration-700 flex flex-col"
-            >
-              {/* Atmospheric Background Orb */}
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full group-hover:bg-indigo-500/10 transition-colors duration-700"></div>
-
-              {/* Growth Badge */}
-              <div className="absolute top-8 right-8 px-3 py-1.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-xl shadow-2xl shadow-emerald-500/10 group-hover:scale-110 transition-transform">
-                <span className="text-[10px] font-black text-emerald-400 tracking-tighter italic">
-                  +42.5%
-                </span>
-              </div>
-
-              <div className="relative z-10 mb-10">
-                {/* Integrated Step Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
-                  <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em]">
-                    Langkah 03
-                  </span>
-                </div>
-
-                <h3 className="text-3xl font-black text-white mb-6 tracking-tight leading-none">
-                  Hasil Nyata
-                </h3>
-                <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-[200px]">
-                  Keputusan bisnis lebih cerdas dengan data visual otomatis.
-                </p>
-              </div>
-
-              {/* Chart Container - Pushed to Bottom */}
-              <div className="flex-1 relative flex items-end gap-3 px-2 min-h-[180px]">
-                {/* Subtle Grid Lines */}
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-2">
-                  <div className="w-full h-[1px] bg-white/[0.03]"></div>
-                  <div className="w-full h-[1px] bg-white/[0.03]"></div>
-                  <div className="w-full h-[1px] bg-white/[0.03]"></div>
-                </div>
-
-                {[35, 65, 45, 95, 55, 100].map((h, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 relative group/bar h-full flex flex-col justify-end"
-                  >
-                    {/* Tooltip - Adjusted for bottom-aligned bars */}
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 bg-white text-[10px] font-black text-indigo-950 px-2.5 py-1.5 rounded-lg opacity-0 group-hover/bar:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-2xl z-20 border border-indigo-100"
-                      style={{ bottom: `calc(${h}% + 10px)` }}
-                    >
-                      {h}% Growth
-                    </div>
-
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      whileInView={{ height: `${h}%`, opacity: 1 }}
-                      viewport={{ once: false }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 20,
-                        delay: 0.2 + i * 0.1,
-                      }}
-                      whileHover={{
-                        scale: 1.05,
-                        filter: "brightness(1.2)",
-                        transition: { duration: 0.2 },
-                      }}
-                      className="w-full bg-gradient-to-t from-indigo-600/40 via-indigo-500 to-indigo-300 rounded-full relative cursor-pointer overflow-hidden shadow-[0_0_20px_rgba(99,102,241,0.1)] hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] transition-shadow"
-                    >
-                      {/* Internal Animated Shimmer */}
-                      <motion.div
-                        initial={{ top: "100%" }}
-                        whileInView={{ top: "-100%" }}
-                        transition={{
-                          duration: 2,
-                          delay: 1 + i * 0.1,
-                          repeat: Infinity,
-                          repeatDelay: 3,
-                        }}
-                        className="absolute inset-x-0 h-1/2 bg-gradient-to-t from-transparent via-white/20 to-transparent pointer-events-none"
-                      />
-
-                      {/* Neon Glowing Tip */}
-                      <div className="absolute top-0 left-0 right-0 h-2 bg-white/60 blur-[1px] rounded-full"></div>
-                    </motion.div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials Section with Drifting Cards & Spotlight */}
       <section
@@ -1489,6 +1768,207 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* FAQ Section - Shopify Style */}
+      <section
+        id="faq"
+        className="relative py-24 md:py-32 overflow-hidden bg-[#050a18]"
+      >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/[0.03] blur-[150px] rounded-full pointer-events-none"></div>
+
+        <div className="container mx-auto px-6 relative z-10 max-w-6xl">
+          {/* Hero Header */}
+          <div className="mb-16 md:mb-20 pb-12 border-b border-white/[0.06]">
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
+              <div className="max-w-xl">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-5"
+                >
+                  <FiHelpCircle size={12} className="text-indigo-400" /> FAQ
+                </motion.div>
+                <motion.h2
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight"
+                >
+                  Pertanyaan Umum
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="text-slate-400 text-base md:text-lg leading-relaxed"
+                >
+                  Panduan lengkap seputar fitur dan layanan Arta untuk membantu
+                  Anda mengelola keuangan UMKM dengan lebih baik.
+                </motion.p>
+              </div>
+              {/* Category count */}
+              <div className="hidden md:flex items-center gap-6 text-sm text-slate-500 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
+                  <span>4 Kategori</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-slate-600"></div>
+                  <span>16 Pertanyaan</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ Content: Sidebar + Grid */}
+          {(() => {
+            const faqData = [
+              {
+                category: "Memulai dengan Arta",
+                questions: [
+                  {
+                    q: "Apa itu Arta dan bagaimana cara kerjanya?",
+                    a: "Arta adalah platform pengelolaan keuangan UMKM berbasis AI yang menyediakan pencatatan digital, laporan otomatis, dan prediksi keuangan.",
+                  },
+                  {
+                    q: "Apakah saya perlu keahlian akuntansi untuk menggunakan Arta?",
+                    a: "Tidak. Arta dirancang untuk pelaku usaha tanpa latar belakang akuntansi. Cukup input transaksi harian, sistem kami yang mengurus sisanya.",
+                  },
+                  {
+                    q: "Bagaimana cara mendaftar akun Arta?",
+                    a: "Klik tombol 'Daftar Sekarang' di halaman utama, isi data usaha Anda, dan Anda bisa langsung mulai menggunakan fitur-fitur Arta.",
+                  },
+                  {
+                    q: "Apakah Arta gratis untuk digunakan?",
+                    a: "Arta menyediakan paket gratis dengan fitur dasar pencatatan. Untuk fitur AI dan laporan otomatis, tersedia paket premium yang terjangkau.",
+                  },
+                ],
+              },
+              {
+                category: "Digital Cashbook",
+                questions: [
+                  {
+                    q: "Bagaimana cara mencatat transaksi di Digital Cashbook?",
+                    a: "Cukup masukkan nominal, kategori, dan deskripsi transaksi. Arta akan otomatis mengklasifikasikan sebagai pemasukan atau pengeluaran.",
+                  },
+                  {
+                    q: "Apakah data transaksi saya aman?",
+                    a: "Ya, semua data terenkripsi dan tersimpan di server yang aman. Hanya Anda yang memiliki akses ke data keuangan usaha Anda.",
+                  },
+                  {
+                    q: "Bisakah saya mengekspor data transaksi?",
+                    a: "Tentu. Anda dapat mengekspor data dalam format CSV atau PDF kapan saja melalui menu Laporan di dashboard.",
+                  },
+                  {
+                    q: "Apakah bisa diakses dari handphone?",
+                    a: "Ya, Arta dirancang responsif sehingga bisa diakses dengan nyaman dari browser di perangkat mobile maupun desktop.",
+                  },
+                ],
+              },
+              {
+                category: "Laporan Keuangan",
+                questions: [
+                  {
+                    q: "Laporan apa saja yang bisa dihasilkan Arta?",
+                    a: "Arta dapat menghasilkan laporan neraca, laba rugi, arus kas, dan ringkasan keuangan bulanan secara otomatis dari data transaksi Anda.",
+                  },
+                  {
+                    q: "Apakah laporan dihasilkan secara otomatis?",
+                    a: "Ya. Setelah Anda memasukkan data transaksi, laporan keuangan formal bisa di-generate secara instan tanpa perlu input tambahan.",
+                  },
+                  {
+                    q: "Bisakah saya mengunduh laporan untuk keperluan pajak?",
+                    a: "Ya. Laporan dapat diunduh dalam format PDF yang sudah terstruktur sesuai standar laporan keuangan UMKM.",
+                  },
+                  {
+                    q: "Seberapa akurat laporan yang dihasilkan?",
+                    a: "Laporan dihitung langsung dari data transaksi aktual Anda, sehingga akurasinya bergantung pada kelengkapan input data yang Anda masukkan.",
+                  },
+                ],
+              },
+              {
+                category: "AI & Forecasting",
+                questions: [
+                  {
+                    q: "Bagaimana AI Arta memprediksi arus kas?",
+                    a: "Arta menggunakan model Time-Series Forecasting yang menganalisis pola transaksi historis Anda untuk memprediksi tren keuangan di masa depan.",
+                  },
+                  {
+                    q: "Apakah rekomendasi AI bisa dipercaya?",
+                    a: "Rekomendasi AI kami berbasis data dan terus ditingkatkan akurasinya. Namun, sebaiknya tetap digunakan sebagai bahan pertimbangan keputusan bisnis.",
+                  },
+                  {
+                    q: "Apa itu fitur AI Rekomendasi untuk calon pengusaha?",
+                    a: "Fitur ini membantu calon pengusaha baru mengevaluasi kelayakan ide bisnis dan mendapatkan saran alokasi modal awal berdasarkan analisis AI.",
+                  },
+                  {
+                    q: "Berapa lama data dibutuhkan agar prediksi akurat?",
+                    a: "Semakin banyak data historis yang tersedia, semakin akurat prediksinya. Minimal 1-3 bulan data transaksi sudah cukup untuk hasil awal.",
+                  },
+                ],
+              },
+            ];
+
+            return (
+              <div className="flex flex-col md:flex-row gap-10 md:gap-16">
+                {/* Sidebar Categories */}
+                <div className="md:w-56 shrink-0">
+                  <div className="md:sticky md:top-28 space-y-1">
+                    {faqData.map((cat, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          document
+                            .getElementById(`faq-cat-${idx}`)
+                            ?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
+                        }}
+                        className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all duration-200"
+                      >
+                        {cat.category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FAQ Content */}
+                <div className="flex-1 space-y-16">
+                  {faqData.map((cat, catIdx) => (
+                    <motion.div
+                      key={catIdx}
+                      id={`faq-cat-${catIdx}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      className="scroll-mt-28"
+                    >
+                      <h3 className="text-xl md:text-2xl font-bold text-white mb-8 pb-4 border-b border-white/[0.06]">
+                        {cat.category}
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                        {cat.questions.map((item, qIdx) => (
+                          <div key={qIdx}>
+                            <h4 className="text-sm md:text-[15px] font-bold text-white mb-2 leading-snug">
+                              {item.q}
+                            </h4>
+                            <p className="text-slate-500 text-sm leading-relaxed">
+                              {item.a}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </section>
+
       {/* Contact Form Grid with Details Section */}
       <section
         id="kontak"
@@ -1517,15 +1997,9 @@ const Landing = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
-                className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-indigo-600/20"
+                className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 border border-indigo-500/30 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-indigo-500/10 p-3"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-7 h-7 text-white fill-none stroke-current stroke-[1.5]"
-                >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
-                </svg>
+                <img src={iconMessage} alt="Message" className="w-full h-full object-contain filter brightness-120 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
               </motion.div>
 
               {/* Heading */}
@@ -1545,9 +2019,11 @@ const Landing = () => {
                 <motion.a
                   href="mailto:contact@konsulkeu.id"
                   whileHover={{ scale: 1.03 }}
-                  className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
+                  className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group bg-white/[0.02] border border-white/5 pl-2 pr-5 py-1.5 rounded-2xl hover:bg-white/[0.05] hover:border-white/10 hover:shadow-[0_0_20px_rgba(99,102,241,0.1)]"
                 >
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 group-hover:shadow-[0_0_12px_rgba(99,102,241,0.6)] transition-shadow"></div>
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 p-1.5 transition-all duration-300 group-hover:bg-indigo-500/20 group-hover:border-indigo-500/40 group-hover:scale-105 shadow-md shadow-indigo-500/5">
+                    <img src={iconWeb} alt="Web" className="w-full h-full object-contain filter brightness-110" />
+                  </div>
                   <span className="text-sm font-semibold">
                     contact@konsulkeu.id
                   </span>
@@ -1555,21 +2031,25 @@ const Landing = () => {
                 <motion.a
                   href="tel:+6281234567890"
                   whileHover={{ scale: 1.03 }}
-                  className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
+                  className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group bg-white/[0.02] border border-white/5 pl-2 pr-5 py-1.5 rounded-2xl hover:bg-white/[0.05] hover:border-white/10 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]"
                 >
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 group-hover:shadow-[0_0_12px_rgba(16,185,129,0.6)] transition-shadow"></div>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 p-1.5 transition-all duration-300 group-hover:bg-emerald-500/20 group-hover:border-emerald-500/40 group-hover:scale-105 shadow-md shadow-emerald-500/5">
+                    <img src={iconPhone} alt="Phone" className="w-full h-full object-contain filter brightness-110" />
+                  </div>
                   <span className="text-sm font-semibold">
                     +62 (812) 3456 7890
                   </span>
                 </motion.a>
                 <motion.a
-                  href="mailto:support@konsulkeu.id"
+                  href="mailto:support@gmail.com"
                   whileHover={{ scale: 1.03 }}
-                  className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
+                  className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group bg-white/[0.02] border border-white/5 pl-2 pr-5 py-1.5 rounded-2xl hover:bg-white/[0.05] hover:border-white/10 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)]"
                 >
-                  <div className="w-2 h-2 rounded-full bg-purple-500 group-hover:shadow-[0_0_12px_rgba(168,85,247,0.6)] transition-shadow"></div>
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0 p-1.5 transition-all duration-300 group-hover:bg-purple-500/20 group-hover:border-purple-500/40 group-hover:scale-105 shadow-md shadow-purple-500/5">
+                    <img src={iconEmail} alt="Email" className="w-full h-full object-contain filter brightness-110" />
+                  </div>
                   <span className="text-sm font-semibold">
-                    support@konsulkeu.id
+                    support@gmail.com
                   </span>
                 </motion.a>
               </div>
@@ -1990,17 +2470,24 @@ const Landing = () => {
 
               {/* Social Media Links */}
               <div className="flex gap-4">
-                {["Twitter", "LinkedIn", "Instagram", "YouTube"].map(
-                  (social) => (
+                {[
+                  { name: "Twitter", icon: FiTwitter, color: "hover:text-sky-400 hover:border-sky-500/30 hover:bg-sky-500/5 hover:shadow-[0_0_15px_rgba(56,189,248,0.15)]" },
+                  { name: "LinkedIn", icon: FiLinkedin, color: "hover:text-blue-400 hover:border-blue-500/30 hover:bg-blue-500/5 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]" },
+                  { name: "Instagram", icon: FiInstagram, color: "hover:text-pink-400 hover:border-pink-500/30 hover:bg-pink-500/5 hover:shadow-[0_0_15px_rgba(236,72,153,0.15)]" },
+                  { name: "YouTube", icon: FiYoutube, color: "hover:text-red-500 hover:border-red-500/30 hover:bg-red-500/5 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]" }
+                ].map((social) => {
+                  const Icon = social.icon;
+                  return (
                     <a
-                      key={social}
+                      key={social.name}
                       href="#"
-                      className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
+                      aria-label={social.name}
+                      className={`w-10 h-10 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-slate-400 transition-all duration-300 ${social.color}`}
                     >
-                      <span className="text-xs font-bold">{social[0]}</span>
+                      <Icon className="w-4 h-4 transition-transform duration-300 hover:scale-110" />
                     </a>
-                  ),
-                )}
+                  );
+                })}
               </div>
             </div>
 
@@ -2111,7 +2598,7 @@ const Landing = () => {
               WebkitTextStroke: "1px rgba(255,255,255,0.05)",
             }}
           >
-            ARTHA
+            ARTA
           </motion.h1>
 
           {/* Subtle gradient overlay at the bottom of the text to blend it with the background */}
@@ -2119,16 +2606,10 @@ const Landing = () => {
         </div>
 
         {/* Copyright */}
-        <div className="container mx-auto px-6 lg:px-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
-          <p className="text-slate-500 text-sm font-medium">
-            © {new Date().getFullYear()} Artha Inc. All rights reserved.
+        <div className="container mx-auto px-6 lg:px-12 pt-8 flex flex-col md:flex-row items-center justify-center gap-4 relative z-10">
+          <p className="text-slate-500 text-sm font-medium text-center">
+            © {new Date().getFullYear()} Arta Inc. All rights reserved.
           </p>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-slate-500 text-sm font-medium">
-              Sistem Beroperasi Normal
-            </span>
-          </div>
         </div>
       </footer>
 

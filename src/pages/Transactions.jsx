@@ -35,6 +35,7 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("Semua");
+  const [filterDate, setFilterDate] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewingInvoice, setViewingInvoice] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -56,9 +57,10 @@ export default function Transactions() {
     return transactions.filter((trx) => {
       const matchSearch = trx.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchCategory = filterCategory === "Semua" || trx.category === filterCategory;
-      return matchSearch && matchCategory;
+      const matchDate = filterDate ? trx.date === filterDate : true;
+      return matchSearch && matchCategory && matchDate;
     });
-  }, [searchTerm, filterCategory, transactions]);
+  }, [searchTerm, filterCategory, filterDate, transactions]);
 
   const metrics = useMemo(() => {
     let income = 0;
@@ -180,33 +182,33 @@ export default function Transactions() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Card: Pemasukan */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-md hover:shadow-lg transition-shadow flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-500 mb-1">Total Pemasukan (Bulan Ini)</p>
               <h3 className="text-2xl font-black text-emerald-600">{formatRupiah(metrics.income)}</h3>
             </div>
             <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
-              <FiArrowDownRight size={24} />
+              <FiArrowUpRight size={24} />
             </div>
           </div>
           
           {/* Card: Pengeluaran */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-md hover:shadow-lg transition-shadow flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-500 mb-1">Total Pengeluaran (Bulan Ini)</p>
               <h3 className="text-2xl font-black text-rose-600">{formatRupiah(metrics.expense)}</h3>
             </div>
             <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center text-rose-600">
-              <FiArrowUpRight size={24} />
+              <FiArrowDownRight size={24} />
             </div>
           </div>
 
           {/* Card: Arus Kas Bersih */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between relative overflow-hidden">
-            <div className="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="bg-white p-5 rounded-2xl border-2 border-blue-50 shadow-md hover:shadow-lg transition-shadow flex items-center justify-between relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl pointer-events-none"></div>
             <div className="relative z-10">
               <p className="text-sm font-semibold text-slate-500 mb-1">Arus Kas Bersih</p>
-              <h3 className={`text-2xl font-black ${metrics.balance >= 0 ? 'text-indigo-600' : 'text-rose-600'}`}>
+              <h3 className={`text-2xl font-black ${metrics.balance >= 0 ? 'text-blue-600' : 'text-rose-600'}`}>
                 {metrics.balance >= 0 ? '+' : ''}{formatRupiah(metrics.balance)}
               </h3>
             </div>
@@ -226,7 +228,7 @@ export default function Transactions() {
               placeholder="Cari transaksi..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-700 font-medium"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-700 font-medium"
             />
           </div>
           
@@ -235,11 +237,30 @@ export default function Transactions() {
             <select 
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-700 font-medium appearance-none cursor-pointer"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-700 font-medium appearance-none cursor-pointer"
             >
               <option value="Semua">Semua Kategori</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+          </div>
+
+          <div className="relative w-full sm:w-44 flex items-center">
+            <input 
+              type="date" 
+              title="Filter Tanggal"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-slate-700 font-medium cursor-pointer"
+            />
+            {filterDate && (
+              <button 
+                onClick={() => setFilterDate("")}
+                className="absolute right-10 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center bg-slate-200 hover:bg-rose-100 hover:text-rose-600 text-slate-500 rounded-full transition-colors"
+                title="Hapus Filter Tanggal"
+              >
+                <FiX size={12} strokeWidth={3} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -263,7 +284,7 @@ export default function Transactions() {
               });
               setIsModalOpen(true);
             }}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-black hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md shadow-indigo-500/20 active:scale-95"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 active:scale-95"
           >
             <FiPlus size={18} />
             <span>Tambah Transaksi</span>
@@ -277,10 +298,12 @@ export default function Transactions() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-bold">
-                <th className="px-6 py-4">Tanggal</th>
+                <th className="px-6 py-4 flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors">Tanggal <span className="text-[10px] text-slate-400">▼</span></th>
                 <th className="px-6 py-4">Keterangan</th>
                 <th className="px-6 py-4">Kategori</th>
-                <th className="px-6 py-4">Nominal</th>
+                <th className="px-6 py-4 text-right cursor-pointer hover:text-blue-600 transition-colors">
+                  <div className="flex items-center justify-end gap-1.5">Nominal <span className="text-[10px] text-slate-400">▼</span></div>
+                </th>
                 <th className="px-6 py-4 text-center">Bukti</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
@@ -288,7 +311,7 @@ export default function Transactions() {
             <tbody className="divide-y divide-slate-100">
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((trx) => (
-                  <tr key={trx.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={trx.id} className="hover:bg-blue-50/40 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">
                       {formatDate(trx.date)}
                     </td>
@@ -300,18 +323,14 @@ export default function Transactions() {
                         {trx.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="inline-flex items-center justify-end gap-2.5">
                         {trx.type === "Pemasukan" ? (
-                          <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-                            <FiArrowDownRight size={14} />
-                          </div>
+                          <FiArrowUpRight size={18} strokeWidth={3} className="text-emerald-500 shrink-0" />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
-                            <FiArrowUpRight size={14} />
-                          </div>
+                          <FiArrowDownRight size={18} strokeWidth={3} className="text-rose-500 shrink-0" />
                         )}
-                        <span className={`text-sm font-black ${trx.type === "Pemasukan" ? "text-emerald-600" : "text-slate-800"}`}>
+                        <span className={`text-[15px] font-black tabular-nums tracking-tight ${trx.type === "Pemasukan" ? "text-emerald-600" : "text-slate-800"}`}>
                           {trx.type === "Pemasukan" ? "+" : "-"}{formatRupiah(trx.amount)}
                         </span>
                       </div>
@@ -457,9 +476,9 @@ export default function Transactions() {
                               )}
                               <span className="relative z-10 flex items-center gap-2">
                                 {isExpense ? (
-                                  <FiArrowUpRight size={18} className={isActive ? "text-rose-500" : "opacity-60"} />
+                                  <FiArrowDownRight size={18} className={isActive ? "text-rose-500" : "opacity-60"} />
                                 ) : (
-                                  <FiArrowDownRight size={18} className={isActive ? "text-emerald-500" : "opacity-60"} />
+                                  <FiArrowUpRight size={18} className={isActive ? "text-emerald-500" : "opacity-60"} />
                                 )}
                                 {type}
                               </span>

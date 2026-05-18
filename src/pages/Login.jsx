@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import AuthLayout from "../components/AuthLayout";
 
@@ -8,6 +8,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = location.state?.message || "";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,6 +26,7 @@ const Login = () => {
 
       // Menyimpan token dan data user ke localStorage agar user tetap login
       localStorage.setItem("token", response.data.data.token);
+      localStorage.setItem("refreshToken", response.data.data.refreshToken);
       localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
       // Arahkan ke halaman utama (Dashboard)
@@ -42,6 +45,11 @@ const Login = () => {
       showSocial={true}
     >
       <form onSubmit={handleSubmit} className="space-y-4 flex flex-col flex-grow">
+        {successMessage && (
+          <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-sm text-center border border-emerald-100 font-medium">
+            {successMessage}
+          </div>
+        )}
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm text-center border border-red-100 font-medium">
             {error}
