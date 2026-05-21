@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 
 // Inisialisasi Express
@@ -31,6 +32,9 @@ app.use(cookieParser());
 
 // Auth routes (tidak dilindungi JWT — register, login, verify-otp, dsb)
 app.use("/api/auth", authRoutes);
+
+// Profile routes (dilindungi JWT)
+app.use("/api/profile", authMiddleware, profileRoutes);
 
 // Contoh: Rute yang dilindungi JWT middleware
 // app.use("/api/transactions", authMiddleware, transactionRoutes);

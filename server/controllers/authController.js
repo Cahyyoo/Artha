@@ -202,12 +202,24 @@ const login = async (req, res) => {
       });
     }
 
+    // Ambil data profil
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error("Gagal mengambil profil:", profileError.message);
+    }
+
     // Supabase secara otomatis mengembalikan JWT Token di data.session.access_token
     res.status(200).json({
       status: "success",
       message: "Login berhasil",
       data: {
         user: data.user,
+        profile: profileData || null,
         token: data.session.access_token, // Ini JWT Token-nya
         refreshToken: data.session.refresh_token,
       },
