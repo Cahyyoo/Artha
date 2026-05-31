@@ -114,8 +114,8 @@ export default function Reports() {
   // Expense Pie data from API
   const expenseData = useMemo(() => {
     return (reportData?.expense_distribution || []).map(item => ({
-      name: item.category,
-      value: item.amount
+      name: item.category || item.kategori || "Lainnya",
+      value: item.amount || item.total || 0
     })).sort((a, b) => b.value - a.value);
   }, [reportData]);
 
@@ -398,7 +398,7 @@ export default function Reports() {
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{rangeLabels[dateRange]}</span>
           </div>
           <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={288}>
               <AreaChart data={cashFlowData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorPemasukan" x1="0" y1="0" x2="0" y2="1">
@@ -432,7 +432,7 @@ export default function Reports() {
             <FiPieChart className="text-slate-400" />
           </div>
           <div className="flex-1 flex flex-col justify-center relative min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
                   data={expenseData}

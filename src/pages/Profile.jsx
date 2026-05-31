@@ -6,6 +6,7 @@ import {
   FiCamera, FiSave, FiCheck, FiLoader, FiEdit3,
   FiShield, FiCalendar, FiTrendingUp, FiKey, FiEye, FiEyeOff, FiX
 } from "react-icons/fi";
+import api from "../services/api";
 
 
 
@@ -164,17 +165,20 @@ export default function Profile() {
     setSaveStatus("saving");
 
     try {
+      // Pastikan supabase client diimpor
       const { supabase } = await import("../services/supabaseClient");
 
-      // 1. Jika ganti password, verifikasi password lama dengan mencoba re-login
+      // 1. Jika ganti password, verifikasi password lama via SERVER
+      // PENTING: Jangan gunakan signInWithPassword di client karena akan
+      // menghancurkan sesi aktif dan menyebabkan error "akses ditolak" saat login ulang
       if (isChangingPassword) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: profile.email,
-          password: passwordData.oldPassword
-        });
-        
-        if (signInError) {
-          setPasswordError("Password yang Anda masukkan salah");
+        try {
+          await api.post("/api/auth/verify-password", {
+            password: passwordData.oldPassword,
+          });
+        } catch (verifyErr) {
+          const msg = verifyErr.response?.data?.message || "Password yang Anda masukkan salah";
+          setPasswordError(msg);
           setSaveStatus("idle");
           return;
         }
@@ -199,16 +203,22 @@ export default function Profile() {
 
       if (updateError) throw updateError;
 
-      // 4. Update LocalStorage dan Dispatch Event
+      // --- Setelah ganti password: sign out bersih dan redirect ---
+      if (isChangingPassword) {
+        alert("Password berhasil diubah. Silakan login kembali untuk keamanan.");
+        await supabase.auth.signOut();
+        // Bersihkan data sesi, tapi jangan localStorage.clear() agar tidak menghapus hal lain
+        localStorage.removeItem("token");
+        localStorage.removeItem("profile");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        return;
+      }
+
+      // 4. Update LocalStorage (hanya jika hanya update profil, bukan password)
       if (updateData?.user) {
         localStorage.setItem("user", JSON.stringify(updateData.user));
         window.dispatchEvent(new Event("profileUpdated"));
-      }
-
-      // 5. Reset state password jika berhasil ganti password
-      if (isChangingPassword) {
-        setPasswordData({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
-        setPasswordError("");
       }
 
       setSaveStatus("saved");
@@ -296,17 +306,15 @@ export default function Profile() {
               <div className="mt-5 pt-4 border-t border-slate-100">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('profile.profile_completion')}</span>
-                  <span className={`text-[11px] font-black ${
-                    completionPercent === 100 ? 'text-emerald-500' : 'text-indigo-500'
-                  }`}>{completionPercent}%</span>
+                  <span className={`text-[11px] font-black ${completionPercent === 100 ? 'text-emerald-500' : 'text-indigo-500'
+                    }`}>{completionPercent}%</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <motion.div
-                    className={`h-1.5 rounded-full ${
-                      completionPercent === 100
-                        ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
-                        : 'bg-gradient-to-r from-indigo-500 to-purple-500'
-                    }`}
+                    className={`h-1.5 rounded-full ${completionPercent === 100
+                      ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                      : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                      }`}
                     initial={{ width: 0 }}
                     animate={{ width: `${completionPercent}%` }}
                     transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1], delay: 0.4 }}
@@ -320,13 +328,12 @@ export default function Profile() {
                   ].map(({ label, filled }) => (
                     <span
                       key={label}
-                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        filled
-                          ? 'bg-indigo-50 text-indigo-600'
-                          : 'bg-slate-100 text-slate-400'
-                      }`}
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${filled
+                        ? 'bg-indigo-50 text-indigo-600'
+                        : 'bg-slate-100 text-slate-400'
+                        }`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${ filled ? 'bg-indigo-500' : 'bg-slate-300'}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${filled ? 'bg-indigo-500' : 'bg-slate-300'}`} />
                       {label}
                     </span>
                   ))}
@@ -458,8 +465,7 @@ export default function Profile() {
                 {passwordError === "Password yang Anda masukkan salah" && (
                   <p className="text-xs text-red-500 mt-1 font-medium">{passwordError}</p>
                 )}
-                {/* Note for dummy UI */}
-                <p className="text-[10px] text-slate-400 italic mt-1">*Demo: ketik 'admin123' agar benar</p>
+
               </div>
 
               {/* New Password */}
@@ -534,7 +540,7 @@ export default function Profile() {
             </div>
           </motion.div>
 
-{/* Save Button */}
+          {/* Save Button */}
           <motion.div variants={cardVariants} className="flex items-center justify-end">
             <button
               onClick={handleSave}

@@ -44,7 +44,7 @@ const transactionService = {
 
   // Ambil prediksi AI
   getForecast: async () => {
-    return api.get("/api/ai/forecast");
+    return api.get("/api/forecast");
   }
 };
 

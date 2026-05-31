@@ -1,47 +1,52 @@
 import axios from "axios";
-import { supabase } from "./supabaseClient";
 
-// Membuat instance axios dengan konfigurasi dasar
 const api = axios.create({
-  // Dev: proxy Vite menangani /api → Vercel. Build: langsung ke VITE_API_BASE_URL.
-  baseURL: import.meta.env.DEV ? "" : (import.meta.env.VITE_API_BASE_URL || "https://arta-backend-nine.vercel.app"),
+  // Gunakan variabel environment yang konsisten
+  baseURL: import.meta.env.VITE_API_BASE_URL || "https://arta-backend-nine.vercel.app",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// ==========================================
 // REQUEST INTERCEPTOR
-// Menyisipkan JWT Token (Supabase) ke header Authorization
-// ==========================================
 api.interceptors.request.use(
   async (config) => {
-    // Sesuai instruksi Anda: Ambil token yang disimpan di localStorage
     const token = localStorage.getItem("token");
-    
-    if (token) {
+
+    // VALIDASI: Pastikan token ada dan bukan objek rusak
+    if (token && typeof token === 'string' && token.length > 20) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log(`[DEBUG API] Menyiapkan Request ke: ${config.url}`);
-      console.log(`[DEBUG API] Token JWT dari localStorage disematkan ke Header: Bearer ${token.substring(0, 20)}...`);
+    } else {
+      // Jika token tidak valid, bersihkan dan biarkan request tanpa auth (atau redirect)
+      localStorage.removeItem("token");
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// ==========================================
 // RESPONSE INTERCEPTOR
-// Tangani error secara global
-// ==========================================
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Jika masih 401, berarti sesi Supabase benar-benar mati/expired parah
-    if (error.response?.status === 401 && !error.config.url.includes("/auth/")) {
-      await supabase.auth.signOut();
-      if (window.location.pathname !== "/login") {
+    // Jika token expired atau invalid (401 Unauthorized)
+    if (error.response?.status === 401) {
+      // Jangan auto-logout untuk endpoint verify-password (expected 401 jika password salah)
+      const requestUrl = error.config?.url || "";
+      if (requestUrl.includes("verify-password")) {
+        return Promise.reject(error);
+      }
+
+      console.error("[API] Sesi tidak valid (401). Logout otomatis.");
+
+      // Bersihkan data auth saja, jangan localStorage.clear() 
+      // karena bisa menghapus data penting dan menyebabkan redirect ke onboarding
+      localStorage.removeItem("token");
+      localStorage.removeItem("profile");
+      localStorage.removeItem("user");
+
+      // Hanya redirect jika belum berada di halaman login (mencegah loop)
+      if (!window.location.pathname.includes("/login")) {
         window.location.href = "/login";
       }
     }

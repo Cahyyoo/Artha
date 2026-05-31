@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthProvider";
 import {
   FiChevronRight,
   FiArrowLeft,
@@ -61,6 +62,7 @@ const BUSINESS_CATEGORIES = [
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { setProfile } = useAuth();
 
   // phase: "intro" | "choose" | "detail"
   const [phase, setPhase] = useState("intro");
@@ -161,7 +163,9 @@ const Onboarding = () => {
     setError("");
     try {
       const res = await api.post("/api/profile/onboarding", { user_type, ...extra });
-      localStorage.setItem("profile", JSON.stringify(res.data.data.profile));
+      const profileData = res.data.data.profile;
+      localStorage.setItem("profile", JSON.stringify(profileData));
+      setProfile(profileData); // Sinkronkan ke context agar ProtectedRoute tidak redirect balik
       navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Terjadi kesalahan. Coba lagi.");
