@@ -241,10 +241,51 @@ const login = async (req, res) => {
   }
 };
 
+// --- VERIFIKASI PASSWORD (TANPA MEMBUAT SESI BARU DI CLIENT) ---
+// Endpoint ini memverifikasi password user di server-side.
+// signInWithPassword di server TIDAK mempengaruhi sesi client, 
+// berbeda dengan memanggil signInWithPassword di client yang merusak sesi aktif.
+const verifyPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const email = req.user.email; // Didapat dari authMiddleware
+
+    if (!password) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password wajib diisi",
+      });
+    }
+
+    // Verifikasi dengan signInWithPassword di server (tidak mengganggu sesi client)
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return res.status(401).json({
+        status: "error",
+        message: "Password yang Anda masukkan salah",
+      });
+    }
+
+    // Password benar
+    res.status(200).json({
+      status: "success",
+      message: "Password terverifikasi",
+    });
+  } catch (error) {
+    console.error("❌ Verify Password Error:", error.message);
+    res.status(400).json({ status: "error", message: error.message });
+  }
+};
+
 module.exports = {
   register,
   verifyOtp,
   resendOtp,
   refreshToken,
   login,
+  verifyPassword,
 };

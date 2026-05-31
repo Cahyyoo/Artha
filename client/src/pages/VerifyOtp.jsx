@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import { supabase } from "../services/supabaseClient";
 import AuthLayout from "../components/AuthLayout";
-import { FiMail, FiRefreshCw, FiShield } from "react-icons/fi";
+import { FiMail, FiRefreshCw } from "react-icons/fi";
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -179,10 +179,6 @@ const VerifyOtp = () => {
           <span>{maskEmail(email)}</span>
         </div>
 
-        {/* Shield icon */}
-        <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/25">
-          <FiShield className="w-8 h-8 text-white" />
-        </div>
 
         {/* Error message */}
         {error && (

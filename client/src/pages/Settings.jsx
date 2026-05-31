@@ -99,37 +99,54 @@ const Settings = () => {
   const handleBusinessChange = (field) => (e) =>
     setBusinessProfile((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleBusinessSave = () => {
+  const handleBusinessSave = async () => {
     if (saveStatus === "saving") return;
     setSaveStatus("saving");
-    setTimeout(() => {
+    
+    try {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
+        const userMetadataUpdates = {
+          nama_usaha: businessProfile.namaUsaha,
+          kategori_usaha: businessProfile.kategoriUsaha,
+          jenis_usaha: businessProfile.jenisUsaha,
+          tahun_berdiri: businessProfile.tahunBerdiri,
+          jumlah_karyawan: businessProfile.jumlahKaryawan,
+          telepon_usaha: businessProfile.teleponUsaha,
+          email_usaha: businessProfile.emailUsaha,
+          website: businessProfile.website,
+          instagram: businessProfile.instagram,
+          alamat_usaha: businessProfile.alamatUsaha,
+          deskripsi_usaha: businessProfile.deskripsiUsaha,
+          nib: businessProfile.nib,
+          npwp: businessProfile.npwp,
+        };
+
+        const { supabase } = await import("../services/supabaseClient");
+        const { data: updateData, error } = await supabase.auth.updateUser({
+          data: userMetadataUpdates
+        });
+
+        if (error) throw error;
+
         const updatedUser = {
           ...user,
           user_metadata: {
             ...user.user_metadata,
-            nama_usaha: businessProfile.namaUsaha,
-            kategori_usaha: businessProfile.kategoriUsaha,
-            jenis_usaha: businessProfile.jenisUsaha,
-            tahun_berdiri: businessProfile.tahunBerdiri,
-            jumlah_karyawan: businessProfile.jumlahKaryawan,
-            telepon_usaha: businessProfile.teleponUsaha,
-            email_usaha: businessProfile.emailUsaha,
-            website: businessProfile.website,
-            instagram: businessProfile.instagram,
-            alamat_usaha: businessProfile.alamatUsaha,
-            deskripsi_usaha: businessProfile.deskripsiUsaha,
-            nib: businessProfile.nib,
-            npwp: businessProfile.npwp,
+            ...userMetadataUpdates
           },
         };
         localStorage.setItem("user", JSON.stringify(updatedUser));
       }
+      
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2500);
-    }, 1200);
+    } catch (err) {
+      console.error("Gagal menyimpan profil usaha:", err);
+      alert("Gagal menyimpan profil usaha: " + err.message);
+      setSaveStatus("idle");
+    }
   };
 
   const handleAddSubmit = (e) => {

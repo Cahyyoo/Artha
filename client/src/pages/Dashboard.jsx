@@ -313,8 +313,54 @@ const Dashboard = () => {
         </div>
 
         {apiError && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl relative z-10 font-medium flex items-center gap-2 mb-6">
-            <FiX /> {apiError}
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-3 relative z-10 mb-6 font-medium">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <FiX className="text-rose-500 shrink-0" size={20} />
+                <p className="text-sm font-semibold text-rose-700">{apiError}</p>
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-rose-200 text-rose-600 rounded-xl text-sm font-bold hover:bg-rose-100 transition-colors shrink-0"
+              >
+                <FiActivity size={14} className="animate-spin" /> Coba Lagi
+              </button>
+            </div>
+
+            {/* Tombol Aktivasi Bisnis — muncul hanya jika error terkait business_id */}
+            {(apiError.toLowerCase().includes("entitas bisnis") || apiError.toLowerCase().includes("business")) && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="text-left">
+                  <p className="text-sm font-bold text-amber-800">Akun Anda belum memiliki entitas bisnis.</p>
+                  <p className="text-xs text-amber-600 mt-1">Klik tombol di samping untuk mencoba mengaktifkan bisnis secara otomatis.</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await api.post("/api/profile/upgrade", {
+                        nama_usaha: "Usaha Saya",
+                        tipe_usaha: "Umum",
+                        lama_usaha: "< 1 Tahun"
+                      });
+                      
+                      const resData = response.data;
+
+                      alert("✅ Bisnis berhasil diaktifkan! Halaman akan dimuat ulang.");
+                      if (resData.data?.profile) {
+                        localStorage.setItem("profile", JSON.stringify(resData.data.profile));
+                      }
+                      window.location.reload();
+                    } catch (err) {
+                      console.error("Gagal aktivasi bisnis:", err);
+                      alert("❌ Gagal mengaktifkan bisnis: " + (err.response?.data?.message || err.message) + "\n\nSilakan hubungi rekan backend Anda untuk membuatkan business_id di database.");
+                    }
+                  }}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-bold hover:bg-amber-600 transition-colors shrink-0 shadow-sm active:scale-95"
+                >
+                  <FiTrendingUp size={14} /> Aktivasi Bisnis
+                </button>
+              </div>
+            )}
           </div>
         )}
 

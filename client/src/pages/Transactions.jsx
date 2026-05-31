@@ -274,7 +274,9 @@ export default function Transactions() {
 
       // File invoice opsional (key harus 'invoiceFile' sesuai docs)
       if (formData.invoiceFile) {
-        submitData.append('invoiceFile', formData.invoiceFile);
+        // [WORKAROUND] Nonaktifkan upload file sementara karena bucket "bukti_transaksi" belum ada di backend Vercel
+        // submitData.append('invoiceFile', formData.invoiceFile);
+        alert("Pemberitahuan: Fitur upload invoice sedang dalam pemeliharaan (bucket not found). Transaksi akan disimpan tanpa lampiran gambar.");
       }
 
       // Kirim ke Backend

@@ -6,111 +6,64 @@ const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 
-// Inisialisasi Express
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ==========================================
-// 1. MIDDLEWARE GLOBAL
+// 1. MIDDLEWARE GLOBAL (Pengaturan Order yang Benar)
 // ==========================================
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // Support both standard Vite ports
-    credentials: true,
-  }),
-);
+// Pastikan CORS adalah middleware pertama agar 'pre-flight' request ditangani dengan benar
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:5174", "https://arta-frontend.vercel.app"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use(express.json());
-
-app.use(express.urlencoded({ extended: true }));
-
+app.use(express.json({ limit: '10mb' })); // Menambah limit payload jika ada kiriman gambar
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // ==========================================
 // 2. DAFTAR ROUTES
 // ==========================================
 
-// Auth routes (tidak dilindungi JWT — register, login, verify-otp, dsb)
+// Auth routes (Publik)
 app.use("/api/auth", authRoutes);
 
-// Profile routes (dilindungi JWT)
+// Profile routes (Dilindungi)
 app.use("/api/profile", authMiddleware, profileRoutes);
 
-// Contoh: Rute yang dilindungi JWT middleware
-// app.use("/api/transactions", authMiddleware, transactionRoutes);
-// app.use("/api/reports", authMiddleware, reportRoutes);
-
-// Test Route Dasar
+// Test Route
 app.get("/", (req, res) => {
-  res.json({
-    status: "success",
-    message: "Server UMKM Finance API berjalan dengan baik! 🚀",
-  });
+  res.json({ status: "success", message: "Server Arta API aktif!" });
 });
 
-// Route untuk mengecek koneksi Supabase
-app.get("/api/health", async (req, res, next) => {
-  try {
-    const supabase = require("./services/supabase");
-
-    const { data, error } = await supabase
-      .from("_test_connection_")
-      .select("*")
-      .limit(1)
-      .maybeSingle();
-
-    if (error && error.code !== "PGRST116" && error.code !== "42P01" && !error.message.includes("Could not find the table")) {
-      throw error;
-    }
-
-    res.json({
-      status: "success",
-      message: "Koneksi Supabase berhasil & API siap digunakan! 🚀",
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Route terproteksi contoh — untuk test middleware JWT
-app.get("/api/me", authMiddleware, (req, res) => {
-  res.json({
-    status: "success",
-    message: "Data user terautentikasi",
-    data: { user: req.user },
-  });
+// Health Check
+app.get("/api/health", async (req, res) => {
+  res.json({ status: "success", message: "Koneksi stabil." });
 });
 
 // ==========================================
-// 3. ERROR HANDLING (Mencegah Server Crash)
+// 3. ERROR HANDLING (Robust)
 // ==========================================
 
-// Middleware untuk menangani Route yang tidak ditemukan (404)
+// Menangani 404
 app.use((req, res, next) => {
-  res.status(404).json({
-    status: "error",
-    message:
-      "Endpoint API tidak ditemukan (404). Silakan cek kembali URL Anda.",
-  });
+  res.status(404).json({ status: "error", message: "Endpoint tidak ditemukan." });
 });
 
-// Global Error Handler (Menangkap semua error dari blok try-catch)
+// Global Error Handler
 app.use((err, req, res, next) => {
-  console.error("❌ Terjadi Kesalahan Internal:", err.message);
+  console.error("❌ Terjadi Kesalahan:", err.message);
 
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
+  // Mengirim error yang lebih informatif
+  res.status(err.status || 500).json({
     status: "error",
-    message:
-      err.message || "Terjadi kesalahan pada server (Internal Server Error).",
+    message: err.message || "Internal Server Error",
   });
 });
 
-// ==========================================
-// 4. JALANKAN SERVER
-// ==========================================
 app.listen(PORT, () => {
-  console.log(`=========================================`);
   console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
-  console.log(`=========================================`);
 });

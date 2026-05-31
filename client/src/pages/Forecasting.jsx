@@ -23,16 +23,37 @@ export default function Forecasting() {
         const res = await transactionService.getForecast();
         const data = res.data?.data || res.data || {};
         
-        const mappedData = (data.forecast_data || []).map(item => ({
-          date: item.date,
-          Aktual: item.actual,
-          Prediksi: item.predicted
-        }));
+        let combinedData = [];
+        if (data.actual_data || data.ai_prediction) {
+          const actualMapped = (data.actual_data || []).map(item => ({
+            date: item.date,
+            Aktual: item.net_cashflow,
+            Prediksi: null
+          }));
+
+          const predictionMapped = (data.ai_prediction || []).map(item => ({
+            date: item.date,
+            Aktual: null,
+            Prediksi: item.predicted_net_cashflow
+          }));
+
+          if (actualMapped.length > 0 && predictionMapped.length > 0) {
+            // Hubungkan titik terakhir aktual dengan titik pertama prediksi agar grafiknya kontinu
+            actualMapped[actualMapped.length - 1].Prediksi = actualMapped[actualMapped.length - 1].Aktual;
+          }
+          combinedData = [...actualMapped, ...predictionMapped];
+        } else if (data.forecast_data) {
+          combinedData = (data.forecast_data || []).map(item => ({
+            date: item.date,
+            Aktual: item.actual,
+            Prediksi: item.predicted
+          }));
+        }
         
-        setForecastData(mappedData);
-        setRecommendation(data.recommendation || t('forecasting.ai_strategy_desc'));
+        setForecastData(combinedData);
+        setRecommendation(data.insight || data.recommendation || t('forecasting.ai_strategy_desc'));
         setConfidenceInterval(data.confidence_interval || 85);
-        setModelUsed(data.model_used || "LSTM");
+        setModelUsed(data.method_used || data.model_used || "LSTM");
       } catch (err) {
         console.error("Gagal mengambil prediksi AI:", err);
         setApiError(err.response?.data?.message || err.message);
@@ -114,7 +135,7 @@ export default function Forecasting() {
              </div>
 
              <div className="h-[400px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={400}>
                   <AreaChart data={forecastData} margin={{ top: 20, right: 30, left: 20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPrediksi" x1="0" y1="0" x2="0" y2="1">

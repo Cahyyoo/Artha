@@ -200,7 +200,8 @@ const Recommendations = () => {
 
       const res = await api.post("/api/feasibility-tests", payload);
       console.log("[DEBUG] RESPONSE VERCEL ASLI:", res.data);
-      setAiResults(res.data);
+      const resultData = res.data?.data || res.data;
+      setAiResults(resultData);
       setPerintisPhase(4);
     } catch (err) {
       console.error(err);
@@ -457,7 +458,7 @@ const Recommendations = () => {
               <h3 className="text-lg font-black text-slate-800 mb-1 flex items-center gap-2"><FiPieChart className="text-teal-500" /> Simulasi Anggaran</h3>
               <p className="text-slate-500 text-xs font-medium mb-6">Total Modal (Rencana): Rp {modalAwalNum.toLocaleString('id-ID')}</p>
               <div className="h-52 w-full mb-4">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={208}>
                   <PieChart>
                     <Pie data={allocations} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={4} dataKey="value" stroke="none">
                       {allocations.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
