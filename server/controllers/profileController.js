@@ -1,9 +1,11 @@
 const supabase = require("../services/supabase");
+const supabaseAdmin = supabase.supabaseAdmin;
 
 // --- AMBIL PROFIL USER ---
 const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
+    const email = req.user.email;
     const authSupabase = supabase.createAuthClient(req.token);
 
     const { data, error } = await authSupabase
@@ -14,22 +16,40 @@ const getProfile = async (req, res) => {
 
     if (error && error.code !== "PGRST116") throw error;
 
-    // Jika profil belum ada, buat profil baru
+    // Jika tidak ditemukan berdasarkan ID, coba cari user dengan email yang sama
+    // via admin API. Ini menangani kasus Google OAuth yang punya user ID berbeda.
+    if (!data && email && supabaseAdmin) {
+      try {
+        const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+        if (!listError && users) {
+          const match = users.find(u => u.email === email && u.id !== userId);
+          if (match) {
+            const { data: existingProfile } = await supabaseAdmin
+              .from("profiles")
+              .select("*")
+              .eq("id", match.id)
+              .maybeSingle();
+
+            if (existingProfile) {
+              return res.status(200).json({
+                status: "success",
+                message: "Profil ditemukan via email lookup.",
+                data: { profile: existingProfile },
+              });
+            }
+          }
+        }
+      } catch (_) {
+        // supabaseAdmin mungkin tidak punya akses (service_role key diperlukan)
+        // fallback: return null
+      }
+    }
+
+    // Tidak ada profil ditemukan — return null, jangan auto-create
     if (!data) {
-      const { data: newProfile, error: insertError } = await authSupabase
-        .from("profiles")
-        .insert({
-          id: userId,
-          nama_lengkap: req.user.user_metadata?.nama_lengkap || req.user.user_metadata?.full_name || "",
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
       return res.status(200).json({
         status: "success",
-        data: { profile: newProfile },
+        data: { profile: null },
       });
     }
 
@@ -59,6 +79,7 @@ const updateOnboarding = async (req, res) => {
     const updateData = {
       user_type,
       onboarding_completed: true,
+      email: req.user.email,
       updated_at: new Date().toISOString(),
     };
 
@@ -113,6 +134,7 @@ const upgradeToUmkm = async (req, res) => {
         user_type: "umkm_aktif",
         nama_usaha,
         tipe_usaha,
+        email: req.user.email,
         updated_at: new Date().toISOString(),
       })
       .select()
