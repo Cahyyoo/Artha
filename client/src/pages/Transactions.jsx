@@ -14,9 +14,9 @@ import {
 const getCurrentUserRole = () => {
   try {
     const profile = JSON.parse(localStorage.getItem("profile") || "{}");
-    if (profile.role) return profile.role.toUpperCase();
+    if (profile && profile.role) return profile.role.toUpperCase();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    return (user.user_metadata?.role || "USER").toUpperCase();
+    return (user && user.user_metadata?.role) ? user.user_metadata.role.toUpperCase() : "USER";
   } catch (e) { return "USER"; }
 };
 
@@ -52,7 +52,8 @@ export default function Transactions({ isDashboard = false }) {
 
   // --- KONFIGURASI AKSES ---
   const role = getCurrentUserRole();
-  const canModify = role === "OWNER" || role === "ADMIN"; // Admin & Owner boleh tambah/hapus
+  const canAdd = role === "OWNER" || role === "ADMIN"; // Admin & Owner boleh tambah
+  const canEditDelete = role === "OWNER"; // Hanya Owner boleh edit/hapus
 
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -461,7 +462,7 @@ export default function Transactions({ isDashboard = false }) {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            {canModify && selectedIds.length > 0 && (
+            {canEditDelete && selectedIds.length > 0 && (
               <button onClick={handleBulkDelete} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-sm font-bold hover:bg-rose-100 transition-colors shadow-sm">
                 <FiTrash2 /> <span>{t('transactions.bulk_delete', { count: selectedIds.length })}</span>
               </button>
@@ -469,7 +470,7 @@ export default function Transactions({ isDashboard = false }) {
             <button onClick={handleExportCSV} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors shadow-sm">
               <FiDownload /> <span>{t('transactions.export_csv')}</span>
             </button>
-            {canModify && (
+            {canAdd && (
               <button onClick={() => { setEditingId(null); setIsModalOpen(true); }} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all active:scale-95">
                 <FiPlus size={18} /> <span>{t('transactions.add_transaction')}</span>
               </button>
@@ -515,7 +516,7 @@ export default function Transactions({ isDashboard = false }) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
-                        {canModify ? (
+                         {canEditDelete ? (
                           <>
                             <button onClick={() => handleEditClick(trx)} className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all"><FiEdit2 size={15} /></button>
                             <button onClick={() => handleDeleteTransaction(trx.id)} className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all"><FiTrash2 size={15} /></button>

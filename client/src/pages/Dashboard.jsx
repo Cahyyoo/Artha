@@ -89,10 +89,10 @@ const Dashboard = () => {
       setLoading(true);
       api
         .get(`/api/dashboard/overview?range=${filterWaktu}`)
-        .then((res) => {
-          setDashboardData(res.data);
-          setApiError(null);
-        })
+            .then((res) => {
+              setDashboardData(res.data.data || res.data);
+              setApiError(null);
+            })
         .catch((err) => {
           console.error("Gagal mengambil data dashboard:", err);
           setApiError(
