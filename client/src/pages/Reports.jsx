@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import {
   FiDownload, FiArrowUpRight, FiArrowDownRight, FiPieChart,
-  FiTrendingUp, FiTrendingDown, FiZap, FiFileText, FiChevronDown, FiAlertCircle
+  FiTrendingUp, FiTrendingDown, FiLayers, FiFileText, FiChevronDown, FiAlertCircle
 } from "react-icons/fi";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -44,6 +44,7 @@ export default function Reports() {
   
   const [reportData, setReportData] = useState(null);
   const [activeTransactions, setActiveTransactions] = useState([]);
+  const [forecastData, setForecastData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
 
@@ -57,9 +58,10 @@ export default function Reports() {
       setApiError(null);
       try {
         const apiRange = rangeMap[dateRange] || dateRange;
-        const [reportsRes, txRes] = await Promise.all([
+        const [reportsRes, txRes, forecastRes] = await Promise.all([
           transactionService.getReports({ range: apiRange }),
-          transactionService.getTransactions().catch(() => ({ data: [] }))
+          transactionService.getTransactions().catch(() => ({ data: [] })),
+          transactionService.getForecast().catch(() => ({ data: {} }))
         ]);
         
         const rData = reportsRes.data?.data || reportsRes.data || {};
@@ -67,6 +69,26 @@ export default function Reports() {
         
         const tData = txRes.data?.data || txRes.data || [];
         setActiveTransactions(Array.isArray(tData) ? tData : (tData.transactions || []));
+
+        // Process forecast data
+        const fcData = forecastRes.data?.data || forecastRes.data || {};
+        if (fcData.ai_prediction) {
+          setForecastData(fcData.ai_prediction.map((item) => ({
+            date: item.date,
+            Prediksi: item.predicted_net_cashflow
+          })));
+        } else if (fcData.forecast_data) {
+          setForecastData(
+            fcData.forecast_data
+              .filter((item) => item.predicted != null)
+              .map((item) => ({
+                date: item.date,
+                Prediksi: item.predicted
+              }))
+          );
+        } else {
+          setForecastData([]);
+        }
       } catch (err) {
         console.error("Gagal fetch laporan:", err);
         setApiError(err.response?.data?.message || err.message);
@@ -122,6 +144,30 @@ export default function Reports() {
       Pengeluaran: d.expense,
     }));
   }, [filteredTransactions]);
+
+  // Merged chart data: historical cash flow + future predictions
+  const mergedChartData = useMemo(() => {
+    const historicalWithNull = cashFlowData.map((d) => ({
+      ...d,
+      Prediksi: null,
+    }));
+
+    const predictionWithNull = forecastData.map((d) => ({
+      date: d.date,
+      Pemasukan: null,
+      Pengeluaran: null,
+      Prediksi: d.Prediksi,
+    }));
+
+    // Merge: keep historical order, append future predictions (avoid duplicate dates)
+    const all = [...historicalWithNull];
+    predictionWithNull.forEach((p) => {
+      if (!all.some((a) => a.date === p.date)) {
+        all.push(p);
+      }
+    });
+    return all;
+  }, [cashFlowData, forecastData]);
 
   // Dynamic chart title
   const chartTitle = useMemo(() => {
@@ -290,11 +336,11 @@ export default function Reports() {
 
   // Range label map for display
   const rangeLabels = {
-    "7_hari": "7 Hari Terakhir",
-    "bulan_ini": "Bulan Ini",
-    "bulan_lalu": "Bulan Lalu",
-    "tahun_ini": "Tahun Ini",
-    "tahun_lalu": "Tahun Lalu",
+    "7_hari": t("reports.last_7_days"),
+    "bulan_ini": t("reports.this_month"),
+    "bulan_lalu": t("reports.last_month"),
+    "tahun_ini": t("reports.this_year"),
+    "tahun_lalu": t("reports.last_year"),
   };
 
   return (
@@ -322,11 +368,11 @@ export default function Reports() {
               onChange={(e) => setDateRange(e.target.value)}
               className="pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none cursor-pointer shadow-sm appearance-none"
             >
-              <option value="7_hari">7 Hari Terakhir</option>
+              <option value="7_hari">{t('reports.last_7_days')}</option>
               <option value="bulan_ini">{t('reports.this_month')}</option>
               <option value="bulan_lalu">{t('reports.last_month')}</option>
               <option value="tahun_ini">{t('reports.this_year')}</option>
-              <option value="tahun_lalu">Tahun Lalu</option>
+              <option value="tahun_lalu">{t('reports.last_year')}</option>
             </select>
             <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
           </div>
@@ -403,7 +449,7 @@ export default function Reports() {
       <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-            <FiZap size={16} />
+            <FiLayers size={16} />
           </div>
           <h3 className="text-lg font-black text-slate-800">{t('reports.ai_insights')}</h3>
         </div>
@@ -435,13 +481,14 @@ export default function Reports() {
               <div className="hidden sm:flex items-center gap-4 text-xs font-semibold text-slate-500">
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Pemasukan</span>
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Pengeluaran</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span> {t('reports.prediction')}</span>
               </div>
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider border border-slate-200 rounded-lg px-2.5 py-1.5">{rangeLabels[dateRange]}</span>
             </div>
           </div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height={288}>
-              <AreaChart data={cashFlowData} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+              <AreaChart data={mergedChartData} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorPemasukan" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
@@ -500,6 +547,16 @@ export default function Reports() {
                   fillOpacity={1}
                   fill="url(#colorPengeluaran)"
                   activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: '#f43f5e' }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Prediksi"
+                  stroke="#6366f1"
+                  strokeWidth={2}
+                  strokeDasharray="6 4"
+                  fill="none"
+                  dot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>

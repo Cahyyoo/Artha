@@ -460,7 +460,7 @@ export default function Profile() {
                     value={passwordData.oldPassword}
                     onChange={handlePasswordChange}
                     className={`w-full px-4 py-3 pr-10 bg-slate-50 border ${passwordError ? 'border-red-400 focus:ring-red-400 focus:bg-red-50/50' : 'border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-500'} rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:bg-white transition-all duration-200 shadow-sm`}
-                    placeholder="Masukkan kata sandi saat ini"
+                    placeholder={t('profile.old_password_placeholder')}
                   />
                   <button
                     type="button"

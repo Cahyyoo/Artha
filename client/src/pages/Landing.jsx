@@ -44,6 +44,9 @@ import {
   FiPackage,
   FiHelpCircle,
   FiGlobe,
+  FiMail,
+  FiPhone,
+  FiSend,
 } from "react-icons/fi";
 import { FaTwitter, FaLinkedin, FaInstagram, FaYoutube } from "react-icons/fa";
 
@@ -59,11 +62,11 @@ const Landing = () => {
   const [activeSection, setActiveSection] = useState("layanan");
 
   const navItems = [
-    { id: "layanan", name: "Fitur" },
-    { id: "cara-kerja", name: "Cara Kerja" },
-    { id: "testimoni", name: "Testimoni" },
-    { id: "faq", name: "FAQ" },
-    { id: "kontak", name: "Kontak" },
+    { id: "layanan", name: t("landing.nav_fitur") },
+    { id: "cara-kerja", name: t("landing.nav_cara_kerja") },
+    { id: "testimoni", name: t("landing.nav_testimoni") },
+    { id: "faq", name: t("landing.nav_faq") },
+    { id: "kontak", name: t("landing.nav_kontak") },
   ];
 
   const scrollToSection = (id) => {
@@ -346,7 +349,7 @@ const Landing = () => {
                 onClick={() => navigate("/dashboard")}
                 className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white px-5 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 shadow-lg shadow-indigo-500/20 border border-indigo-400/20"
               >
-                Dashboard
+                {t("landing.nav_dashboard")}
               </button>
             ) : (
               <div className="flex items-center gap-4 lg:gap-6">
@@ -354,13 +357,13 @@ const Landing = () => {
                   to="/login"
                   className="text-xs font-black text-slate-400 hover:text-white transition-colors"
                 >
-                  Masuk
+                  {t("landing.nav_masuk")}
                 </Link>
                 <Link
                   to="/register"
                   className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#4f46e5] hover:to-[#7c3aed] text-white px-5 lg:px-7 py-2.5 md:py-3 rounded-2xl text-xs font-black transition-all active:scale-95 shadow-xl shadow-indigo-500/25 border border-white/10"
                 >
-                  Daftar Gratis
+                  {t("landing.nav_daftar_gratis")}
                 </Link>
               </div>
             )}
@@ -425,7 +428,7 @@ const Landing = () => {
                   onClick={() => navigate("/dashboard")}
                   className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-2xl font-black text-center"
                 >
-                  Dashboard
+                  {t("landing.nav_dashboard")}
                 </button>
               ) : (
                 <div className="flex flex-col gap-4">
@@ -433,13 +436,13 @@ const Landing = () => {
                     to="/login"
                     className="text-center font-bold text-slate-300 py-2"
                   >
-                    Masuk
+                    {t("landing.nav_masuk")}
                   </Link>
                   <Link
                     to="/register"
                     className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-2xl font-black text-center"
                   >
-                    Daftar Gratis
+                    {t("landing.nav_daftar_gratis")}
                   </Link>
                 </div>
               )}
@@ -456,7 +459,7 @@ const Landing = () => {
         {/* Left Content */}
         <div className="w-full lg:w-[50%] xl:w-[45%] space-y-6 md:space-y-8 animate-in fade-in slide-in-from-left-8 duration-1000 text-center lg:text-left">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] xl:text-[5.5rem] font-black leading-[1.15] tracking-tight relative text-white">
-            Berhenti Catat Manual. <br className="hidden sm:block" />
+            {t("landing.hero_title_1")} <br className="hidden sm:block" />
             {/* Elegant Text Glow Effect */}
             <span className="relative inline-block py-1 md:py-2">
               {/* Soft animated background glow */}
@@ -464,17 +467,15 @@ const Landing = () => {
 
               {/* Text with dynamic gradient */}
               <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">
-                Mulai Kelola Cerdas
+                {t("landing.hero_title_2")}
               </span>
             </span>
             <br className="hidden sm:block" />
-            dengan Arta
+            {t("landing.hero_title_3")}
           </h1>
 
           <p className="text-base md:text-lg text-slate-400 max-w-lg lg:max-w-md xl:max-w-lg leading-relaxed font-medium mx-auto lg:mx-0">
-            Arta hadir untuk membantu pelaku UMKM. Dari pencatatan transaksi
-            hingga prediksi arus kas, semua dalam satu platform cerdas yang
-            dirancang khusus untuk wirausaha muda Indonesia.
+            {t("landing.hero_desc")}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
@@ -504,7 +505,7 @@ const Landing = () => {
                   }}
                 />
 
-                <span className="relative z-10">Mulai Kelola Keuangan</span>
+                <span className="relative z-10">{t("landing.hero_cta")}</span>
                 <motion.span
                   className="relative z-10"
                   animate={{ x: [0, 5, 0] }}
@@ -548,16 +549,11 @@ const Landing = () => {
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
                 <div className="ml-auto text-[8px] md:text-[9px] text-slate-500 font-medium tracking-wider">
-                  Laporan Keuangan Arta
+                  {t("landing.hero_mockup_label")}
                 </div>
-              </div>
-
-              {/* The Actual Image */}
-              <div className="pt-7 md:pt-8 relative bg-white">
-                {/* Gunakan gambar dari folder public */}
                 <img
-                  src="/laporan-mockup.jpg"
-                  alt="Dashboard Laporan Arta"
+                  src={iconGeneratedReport}
+                  alt={t("landing.hero_mockup_label")}
                   className="w-full h-auto object-cover opacity-95 group-hover:opacity-100 transition-opacity duration-500"
                   onError={(e) => {
                     e.target.style.display = "none";
@@ -589,8 +585,7 @@ const Landing = () => {
               transition={{ delay: 0.1 }}
               className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6 leading-tight tracking-tight"
             >
-              Banyak usaha muda gagal bukan karena ide yang buruk, tapi karena
-              keuangan yang tidak terkelola.
+              {t("landing.problem_headline")}
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -599,9 +594,7 @@ const Landing = () => {
               transition={{ delay: 0.2 }}
               className="text-base md:text-lg text-slate-400 font-medium leading-relaxed"
             >
-              Sebagian besar pelaku UMKM muda masih bergantung pada buku kas
-              manual dan nota yang menumpuk — jauh dari laporan keuangan formal
-              yang seharusnya.
+              {t("landing.problem_desc")}
             </motion.p>
           </div>
 
@@ -623,29 +616,29 @@ const Landing = () => {
                 <div className="relative z-10">
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 text-rose-400 font-bold text-sm mb-8 border border-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.15)]">
                     <FiX strokeWidth={3} className="text-rose-500" />
-                    Sebelum Arta
+                    {t("landing.before_badge")}
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 tracking-tight">
-                    Catatan manual yang berantakan
+                  <h3 className="text-xl md:text-2xl font-bold text-white">
+                    {t("landing.before_title")}
                   </h3>
 
                   <div className="space-y-4">
                     {[
                       {
                         icon: iconBukuKas,
-                        text: "Buku kas fisik penuh coretan, sulit ditelusuri kembali",
+                        text: t("landing.before_item_1"),
                       },
                       {
                         icon: iconNotaTransaksi,
-                        text: "Nota transaksi bertumpuk, hilang, atau rusak",
+                        text: t("landing.before_item_2"),
                       },
                       {
                         icon: iconWarning,
-                        text: "Tidak ada laporan neraca atau laba rugi formal",
+                        text: t("landing.before_item_3"),
                       },
                       {
                         icon: iconDowntrend,
-                        text: "Sulit memprediksi arus kas atau keuntungan",
+                        text: t("landing.before_item_4"),
                       },
                     ].map((item, idx) => (
                       <div
@@ -692,25 +685,25 @@ const Landing = () => {
                 <div className="relative z-10">
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 font-bold text-sm mb-8 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
                     <FiCheck strokeWidth={3} className="text-emerald-500" />
-                    Dengan Arta
+                    {t("landing.after_badge")}
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 tracking-tight">
-                    Dashboard digital yang terstruktur
+                  <h3 className="text-xl md:text-2xl font-bold text-white">
+                    {t("landing.after_title")}
                   </h3>
 
                   <div className="space-y-4 mb-8">
                     {[
                       {
                         icon: iconLaporanNeraca,
-                        text: "Laporan neraca & laba rugi dibuat otomatis dari data input",
+                        text: t("landing.after_item_1"),
                       },
                       {
                         icon: iconTrend,
-                        text: "AI forecasting memprediksi arus kas ke depan",
+                        text: t("landing.after_item_2"),
                       },
                       {
                         icon: iconRealTime,
-                        text: "Visualisasi performa keuangan real-time & interaktif",
+                        text: t("landing.after_item_3"),
                       },
                     ].map((item, idx) => (
                       <div
@@ -739,7 +732,7 @@ const Landing = () => {
                       <div className="w-2 h-2 rounded-full bg-amber-500/80"></div>
                       <div className="w-2 h-2 rounded-full bg-emerald-500/80"></div>
                       <div className="ml-auto text-[8px] text-slate-500 font-medium tracking-wider">
-                        cashbook
+                        {t("landing.after_mockup_label")}
                       </div>
                     </div>
 
@@ -772,19 +765,19 @@ const Landing = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 relative z-10 divide-y md:divide-y-0 md:divide-x divide-white/10">
               {[
                 {
-                  value: "60%+",
-                  label: "Tingkat Kegagalan",
-                  desc: "UMKM muda gagal dalam 5 tahun pertama akibat masalah arus kas dan tata kelola.",
+                  value: t("landing.stat_failure_value"),
+                  label: t("landing.stat_failure_title"),
+                  desc: t("landing.stat_failure_desc"),
                 },
                 {
-                  value: "8/10",
-                  label: "Tanpa Laporan Formal",
-                  desc: "Pelaku UMKM belum mampu menyusun laporan keuangan formal untuk usahanya.",
+                  value: t("landing.stat_report_value"),
+                  label: t("landing.stat_report_title"),
+                  desc: t("landing.stat_report_desc"),
                 },
                 {
-                  value: "0",
-                  label: "Kebutaan Prediksi",
-                  desc: "Dari mereka yang masih catat di buku fisik, hampir tidak ada yang bisa memprediksi tren.",
+                  value: t("landing.stat_prediction_value"),
+                  label: t("landing.stat_prediction_title"),
+                  desc: t("landing.stat_prediction_desc"),
                 },
               ].map((stat, idx) => (
                 <motion.div
@@ -820,13 +813,13 @@ const Landing = () => {
               to="/register"
               className="px-8 py-4 bg-white text-slate-900 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
             >
-              Lihat Solusi Arta <FiArrowRight />
+              {t("landing.solution_cta")} <FiArrowRight />
             </Link>
             <a
               href="#layanan"
               className="px-8 py-4 text-slate-400 font-medium hover:text-white transition-colors flex items-center gap-2"
             >
-              Pelajari bagaimana fitur kami bekerja
+              {t("landing.solution_cta_desc")}
             </a>
           </motion.div>
         </div>
@@ -847,9 +840,9 @@ const Landing = () => {
               viewport={{ once: true }}
               className="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight"
             >
-              Fitur Utama{" "}
+              {t("landing.features_title_1")}{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
-                Arta
+                {t("landing.features_title_2")}
               </span>
             </motion.h2>
             <motion.p
@@ -859,51 +852,50 @@ const Landing = () => {
               transition={{ delay: 0.1 }}
               className="text-slate-500 text-base md:text-lg max-w-2xl mx-auto"
             >
-              Solusi komprehensif yang dirancang khusus untuk membantu UMKM muda
-              mengelola keuangan dengan sehat dan berkelanjutan.
+              {t("landing.features_desc")}
             </motion.p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-white/5 rounded-[3rem] overflow-hidden bg-white/[0.01] backdrop-blur-3xl shadow-2xl shadow-indigo-500/5">
             {[
               {
-                title: "Digital Cashbook",
-                desc: "Pencatatan kas masuk dan keluar secara digital dengan antarmuka yang sangat intuitif dan responsif.",
+                title: t("landing.feature_digital_cashbook"),
+                desc: t("landing.feature_digital_cashbook_desc"),
                 icon: iconDigitalCashbook,
               },
               {
-                title: "AI Rekomendasi",
-                desc: "Sistem cerdas untuk klasifikasi dan evaluasi kelayakan bisnis bagi calon pengusaha baru.",
+                title: t("landing.feature_ai_rekomendasi"),
+                desc: t("landing.feature_ai_rekomendasi_desc"),
                 icon: iconAiRekomendasi,
               },
               {
-                title: "Generated Report",
-                desc: "Laporan neraca dan laba rugi instan yang dihasilkan otomatis tanpa perlu keahlian akuntansi khusus.",
+                title: t("landing.feature_generated_report"),
+                desc: t("landing.feature_generated_report_desc"),
                 icon: iconGeneratedReport,
               },
               {
-                title: "AI Forecasting",
-                desc: "Prediksi tren finansial (Time-Series) untuk mengantisipasi kondisi arus kas usaha Anda di masa depan.",
+                title: t("landing.feature_ai_forecasting"),
+                desc: t("landing.feature_ai_forecasting_desc"),
                 icon: iconForecasting,
               },
               {
-                title: "Visualisasi Data",
-                desc: "Analisis performa keuangan melalui grafik interaktif yang mudah dipahami dalam satu dashboard.",
+                title: t("landing.feature_visualisasi"),
+                desc: t("landing.feature_visualisasi_desc"),
                 icon: iconVisualData,
               },
               {
-                title: "Onboarding Adaptif",
-                desc: "Alur registrasi yang menyesuaikan kebutuhan Anda, baik yang baru merintis maupun yang sudah memiliki usaha.",
+                title: t("landing.feature_onboarding"),
+                desc: t("landing.feature_onboarding_desc"),
                 icon: iconOnboarding,
               },
               {
-                title: "Keamanan Terjamin",
-                desc: "Data finansial Anda dilindungi dengan enkripsi tingkat tinggi untuk memastikan privasi.",
+                title: t("landing.feature_keamanan"),
+                desc: t("landing.feature_keamanan_desc"),
                 icon: iconKeamanan,
               },
               {
-                title: "Cloud Based",
-                desc: "Akses data UMKM Anda kapan saja dan di mana saja tanpa khawatir kehilangan riwayat transaksi.",
+                title: t("landing.feature_cloud"),
+                desc: t("landing.feature_cloud_desc"),
                 icon: iconCloudBased,
               },
             ].map((feature, i) => (
@@ -954,7 +946,7 @@ const Landing = () => {
               viewport={{ once: true }}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-6"
             >
-              How It Works
+              {t("landing.how_badge")}
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -962,9 +954,9 @@ const Landing = () => {
               viewport={{ once: true }}
               className="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight"
             >
-              Mulai Perjalanan Anda{" "}
+              {t("landing.how_title_1")}{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
-                dengan Arta
+                {t("landing.how_title_2")}
               </span>
             </motion.h2>
             <motion.p
@@ -974,8 +966,7 @@ const Landing = () => {
               transition={{ delay: 0.1 }}
               className="text-slate-500 text-base md:text-lg max-w-2xl mx-auto"
             >
-              Dari pendaftaran hingga pengelolaan keuangan penuh — ikuti alur
-              sederhana ini.
+              {t("landing.how_desc")}
             </motion.p>
           </div>
 
@@ -995,15 +986,13 @@ const Landing = () => {
               <div className="flex-1 md:text-right">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></div>
-                  Langkah 01
+                  {t("landing.step_01")}
                 </div>
                 <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
-                  Daftar atau Masuk
+                  {t("landing.step_01_title")}
                 </h3>
                 <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md md:ml-auto">
-                  Buat akun baru dengan nama, email, dan password — atau
-                  langsung masuk jika sudah punya akun. Proses cepat dalam 60
-                  detik.
+                  {t("landing.step_01_desc")}
                 </p>
               </div>
               {/* Center dot */}
@@ -1119,14 +1108,13 @@ const Landing = () => {
               <div className="flex-1">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></div>
-                  Langkah 02
+                  {t("landing.step_02")}
                 </div>
                 <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
-                  Onboarding Adaptif
+                  {t("landing.step_02_title")}
                 </h3>
                 <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md">
-                  Sistem menyesuaikan pengalaman Anda berdasarkan status bisnis.
-                  Pilih jalur yang sesuai untuk memulai.
+                  {t("landing.step_02_desc")}
                 </p>
               </div>
               {/* Center dot */}
@@ -1143,10 +1131,10 @@ const Landing = () => {
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-white">
-                          Sudah Punya Usaha
+                          {t("landing.step_02_option_1")}
                         </h4>
                         <p className="text-[11px] text-slate-500">
-                          Setup profil bisnis & mulai catat
+                          {t("landing.step_02_option_1_desc")}
                         </p>
                       </div>
                     </div>
@@ -1158,10 +1146,10 @@ const Landing = () => {
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-white">
-                          Calon Pengusaha
+                          {t("landing.step_02_option_2")}
                         </h4>
                         <p className="text-[11px] text-slate-500">
-                          AI analisis kelayakan bisnis Anda
+                          {t("landing.step_02_option_2_desc")}
                         </p>
                       </div>
                     </div>
@@ -1181,14 +1169,13 @@ const Landing = () => {
               <div className="flex-1 md:text-right">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                  Langkah 03
+                  {t("landing.step_03")}
                 </div>
                 <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
-                  Kelola di Dashboard
+                  {t("landing.step_03_title")}
                 </h3>
                 <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md md:ml-auto">
-                  Akses semua fitur utama Arta dari satu dashboard terpusat —
-                  pencatatan, laporan, prediksi, hingga konsultasi AI.
+                  {t("landing.step_03_desc")}
                 </p>
               </div>
               {/* Center dot */}
@@ -1200,23 +1187,23 @@ const Landing = () => {
                 <div className="grid grid-cols-2 gap-3 max-w-sm">
                   {[
                     {
-                      name: "Cashbook",
-                      desc: "Catat pemasukan & pengeluaran",
+                      name: t("landing.step_03_cashbook"),
+                      desc: t("landing.step_03_cashbook_desc"),
                       color: "emerald",
                     },
                     {
-                      name: "Reports",
-                      desc: "Neraca & laba rugi otomatis",
+                      name: t("landing.step_03_reports"),
+                      desc: t("landing.step_03_reports_desc"),
                       color: "blue",
                     },
                     {
-                      name: "AI Forecast",
-                      desc: "Prediksi arus kas",
+                      name: t("landing.step_03_forecast"),
+                      desc: t("landing.step_03_forecast_desc"),
                       color: "violet",
                     },
                     {
-                      name: "AI Consult",
-                      desc: "Konsultasi bisnis interaktif",
+                      name: t("landing.step_03_consult"),
+                      desc: t("landing.step_03_consult_desc"),
                       color: "amber",
                     },
                   ].map((f, i) => {
@@ -1256,14 +1243,13 @@ const Landing = () => {
               <div className="flex-1">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-bold text-violet-400 uppercase tracking-widest mb-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></div>
-                  Langkah 04
+                  {t("landing.step_04")}
                 </div>
                 <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
-                  Pantau & Kembangkan
+                  {t("landing.step_04_title")}
                 </h3>
                 <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md">
-                  Kelola profil bisnis, terima notifikasi penting, dan gunakan
-                  data visual untuk mengembangkan usaha Anda.
+                  {t("landing.step_04_desc")}
                 </p>
               </div>
               {/* Center dot */}
@@ -1274,9 +1260,9 @@ const Landing = () => {
               <div className="flex-1 md:flex md:justify-end">
                 <div className="max-w-sm w-full space-y-3">
                   {[
-                    { label: "Profil Akun", desc: "Nama, password, avatar" },
-                    { label: "Profil Bisnis", desc: "Kategori, modal, tujuan" },
-                    { label: "Notifikasi", desc: "Alert & pengingat" },
+                    { label: t("landing.step_04_profile_account"), desc: t("landing.step_04_profile_account_desc") },
+                    { label: t("landing.step_04_profile_business"), desc: t("landing.step_04_profile_business_desc") },
+                    { label: t("landing.step_04_notifications"), desc: t("landing.step_04_notifications_desc") },
                   ].map((item, i) => (
                     <div
                       key={i}
@@ -1314,9 +1300,9 @@ const Landing = () => {
               transition={{ delay: 0.1 }}
               className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight tracking-tight"
             >
-              Mulai dari mana kamu berada —{" "}
+              {t("landing.adaptive_title_1")}{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
-                Arta yang menyesuaikan.
+                {t("landing.adaptive_title_2")}
               </span>
             </motion.h2>
             <motion.p
@@ -1326,9 +1312,7 @@ const Landing = () => {
               transition={{ delay: 0.2 }}
               className="text-lg md:text-xl text-slate-400 font-medium leading-relaxed"
             >
-              Tidak semua orang berada di titik yang sama. Arta hadir dengan dua
-              jalur berbeda agar pengalaman kamu terasa relevan, personal, dan
-              tepat sasaran.
+              {t("landing.adaptive_desc")}
             </motion.p>
           </div>
 
@@ -1350,24 +1334,22 @@ const Landing = () => {
                       className="w-full h-full object-contain drop-shadow-lg scale-110"
                     />
                   </div>
-                  <span className="pt-0.5">Jalur Perintis</span>
+                  <span className="pt-0.5">{t("landing.path_perintis_badge")}</span>
                 </div>
                 <h3 className="text-3xl md:text-5xl font-black text-white mb-5 leading-[1.1] tracking-tight">
-                  Saya baru ingin <br />
+                  {t("landing.path_perintis_title_1")} <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">
-                    memulai usaha
+                    {t("landing.path_perintis_title_2")}
                   </span>
                 </h3>
                 <p className="text-slate-400 text-base md:text-lg mb-8 leading-relaxed font-medium max-w-md">
-                  Belum punya usaha tapi semangat memulai? Arta akan memandumu
-                  langkah demi langkah lewat kuesioner interaktif untuk
-                  memetakan potensimu.
+                  {t("landing.path_perintis_desc")}
                 </p>
                 <div className="space-y-4">
                   {[
-                    "Kuesioner profiling calon pengusaha",
-                    "Rekomendasi model bisnis dari AI",
-                    "Simulasi alokasi modal awal",
+                    t("landing.path_perintis_item_1"),
+                    t("landing.path_perintis_item_2"),
+                    t("landing.path_perintis_item_3"),
                   ].map((feat, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
@@ -1393,24 +1375,22 @@ const Landing = () => {
                       className="w-full h-full object-contain drop-shadow-lg scale-110"
                     />
                   </div>
-                  <span className="pt-0.5">Jalur Pengusaha</span>
+                  <span className="pt-0.5">{t("landing.path_pengusaha_badge")}</span>
                 </div>
                 <h3 className="text-3xl md:text-5xl font-black text-white mb-5 leading-[1.1] tracking-tight">
-                  Usaha saya sudah <br />
+                  {t("landing.path_pengusaha_title_1")} <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
-                    berjalan lancar
+                    {t("landing.path_pengusaha_title_2")}
                   </span>
                 </h3>
                 <p className="text-slate-400 text-base md:text-lg mb-8 leading-relaxed font-medium max-w-md">
-                  Pencatatan arus kas masih manual? Beralih ke Digital Cashbook
-                  Arta sekarang dan biarkan AI menyusun laporan keuangan
-                  otomatis untukmu.
+                  {t("landing.path_pengusaha_desc")}
                 </p>
                 <div className="space-y-4">
                   {[
-                    "Pencatatan transaksi real-time",
-                    "Generate neraca & laba rugi otomatis",
-                    "AI insight & visualisasi performa",
+                    t("landing.path_pengusaha_item_1"),
+                    t("landing.path_pengusaha_item_2"),
+                    t("landing.path_pengusaha_item_3"),
                   ].map((feat, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
@@ -1755,12 +1735,11 @@ const Landing = () => {
             transition={{ duration: 0.8 }}
             className="text-5xl md:text-[5rem] font-black mb-8 tracking-tighter text-white leading-[1.1]"
           >
-            Loved by thousands <br />
-            of happy customers
+            {t("landing.testi_title_1")} <br />
+            {t("landing.testi_title_2")}
           </motion.h2>
           <p className="text-slate-500 max-w-xl mx-auto text-lg md:text-xl font-medium leading-relaxed mb-12">
-            Hear from our community of builders, designers, and creators who
-            trust us to power their projects.
+            {t("landing.testi_desc")}
           </p>
 
           <div className="flex justify-center">
@@ -1768,7 +1747,7 @@ const Landing = () => {
               onClick={() => setShowReviewsModal(true)}
               className="px-10 py-4 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] rounded-full text-sm font-bold text-white backdrop-blur-xl transition-all pointer-events-auto"
             >
-              Read all reviews →
+              {t("landing.testi_read_all")}
             </button>
           </div>
         </div>
@@ -1792,7 +1771,7 @@ const Landing = () => {
                   viewport={{ once: true }}
                   className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-5"
                 >
-                  <FiHelpCircle size={12} className="text-indigo-400" /> FAQ
+                   <FiHelpCircle size={12} className="text-indigo-400" /> {t("landing.faq_badge")}
                 </motion.div>
                 <motion.h2
                   initial={{ opacity: 0, y: 20 }}
@@ -1800,7 +1779,7 @@ const Landing = () => {
                   viewport={{ once: true }}
                   className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight"
                 >
-                  Pertanyaan Umum
+                  {t("landing.faq_title")}
                 </motion.h2>
                 <motion.p
                   initial={{ opacity: 0, y: 15 }}
@@ -1809,19 +1788,18 @@ const Landing = () => {
                   transition={{ delay: 0.1 }}
                   className="text-slate-400 text-base md:text-lg leading-relaxed"
                 >
-                  Panduan lengkap seputar fitur dan layanan Arta untuk membantu
-                  Anda mengelola keuangan UMKM dengan lebih baik.
+                  {t("landing.faq_desc")}
                 </motion.p>
               </div>
               {/* Category count */}
               <div className="hidden md:flex items-center gap-6 text-sm text-slate-500 shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
-                  <span>4 Kategori</span>
+                  <span>{t("landing.faq_categories")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-slate-600"></div>
-                  <span>16 Pertanyaan</span>
+                  <span>{t("landing.faq_questions")}</span>
                 </div>
               </div>
             </div>
@@ -1831,87 +1809,39 @@ const Landing = () => {
           {(() => {
             const faqData = [
               {
-                category: "Memulai dengan Arta",
+                category: t("landing.faq_cat_start"),
                 questions: [
-                  {
-                    q: "Apa itu Arta dan bagaimana cara kerjanya?",
-                    a: "Arta adalah platform pengelolaan keuangan UMKM berbasis AI yang menyediakan pencatatan digital, laporan otomatis, dan prediksi keuangan.",
-                  },
-                  {
-                    q: "Apakah saya perlu keahlian akuntansi untuk menggunakan Arta?",
-                    a: "Tidak. Arta dirancang untuk pelaku usaha tanpa latar belakang akuntansi. Cukup input transaksi harian, sistem kami yang mengurus sisanya.",
-                  },
-                  {
-                    q: "Bagaimana cara mendaftar akun Arta?",
-                    a: "Klik tombol 'Daftar Sekarang' di halaman utama, isi data usaha Anda, dan Anda bisa langsung mulai menggunakan fitur-fitur Arta.",
-                  },
-                  {
-                    q: "Apakah Arta gratis untuk digunakan?",
-                    a: "Arta menyediakan paket gratis dengan fitur dasar pencatatan. Untuk fitur AI dan laporan otomatis, tersedia paket premium yang terjangkau.",
-                  },
+                  { q: t("landing.faq_start_q1"), a: t("landing.faq_start_a1") },
+                  { q: t("landing.faq_start_q2"), a: t("landing.faq_start_a2") },
+                  { q: t("landing.faq_start_q3"), a: t("landing.faq_start_a3") },
+                  { q: t("landing.faq_start_q4"), a: t("landing.faq_start_a4") },
                 ],
               },
               {
-                category: "Digital Cashbook",
+                category: t("landing.faq_cat_cashbook"),
                 questions: [
-                  {
-                    q: "Bagaimana cara mencatat transaksi di Digital Cashbook?",
-                    a: "Cukup masukkan nominal, kategori, dan deskripsi transaksi. Arta akan otomatis mengklasifikasikan sebagai pemasukan atau pengeluaran.",
-                  },
-                  {
-                    q: "Apakah data transaksi saya aman?",
-                    a: "Ya, semua data terenkripsi dan tersimpan di server yang aman. Hanya Anda yang memiliki akses ke data keuangan usaha Anda.",
-                  },
-                  {
-                    q: "Bisakah saya mengekspor data transaksi?",
-                    a: "Tentu. Anda dapat mengekspor data dalam format CSV atau PDF kapan saja melalui menu Laporan di dashboard.",
-                  },
-                  {
-                    q: "Apakah bisa diakses dari handphone?",
-                    a: "Ya, Arta dirancang responsif sehingga bisa diakses dengan nyaman dari browser di perangkat mobile maupun desktop.",
-                  },
+                  { q: t("landing.faq_cashbook_q1"), a: t("landing.faq_cashbook_a1") },
+                  { q: t("landing.faq_cashbook_q2"), a: t("landing.faq_cashbook_a2") },
+                  { q: t("landing.faq_cashbook_q3"), a: t("landing.faq_cashbook_a3") },
+                  { q: t("landing.faq_cashbook_q4"), a: t("landing.faq_cashbook_a4") },
                 ],
               },
               {
-                category: "Laporan Keuangan",
+                category: t("landing.faq_cat_report"),
                 questions: [
-                  {
-                    q: "Laporan apa saja yang bisa dihasilkan Arta?",
-                    a: "Arta dapat menghasilkan laporan neraca, laba rugi, arus kas, dan ringkasan keuangan bulanan secara otomatis dari data transaksi Anda.",
-                  },
-                  {
-                    q: "Apakah laporan dihasilkan secara otomatis?",
-                    a: "Ya. Setelah Anda memasukkan data transaksi, laporan keuangan formal bisa di-generate secara instan tanpa perlu input tambahan.",
-                  },
-                  {
-                    q: "Bisakah saya mengunduh laporan untuk keperluan pajak?",
-                    a: "Ya. Laporan dapat diunduh dalam format PDF yang sudah terstruktur sesuai standar laporan keuangan UMKM.",
-                  },
-                  {
-                    q: "Seberapa akurat laporan yang dihasilkan?",
-                    a: "Laporan dihitung langsung dari data transaksi aktual Anda, sehingga akurasinya bergantung pada kelengkapan input data yang Anda masukkan.",
-                  },
+                  { q: t("landing.faq_report_q1"), a: t("landing.faq_report_a1") },
+                  { q: t("landing.faq_report_q2"), a: t("landing.faq_report_a2") },
+                  { q: t("landing.faq_report_q3"), a: t("landing.faq_report_a3") },
+                  { q: t("landing.faq_report_q4"), a: t("landing.faq_report_a4") },
                 ],
               },
               {
-                category: "AI & Forecasting",
+                category: t("landing.faq_cat_ai"),
                 questions: [
-                  {
-                    q: "Bagaimana AI Arta memprediksi arus kas?",
-                    a: "Arta menggunakan model Time-Series Forecasting yang menganalisis pola transaksi historis Anda untuk memprediksi tren keuangan di masa depan.",
-                  },
-                  {
-                    q: "Apakah rekomendasi AI bisa dipercaya?",
-                    a: "Rekomendasi AI kami berbasis data dan terus ditingkatkan akurasinya. Namun, sebaiknya tetap digunakan sebagai bahan pertimbangan keputusan bisnis.",
-                  },
-                  {
-                    q: "Apa itu fitur AI Rekomendasi untuk calon pengusaha?",
-                    a: "Fitur ini membantu calon pengusaha baru mengevaluasi kelayakan ide bisnis dan mendapatkan saran alokasi modal awal berdasarkan analisis AI.",
-                  },
-                  {
-                    q: "Berapa lama data dibutuhkan agar prediksi akurat?",
-                    a: "Semakin banyak data historis yang tersedia, semakin akurat prediksinya. Minimal 1-3 bulan data transaksi sudah cukup untuk hasil awal.",
-                  },
+                  { q: t("landing.faq_ai_q1"), a: t("landing.faq_ai_a1") },
+                  { q: t("landing.faq_ai_q2"), a: t("landing.faq_ai_a2") },
+                  { q: t("landing.faq_ai_q3"), a: t("landing.faq_ai_a3") },
+                  { q: t("landing.faq_ai_q4"), a: t("landing.faq_ai_a4") },
                 ],
               },
             ];
@@ -1997,7 +1927,7 @@ const Landing = () => {
               viewport={{ once: true }}
               className="flex flex-col justify-center"
             >
-              {/* Mail Icon */}
+              {/* Message Icon */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -2009,21 +1939,20 @@ const Landing = () => {
                   viewBox="0 0 24 24"
                   className="w-7 h-7 text-white fill-none stroke-current stroke-[1.5]"
                 >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  <line x1="8" y1="9" x2="16" y2="9"></line>
+                  <line x1="8" y1="13" x2="12" y2="13"></line>
                 </svg>
               </motion.div>
 
               {/* Heading */}
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tighter leading-[1.1]">
-                Hubungi Kami
+                {t("landing.contact_title")}
               </h2>
 
               {/* Description */}
               <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-lg mb-10">
-                Kami selalu mencari cara untuk meningkatkan produk dan layanan
-                kami. Hubungi kami dan beri tahu bagaimana kami bisa membantu
-                Anda.
+                {t("landing.contact_desc")}
               </p>
 
               {/* Contact Info Items */}
@@ -2033,7 +1962,9 @@ const Landing = () => {
                   whileHover={{ scale: 1.03 }}
                   className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
                 >
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 group-hover:shadow-[0_0_12px_rgba(99,102,241,0.6)] transition-shadow"></div>
+                  <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:border-indigo-500/40 transition-all">
+                    <FiMail size={16} className="text-indigo-400" />
+                  </div>
                   <span className="text-sm font-semibold">
                     contact@konsulkeu.id
                   </span>
@@ -2043,7 +1974,9 @@ const Landing = () => {
                   whileHover={{ scale: 1.03 }}
                   className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
                 >
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 group-hover:shadow-[0_0_12px_rgba(16,185,129,0.6)] transition-shadow"></div>
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:border-emerald-500/40 transition-all">
+                    <FiPhone size={16} className="text-emerald-400" />
+                  </div>
                   <span className="text-sm font-semibold">
                     +62 (812) 3456 7890
                   </span>
@@ -2053,7 +1986,9 @@ const Landing = () => {
                   whileHover={{ scale: 1.03 }}
                   className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
                 >
-                  <div className="w-2 h-2 rounded-full bg-purple-500 group-hover:shadow-[0_0_12px_rgba(168,85,247,0.6)] transition-shadow"></div>
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/20 group-hover:border-purple-500/40 transition-all">
+                    <FiSend size={16} className="text-purple-400" />
+                  </div>
                   <span className="text-sm font-semibold">
                     support@gmail.com
                   </span>
@@ -2257,14 +2192,14 @@ const Landing = () => {
                     htmlFor="contact-fullname"
                     className="block text-sm font-bold text-white mb-2.5"
                   >
-                    Nama Lengkap
+                    {t("landing.contact_form_name")}
                   </label>
                   <div className="relative group">
                     <input
                       type="text"
                       id="contact-fullname"
                       name="fullname"
-                      placeholder="Nama Anda"
+                      placeholder={t("landing.contact_form_name_placeholder")}
                       className="w-full bg-white/[0.03] hover:bg-white/[0.05] focus:bg-white/[0.05] border border-white/[0.08] focus:border-indigo-500/50 rounded-2xl px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-300 backdrop-blur-sm shadow-inner focus:shadow-[0_0_20px_rgba(99,102,241,0.1)]"
                     />
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
@@ -2277,14 +2212,14 @@ const Landing = () => {
                     htmlFor="contact-email"
                     className="block text-sm font-bold text-white mb-2.5"
                   >
-                    Alamat Email
+                    {t("landing.contact_form_email")}
                   </label>
                   <div className="relative group">
                     <input
                       type="email"
                       id="contact-email"
                       name="email"
-                      placeholder="email@perusahaan.com"
+                      placeholder={t("landing.contact_form_email_placeholder")}
                       className="w-full bg-white/[0.03] hover:bg-white/[0.05] focus:bg-white/[0.05] border border-white/[0.08] focus:border-indigo-500/50 rounded-2xl px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-300 backdrop-blur-sm shadow-inner focus:shadow-[0_0_20px_rgba(99,102,241,0.1)]"
                     />
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
@@ -2297,14 +2232,14 @@ const Landing = () => {
                     htmlFor="contact-company"
                     className="block text-sm font-bold text-white mb-2.5"
                   >
-                    Nama Perusahaan / UMKM
+                    {t("landing.contact_form_company")}
                   </label>
                   <div className="relative group">
                     <input
                       type="text"
                       id="contact-company"
                       name="company"
-                      placeholder="PT. Usaha Maju"
+                      placeholder={t("landing.contact_form_company_placeholder")}
                       className="w-full bg-white/[0.03] hover:bg-white/[0.05] focus:bg-white/[0.05] border border-white/[0.08] focus:border-indigo-500/50 rounded-2xl px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-300 backdrop-blur-sm shadow-inner focus:shadow-[0_0_20px_rgba(99,102,241,0.1)]"
                     />
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
@@ -2317,14 +2252,14 @@ const Landing = () => {
                     htmlFor="contact-message"
                     className="block text-sm font-bold text-white mb-2.5"
                   >
-                    Pesan
+                    {t("landing.contact_form_message")}
                   </label>
                   <div className="relative group">
                     <textarea
                       id="contact-message"
                       name="message"
                       rows="5"
-                      placeholder="Tulis pesan Anda disini..."
+                      placeholder={t("landing.contact_form_message_placeholder")}
                       className="w-full bg-white/[0.03] hover:bg-white/[0.05] focus:bg-white/[0.05] border border-white/[0.08] focus:border-indigo-500/50 rounded-2xl px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-300 backdrop-blur-sm shadow-inner resize-none focus:shadow-[0_0_20px_rgba(99,102,241,0.1)]"
                     ></textarea>
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
@@ -2354,7 +2289,7 @@ const Landing = () => {
                     }}
                   />
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    Kirim Pesan
+                    {t("landing.contact_form_submit")}
                     <svg
                       viewBox="0 0 24 24"
                       className="w-4 h-4 fill-none stroke-current stroke-2 group-hover:translate-x-1 transition-transform"
@@ -2366,8 +2301,7 @@ const Landing = () => {
 
                 {/* Bottom note */}
                 <p className="text-center text-xs text-slate-600 font-medium pt-2">
-                  Kami akan merespons dalam waktu 24 jam kerja.{" "}
-                  <span className="text-indigo-500/60">Dijamin.</span>
+                  {t("landing.contact_form_note")}
                 </p>
               </form>
             </motion.div>
@@ -2394,10 +2328,10 @@ const Landing = () => {
               <div className="p-8 md:p-12 border-b border-white/5 flex items-center justify-between bg-gradient-to-b from-white/[0.02] to-transparent">
                 <div>
                   <h3 className="text-3xl md:text-4xl font-black text-white mb-2">
-                    Semua Testimoni
+                    {t("landing.testi_modal_title")}
                   </h3>
                   <p className="text-slate-500 font-medium">
-                    Apa kata mereka tentang KonsulKeu
+                    {t("landing.testi_modal_subtitle")}
                   </p>
                 </div>
                 <button
@@ -2469,9 +2403,7 @@ const Landing = () => {
                 />
               </div>
               <p className="text-slate-400 font-medium leading-relaxed mb-8 text-base md:text-lg max-w-md">
-                Platform #1 Pengelolaan Keuangan UMKM Terintegrasi AI. Solusi
-                cerdas untuk mencatat kas, mendapatkan rekomendasi, dan
-                memprediksi masa depan bisnis Anda tanpa kerumitan.
+                {t("landing.footer_desc")}
               </p>
 
               {/* Social Media Links */}
@@ -2498,7 +2430,7 @@ const Landing = () => {
             {/* Column 2: Platform Links */}
             <div className="col-span-1 lg:col-span-2 lg:col-start-7">
               <h4 className="text-white font-bold mb-6 tracking-wide">
-                Platform
+                {t("landing.footer_platform")}
               </h4>
               <ul className="space-y-4 flex flex-col items-start">
                 {navItems.map((item) => (
@@ -2517,7 +2449,7 @@ const Landing = () => {
             {/* Column 3: Perusahaan Links */}
             <div className="col-span-1 lg:col-span-2">
               <h4 className="text-white font-bold mb-6 tracking-wide">
-                Perusahaan
+                {t("landing.footer_company")}
               </h4>
               <ul className="space-y-4">
                 <li>
@@ -2525,7 +2457,7 @@ const Landing = () => {
                     href="#"
                     className="text-slate-400 hover:text-indigo-400 transition-colors font-medium"
                   >
-                    Tentang Kami
+                    {t("landing.footer_tentang")}
                   </a>
                 </li>
                 <li>
@@ -2533,7 +2465,7 @@ const Landing = () => {
                     href="#"
                     className="text-slate-400 hover:text-indigo-400 transition-colors font-medium"
                   >
-                    Karir
+                    {t("landing.footer_karir")}
                   </a>
                 </li>
                 <li>
@@ -2541,7 +2473,7 @@ const Landing = () => {
                     href="#"
                     className="text-slate-400 hover:text-indigo-400 transition-colors font-medium"
                   >
-                    Blog & Edukasi
+                    {t("landing.footer_blog")}
                   </a>
                 </li>
                 <li>
@@ -2549,7 +2481,7 @@ const Landing = () => {
                     href="#"
                     className="text-slate-400 hover:text-indigo-400 transition-colors font-medium"
                   >
-                    Hubungi Kami
+                    {t("landing.footer_hubungi")}
                   </a>
                 </li>
               </ul>
@@ -2557,14 +2489,14 @@ const Landing = () => {
 
             {/* Column 4: Legal Links */}
             <div className="col-span-1 lg:col-span-2">
-              <h4 className="text-white font-bold mb-6 tracking-wide">Legal</h4>
+              <h4 className="text-white font-bold mb-6 tracking-wide">{t("landing.footer_legal")}</h4>
               <ul className="space-y-4">
                 <li>
                   <a
                     href="#"
                     className="text-slate-400 hover:text-indigo-400 transition-colors font-medium"
                   >
-                    Syarat & Ketentuan
+                    {t("landing.footer_syarat")}
                   </a>
                 </li>
                 <li>
@@ -2572,7 +2504,7 @@ const Landing = () => {
                     href="#"
                     className="text-slate-400 hover:text-indigo-400 transition-colors font-medium"
                   >
-                    Kebijakan Privasi
+                    {t("landing.footer_privacy")}
                   </a>
                 </li>
                 <li>
@@ -2580,7 +2512,7 @@ const Landing = () => {
                     href="#"
                     className="text-slate-400 hover:text-indigo-400 transition-colors font-medium"
                   >
-                    Keamanan Data
+                    {t("landing.footer_keamanan")}
                   </a>
                 </li>
               </ul>
@@ -2610,16 +2542,10 @@ const Landing = () => {
         </div>
 
         {/* Copyright */}
-        <div className="container mx-auto px-6 lg:px-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+        <div className="container mx-auto px-6 lg:px-12 pt-8 text-center relative z-10">
           <p className="text-slate-500 text-sm font-medium">
-            © {new Date().getFullYear()} Arta Inc. All rights reserved.
+            {new Date().getFullYear()} &copy; {t("landing.footer_copyright")}
           </p>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-slate-500 text-sm font-medium">
-              Sistem Beroperasi Normal
-            </span>
-          </div>
         </div>
       </footer>
 

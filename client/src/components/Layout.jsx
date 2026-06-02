@@ -56,6 +56,8 @@ const Layout = () => {
   };
 
   const { t, i18n } = useTranslation();
+  const localeStr = i18n.language === "ID" ? "id-ID" : "en-US";
+  const tzLabel = i18n.language === "ID" ? "WIB" : "GMT+7";
 
   const handleLanguageChange = () => {
     const newLang = i18n.language === "ID" ? "EN" : "ID";
@@ -107,13 +109,13 @@ const Layout = () => {
 
   // Susun submenu settings secara dinamis
   const settingsSubItems = [
-    { name: "Profil Akun", path: "/dashboard/profile" },
-    { name: "Profil Usaha", path: "/dashboard/settings?tab=profile" }
+    { name: t("menu.profile_account"), path: "/dashboard/profile" },
+    { name: t("menu.business_profile"), path: "/dashboard/settings?tab=profile" }
   ];
 
   // Tambahkan Manajemen Role HANYA jika isOwner
   if (isOwner) {
-    settingsSubItems.push({ name: "Manajemen Role", path: "/dashboard/settings?tab=roles" });
+    settingsSubItems.push({ name: t("menu.role_management"), path: "/dashboard/settings?tab=roles" });
   }
   // --------------------------
 
@@ -137,7 +139,7 @@ const Layout = () => {
         name: t("menu.settings"),
         icon: <FiSettings />,
         subItems: [
-          { name: "Profil Akun", path: "/dashboard/profile" }
+          { name: t("menu.profile_account"), path: "/dashboard/profile" }
         ]
       },
     ];
@@ -308,11 +310,11 @@ const Layout = () => {
                   className="overflow-hidden origin-left"
                 >
                   <p className="text-[15px] font-semibold text-slate-800 tabular-nums leading-tight whitespace-nowrap">
-                    {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                    <span className="text-[13px] text-slate-400 font-medium ml-1">WIB</span>
+                    {currentTime.toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })}
+                    <span className="text-[13px] text-slate-400 font-medium ml-1">{tzLabel}</span>
                   </p>
                   <p className="text-[12px] text-slate-500 font-medium mt-0.5 leading-tight whitespace-nowrap">
-                    {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                    {currentTime.toLocaleDateString(localeStr, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 </motion.div>
               )}
@@ -430,11 +432,11 @@ const Layout = () => {
                   </span>
                   <div>
                     <p className="text-base font-semibold text-slate-800 tabular-nums leading-tight">
-                      {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                      <span className="text-sm text-slate-400 font-medium ml-1">WIB</span>
+                      {currentTime.toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })}
+                      <span className="text-sm text-slate-400 font-medium ml-1">{tzLabel}</span>
                     </p>
                     <p className="text-xs text-slate-500 font-medium mt-0.5 leading-tight">
-                      {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      {currentTime.toLocaleDateString(localeStr, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
                 </div>

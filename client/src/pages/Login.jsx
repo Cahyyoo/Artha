@@ -122,7 +122,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={handleGoToVerify}
-                className="mt-2 block w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+                className="mt-2 block w-full bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
               >
                 Verifikasi Sekarang →
               </button>
@@ -138,7 +138,7 @@ const Login = () => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-orange-400 focus:bg-white outline-none transition-all text-sm"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:bg-white outline-none transition-all text-sm"
             placeholder="Input your email"
           />
         </div>
@@ -152,7 +152,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 pr-10 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-orange-400 focus:bg-white outline-none transition-all text-sm"
+              className="w-full px-4 py-3 pr-10 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:bg-white outline-none transition-all text-sm"
               placeholder="Input your password"
             />
             <button
@@ -169,7 +169,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-[0.98]"
+            className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#4f46e5] hover:to-[#7c3aed] text-white font-bold py-3.5 rounded-xl shadow-xl shadow-indigo-500/25 transition-all active:scale-[0.98]"
           >
             {loading ? "Processing..." : "Sign In"}
           </button>
@@ -177,7 +177,7 @@ const Login = () => {
 
         <p className="mt-auto pt-6 text-center text-sm font-medium text-slate-600">
           Don't have an account?{" "}
-          <Link to="/register" className="text-slate-900 hover:text-orange-500 font-bold transition-colors">
+          <Link to="/register" className="text-slate-900 hover:text-indigo-500 font-bold transition-colors">
             Sign Up
           </Link>
         </p>
