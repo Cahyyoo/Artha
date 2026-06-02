@@ -105,7 +105,7 @@ const Register = () => {
             value={formData.nama}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-orange-400 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400"
             placeholder="Input Full Name"
           />
         </div>
@@ -120,7 +120,7 @@ const Register = () => {
             value={formData.email}
             onChange={handleChange}
             required
-            className={`w-full px-4 py-3 bg-slate-50 border ${!isEmailValid ? "border-red-400 focus:ring-red-400 focus:bg-red-50/50" : "border-slate-100 focus:ring-orange-400"} rounded-xl focus:ring-2 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400`}
+            className={`w-full px-4 py-3 bg-slate-50 border ${!isEmailValid ? "border-red-400 focus:ring-red-400 focus:bg-red-50/50" : "border-slate-100 focus:ring-indigo-400"} rounded-xl focus:ring-2 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400`}
             placeholder="Input your email"
           />
           {!isEmailValid && (
@@ -141,7 +141,7 @@ const Register = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 pr-10 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-orange-400 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400"
+              className="w-full px-4 py-3 pr-10 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400"
               placeholder="Input your password"
             />
             <button
@@ -218,7 +218,7 @@ const Register = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
-              className={`w-full px-4 py-3 pr-10 bg-slate-50 border ${isConfirmPasswordInvalid ? "border-red-400 focus:ring-red-400 focus:bg-red-50/50" : isPasswordMatch ? "border-emerald-400 focus:ring-emerald-400 focus:bg-emerald-50/50" : "border-slate-100 focus:ring-orange-400"} rounded-xl focus:ring-2 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400`}
+              className={`w-full px-4 py-3 pr-10 bg-slate-50 border ${isConfirmPasswordInvalid ? "border-red-400 focus:ring-red-400 focus:bg-red-50/50" : isPasswordMatch ? "border-emerald-400 focus:ring-emerald-400 focus:bg-emerald-50/50" : "border-slate-100 focus:ring-indigo-400"} rounded-xl focus:ring-2 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400`}
               placeholder="Ulangi password Anda"
             />
             <button
@@ -249,7 +249,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-orange-500/30 transition-all active:scale-[0.98] flex justify-center items-center"
+            className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#4f46e5] hover:to-[#7c3aed] text-white font-bold py-3.5 rounded-xl shadow-xl shadow-indigo-500/25 transition-all active:scale-[0.98] flex justify-center items-center"
           >
             {loading ? "Processing..." : "Sign Up"}
           </button>
@@ -271,7 +271,7 @@ const Register = () => {
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-slate-900 hover:text-orange-500 font-bold transition-colors"
+            className="text-slate-900 hover:text-indigo-500 font-bold transition-colors"
           >
             Sign In
           </Link>

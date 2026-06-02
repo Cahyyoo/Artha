@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaGoogle, FaApple } from 'react-icons/fa';
 import { supabase } from '../services/supabaseClient';
 import financeBg from '../assets/finance_bg.png';
@@ -7,6 +7,10 @@ import logoImg from '../assets/logo-2.png';
 
 const AuthLayout = ({ children, title, subtitle, showSocial }) => {
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.remove("dark-mode");
+  }, []);
 
   const handleGoogleLogin = async () => {
     try {

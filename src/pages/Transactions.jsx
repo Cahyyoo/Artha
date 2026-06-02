@@ -442,11 +442,11 @@ export default function Transactions({ isDashboard = false }) {
                 onChange={(e) => setFilterRange(e.target.value)}
                 className="appearance-none bg-transparent text-slate-600 text-sm font-medium pr-6 focus:outline-none cursor-pointer"
               >
-                <option value="7_hari">7 Hari Terakhir</option>
-                <option value="bulan_ini">Bulan Ini</option>
-                <option value="bulan_lalu">Bulan Lalu</option>
-                <option value="tahun_ini">Tahun Ini</option>
-                <option value="tahun_lalu">Tahun Lalu</option>
+                <option value="7_hari">{t("dashboard.filter_7_hari")}</option>
+                <option value="bulan_ini">{t("dashboard.filter_bulan_ini")}</option>
+                <option value="bulan_lalu">{t("dashboard.filter_bulan_lalu")}</option>
+                <option value="tahun_ini">{t("dashboard.filter_tahun_ini")}</option>
+                <option value="tahun_lalu">{t("dashboard.filter_tahun_lalu")}</option>
               </select>
               <FiChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
 import transactionService from "../services/transactionService";
@@ -12,7 +12,6 @@ import {
   FiPieChart,
   FiActivity,
   FiArrowRight,
-  FiCpu,
   FiCheckCircle,
   FiUserCheck,
   FiBarChart2,
@@ -63,11 +62,11 @@ const Dashboard = () => {
   const [filterWaktu, setFilterWaktu] = useState("bulan_ini");
 
   const rangeLabels = {
-    "7_hari": "7 Hari Terakhir",
-    "bulan_ini": "Bulan Ini",
-    "bulan_lalu": "Bulan Lalu",
-    "tahun_ini": "Tahun Ini",
-    "tahun_lalu": "Tahun Lalu",
+    "7_hari": t("dashboard.filter_7_hari"),
+    "bulan_ini": t("dashboard.filter_bulan_ini"),
+    "bulan_lalu": t("dashboard.filter_bulan_lalu"),
+    "tahun_ini": t("dashboard.filter_tahun_ini"),
+    "tahun_lalu": t("dashboard.filter_tahun_lalu"),
   };
 
   // Data dari API
@@ -75,8 +74,6 @@ const Dashboard = () => {
   const [apiError, setApiError] = useState(null);
 
   const [cashFlowChartData, setCashFlowChartData] = useState([]);
-  const [aiPredictionScore, setAiPredictionScore] = useState(null);
-
   // Fitur Tabel Data Transaksi Dashboard
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("Semua");
@@ -163,15 +160,6 @@ const Dashboard = () => {
         })
         .finally(() => {
           setLoading(false);
-        });
-
-      transactionService.getForecast()
-        .then((res) => {
-          const data = res.data?.data || res.data || {};
-          setAiPredictionScore(data.confidence_interval ?? null);
-        })
-        .catch(() => {
-          // fallback: keep showing default
         });
     } else {
       setLoading(false);
@@ -415,11 +403,11 @@ const Dashboard = () => {
                 onChange={(e) => setFilterWaktu(e.target.value)}
                 className="appearance-none bg-transparent text-slate-600 text-sm font-medium pr-6 focus:outline-none cursor-pointer"
               >
-                <option value="7_hari">7 Hari Terakhir</option>
-                <option value="bulan_ini">Bulan Ini</option>
-                <option value="bulan_lalu">Bulan Lalu</option>
-                <option value="tahun_ini">Tahun Ini</option>
-                <option value="tahun_lalu">Tahun Lalu</option>
+                <option value="7_hari">{t("dashboard.filter_7_hari")}</option>
+                <option value="bulan_ini">{t("dashboard.filter_bulan_ini")}</option>
+                <option value="bulan_lalu">{t("dashboard.filter_bulan_lalu")}</option>
+                <option value="tahun_ini">{t("dashboard.filter_tahun_ini")}</option>
+                <option value="tahun_lalu">{t("dashboard.filter_tahun_lalu")}</option>
               </select>
               <FiChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
@@ -432,7 +420,7 @@ const Dashboard = () => {
               to="/dashboard/transactions"
               className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all shadow-sm whitespace-nowrap"
             >
-              <FiPlus size={14} /> Catat Transaksi
+              <FiPlus size={14} /> {t("dashboard.record_transaction")}
             </Link>
           </div>
         </div>
@@ -612,10 +600,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* MIDDLE SECTION: Charts & AI (Grid 2/3 dan 1/3) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Chart — identik dengan yang ada di menu Laporan */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        {/* MIDDLE SECTION: Charts */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <h3 className="text-lg font-black text-slate-900">
@@ -710,56 +696,6 @@ const Dashboard = () => {
                 </ResponsiveContainer>
               )}
             </div>
-          </div>
-
-          {/* AI Forecasting Snippet (Menggantikan posisi diagram Donut Emails) */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
-            <div className="flex items-center gap-2 mb-8">
-              <h3 className="text-base font-bold text-slate-900">
-                {t("dashboard.ai_prediction_title")}
-              </h3>
-              <FiCpu className="text-slate-400" size={14} />
-            </div>
-
-            <div className="flex-1 flex flex-col justify-center items-center text-center">
-              {/* Confidence gauge — menggantikan ornamen lingkaran tumpuk */}
-              <div className="relative w-36 h-36 sm:w-44 sm:h-44 mb-5">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8"
-                    className="text-slate-300" />
-                  <circle cx="60" cy="60" r="52" fill="none" stroke="url(#gaugeGrad)" strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 52}`}
-                    strokeDashoffset={`${2 * Math.PI * 52 * (1 - (aiPredictionScore ?? 72) / 100)}`}
-                    className="transition-all duration-1000 ease-out" />
-                  <defs>
-                    <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#818cf8" />
-                      <stop offset="100%" stopColor="#34d399" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl sm:text-3xl font-black text-slate-900 leading-none">{aiPredictionScore ?? 72}%</span>
-                  <span className="text-[10px] sm:text-xs font-medium text-slate-400 mt-1">Skor Prediksi</span>
-                </div>
-              </div>
-
-              <p className="text-xs sm:text-sm leading-relaxed px-2 text-slate-500 mb-5">
-                <Trans i18nKey="dashboard.ai_prediction_desc">
-                  Lihat potensi arus kas bisnis Anda di masa depan dengan model
-                  AI prediktif kami.
-                </Trans>
-              </p>
-
-              <Link
-                to="/dashboard/forecasting"
-                className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 transition-colors flex items-center justify-center gap-2"
-              >
-                {t("dashboard.view_detail")} <FiArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
         </div>
 
         {/* BOTTOM SECTION: Data Transaksi (Menggantikan posisi Sales Data Table) */}
