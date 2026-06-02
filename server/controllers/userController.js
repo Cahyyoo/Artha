@@ -119,6 +119,8 @@ const createUser = async (req, res) => {
         email: email,
         name: name,
         role: finalRole,
+        user_type: "umkm_aktif",
+        onboarding_completed: true,
         updated_at: new Date().toISOString(),
       });
 

@@ -135,4 +135,44 @@ const upgradeToUmkm = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updateOnboarding, upgradeToUmkm };
+// --- UPDATE PROFILE (Update Data Diri) ---
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { nama_lengkap, telepon, bio } = req.body;
+
+    const authSupabase = supabase.createAuthClient(req.token);
+    const dbClient = supabaseAdmin || authSupabase;
+
+    const updateData = {
+      updated_at: new Date().toISOString(),
+    };
+    
+    if (nama_lengkap !== undefined) {
+      updateData.nama_lengkap = nama_lengkap;
+      updateData.name = nama_lengkap; // Update dua-duanya untuk kompatibilitas
+    }
+    if (telepon !== undefined) updateData.telepon = telepon;
+    if (bio !== undefined) updateData.bio = bio;
+
+    const { data, error } = await dbClient
+      .from("profiles")
+      .update(updateData)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({
+      status: "success",
+      message: "Profil berhasil diperbarui.",
+      data: { profile: data },
+    });
+  } catch (error) {
+    console.error("❌ Update Profile Error:", error.message);
+    res.status(400).json({ status: "error", message: error.message });
+  }
+};
+
+module.exports = { getProfile, updateOnboarding, upgradeToUmkm, updateProfile };

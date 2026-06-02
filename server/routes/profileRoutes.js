@@ -8,6 +8,9 @@ router.get("/", profileController.getProfile);
 // POST /api/profile/onboarding — Simpan hasil onboarding
 router.post("/onboarding", profileController.updateOnboarding);
 
+// PUT /api/profile — Update Data Diri (Nama, Telepon, Bio)
+router.put("/", profileController.updateProfile);
+
 // POST /api/profile/upgrade — Upgrade ke UMKM Aktif
 router.post("/upgrade", profileController.upgradeToUmkm);
 
