@@ -9,6 +9,14 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      "/api/profile/sync-business": {
+        target: "http://localhost:5001",
+        changeOrigin: true,
+      },
+      "/api/users": {
+        target: "http://localhost:5001",
+        changeOrigin: true,
+      },
       "/api": {
         target: "https://arta-backend-nine.vercel.app",
         changeOrigin: true,

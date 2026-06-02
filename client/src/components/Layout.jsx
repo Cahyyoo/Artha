@@ -13,7 +13,8 @@ import {
   FiTrendingUp,
   FiMoon,
   FiSun,
-  FiGlobe
+  FiGlobe,
+  FiClock
 } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,9 +30,15 @@ const Layout = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   // UI States
   const [isDarkMode, setIsDarkMode] = useState(() => {
+    const stored = localStorage.getItem("darkMode");
+    if (stored === "true") {
+      document.documentElement.classList.add("dark-mode");
+      return true;
+    }
     return document.documentElement.classList.contains("dark-mode");
   });
   const [language, setLanguage] = useState("ID");
@@ -39,9 +46,11 @@ const Layout = () => {
   const toggleDarkMode = () => {
     if (isDarkMode) {
       document.documentElement.classList.remove("dark-mode");
+      localStorage.setItem("darkMode", "false");
       setIsDarkMode(false);
     } else {
       document.documentElement.classList.add("dark-mode");
+      localStorage.setItem("darkMode", "true");
       setIsDarkMode(true);
     }
   };
@@ -78,6 +87,11 @@ const Layout = () => {
 
     window.addEventListener("profileUpdated", loadUserData);
     return () => window.removeEventListener("profileUpdated", loadUserData);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const fullName = profile?.nama_lengkap || user?.user_metadata?.nama_lengkap || user?.user_metadata?.full_name || "Admin Usaha";
@@ -274,6 +288,37 @@ const Layout = () => {
             </div>
           ))}
         </nav>
+
+        {/* Desktop Sidebar Clock */}
+        <div className={`border-t border-slate-100 transition-all duration-300 ${isDesktopSidebarCollapsed ? 'p-4' : 'p-6'}`}>
+          <div
+            className={`flex items-start rounded-xl transition-colors duration-200 cursor-default ${isDesktopSidebarCollapsed ? 'justify-center px-0 py-3.5' : 'px-5 py-3.5'
+              } text-slate-500 hover:bg-slate-50`}
+          >
+            <span className="text-xl min-w-[24px] flex justify-center pt-0.5 shrink-0">
+              <FiClock />
+            </span>
+            <AnimatePresence>
+              {!isDesktopSidebarCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0, marginLeft: 0 }}
+                  animate={{ opacity: 1, width: "auto", marginLeft: 12 }}
+                  exit={{ opacity: 0, width: 0, marginLeft: 0 }}
+                  transition={{ type: "spring", stiffness: 250, damping: 25 }}
+                  className="overflow-hidden origin-left"
+                >
+                  <p className="text-[15px] font-semibold text-slate-800 tabular-nums leading-tight whitespace-nowrap">
+                    {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                    <span className="text-[13px] text-slate-400 font-medium ml-1">WIB</span>
+                  </p>
+                  <p className="text-[12px] text-slate-500 font-medium mt-0.5 leading-tight whitespace-nowrap">
+                    {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </motion.aside>
 
       {/* Sidebar Mobile Overlay */}
@@ -376,6 +421,24 @@ const Layout = () => {
                   </div>
                 ))}
               </nav>
+
+              {/* Mobile Sidebar Clock */}
+              <div className="border-t border-slate-100 p-6">
+                <div className="flex items-start gap-3 px-5 py-4 rounded-xl transition-colors duration-200 cursor-default text-slate-500 hover:bg-slate-50">
+                  <span className="text-xl min-w-[24px] flex justify-center pt-0.5 shrink-0">
+                    <FiClock />
+                  </span>
+                  <div>
+                    <p className="text-base font-semibold text-slate-800 tabular-nums leading-tight">
+                      {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                      <span className="text-sm text-slate-400 font-medium ml-1">WIB</span>
+                    </p>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5 leading-tight">
+                      {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </motion.aside>
           </>
         )}

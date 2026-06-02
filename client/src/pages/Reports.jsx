@@ -13,6 +13,7 @@ import "jspdf-autotable";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import transactionService from "../services/transactionService";
+import { computeDailyCashflow, filterTransactionsByRange } from "../utils/cashflowHelper";
 
 const categoryColors = {
   "Penjualan Produk": "#10b981",
@@ -31,7 +32,15 @@ const categoryColors = {
 
 export default function Reports() {
   const { t } = useTranslation();
-  const [dateRange, setDateRange] = useState("this_month");
+  const [dateRange, setDateRange] = useState("bulan_ini");
+
+  const rangeMap = {
+    "7_hari": "last_7_days",
+    "bulan_ini": "this_month",
+    "bulan_lalu": "last_month",
+    "tahun_ini": "this_year",
+    "tahun_lalu": "last_year",
+  };
   
   const [reportData, setReportData] = useState(null);
   const [activeTransactions, setActiveTransactions] = useState([]);
@@ -47,9 +56,10 @@ export default function Reports() {
       setIsLoading(true);
       setApiError(null);
       try {
+        const apiRange = rangeMap[dateRange] || dateRange;
         const [reportsRes, txRes] = await Promise.all([
-          transactionService.getReports({ range: dateRange }),
-          transactionService.getTransactions({ range: dateRange }).catch(() => ({ data: [] }))
+          transactionService.getReports({ range: apiRange }),
+          transactionService.getTransactions().catch(() => ({ data: [] }))
         ]);
         
         const rData = reportsRes.data?.data || reportsRes.data || {};
@@ -67,15 +77,6 @@ export default function Reports() {
     fetchData();
   }, [dateRange]);
 
-  // Metrics from API
-  const metrics = useMemo(() => {
-    return {
-      income: reportData?.summary?.total_income || 0,
-      expense: reportData?.summary?.total_expense || 0,
-      balance: reportData?.summary?.net_profit || 0
-    };
-  }, [reportData]);
-
   // Trends from API
   const trends = useMemo(() => {
     const incChange = reportData?.summary?.income_change_percent || 0;
@@ -91,33 +92,63 @@ export default function Reports() {
   const profitMargin = reportData?.summary?.profit_margin_percent || 0;
   const healthStatus = reportData?.summary?.health_status || "Belum Ada Data";
 
-  // Chart data from API
+  // Transactions filtered by selected date range
+  const filteredTransactions = useMemo(() => {
+    return filterTransactionsByRange(activeTransactions, dateRange);
+  }, [activeTransactions, dateRange]);
+
+  // Metrics computed from actual filtered transactions
+  const metrics = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    filteredTransactions.forEach((trx) => {
+      const type = (trx.type || "").toLowerCase();
+      const amount = Math.abs(Number(trx.amount || 0));
+      if (type === "pemasukan" || type === "income") {
+        income += amount;
+      } else if (type === "pengeluaran" || type === "expense") {
+        expense += amount;
+      }
+    });
+    return { income, expense, balance: income - expense };
+  }, [filteredTransactions]);
+
+  // Chart data computed from actual transactions (filtered by date range)
   const cashFlowData = useMemo(() => {
-    return (reportData?.daily_cashflow || []).map(item => ({
-      date: item.date,
-      Pemasukan: item.income,
-      Pengeluaran: item.expense
+    const daily = computeDailyCashflow(filteredTransactions);
+    return daily.map((d) => ({
+      date: d.date,
+      Pemasukan: d.income,
+      Pengeluaran: d.expense,
     }));
-  }, [reportData]);
+  }, [filteredTransactions]);
 
   // Dynamic chart title
   const chartTitle = useMemo(() => {
     const titles = {
-      "last_7_days": t('reports.daily_cashflow_7d'),
-      "this_month": t('reports.daily_cashflow'),
-      "last_month": t('reports.daily_cashflow_last'),
-      "this_year": t('reports.monthly_cashflow'),
+      "7_hari": t('reports.daily_cashflow_7d'),
+      "bulan_ini": t('reports.daily_cashflow'),
+      "bulan_lalu": t('reports.daily_cashflow_last'),
+      "tahun_ini": t('reports.monthly_cashflow'),
+      "tahun_lalu": t('reports.monthly_cashflow_last'),
     };
     return titles[dateRange] || t('reports.daily_cashflow');
   }, [dateRange, t]);
 
-  // Expense Pie data from API
+  // Expense Pie data from filtered transactions
   const expenseData = useMemo(() => {
-    return (reportData?.expense_distribution || []).map(item => ({
-      name: item.category || item.kategori || "Lainnya",
-      value: item.amount || item.total || 0
-    })).sort((a, b) => b.value - a.value);
-  }, [reportData]);
+    const expenseMap = {};
+    filteredTransactions.forEach((trx) => {
+      const type = (trx.type || "").toLowerCase();
+      if (type === "pengeluaran" || type === "expense") {
+        const cat = trx.category || "Lainnya";
+        expenseMap[cat] = (expenseMap[cat] || 0) + Math.abs(Number(trx.amount || 0));
+      }
+    });
+    return Object.entries(expenseMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredTransactions]);
 
   // AI Insights from API
   const expenseInsight = reportData?.insights?.expense_insight || t('reports.insight_no_data');
@@ -176,7 +207,7 @@ export default function Reports() {
 
     addRowWithBorder(['PEMASUKAN', '', '', ''], true);
     const pemasukanKategori = {};
-    activeTransactions.filter(tr => tr.type === 'Pemasukan').forEach(tr => {
+    filteredTransactions.filter(tr => tr.type === 'Pemasukan').forEach(tr => {
       if (!pemasukanKategori[tr.category]) pemasukanKategori[tr.category] = 0;
       pemasukanKategori[tr.category] += tr.amount;
     });
@@ -195,7 +226,7 @@ export default function Reports() {
 
     addRowWithBorder(['PENGELUARAN', '', '', ''], true);
     const pengeluaranKategori = {};
-    activeTransactions.filter(tr => tr.type === 'Pengeluaran').forEach(tr => {
+    filteredTransactions.filter(tr => tr.type === 'Pengeluaran').forEach(tr => {
       if (!pengeluaranKategori[tr.category]) pengeluaranKategori[tr.category] = 0;
       pengeluaranKategori[tr.category] += tr.amount;
     });
@@ -242,7 +273,7 @@ export default function Reports() {
     doc.text(`Laba Bersih: ${formatRupiah(metrics.balance)}`, 14, 62);
 
     const tableColumn = ["Tanggal", "Keterangan", "Kategori", "Tipe", "Nominal"];
-    const tableRows = activeTransactions.map(trx => [
+    const tableRows = filteredTransactions.map(trx => [
       trx.date, trx.description, trx.category, trx.type, formatRupiah(trx.amount)
     ]);
 
@@ -259,10 +290,11 @@ export default function Reports() {
 
   // Range label map for display
   const rangeLabels = {
-    "this_month": t('reports.this_month'),
-    "last_month": t('reports.last_month'),
-    "last_7_days": t('reports.last_7_days'),
-    "this_year": t('reports.this_year'),
+    "7_hari": "7 Hari Terakhir",
+    "bulan_ini": "Bulan Ini",
+    "bulan_lalu": "Bulan Lalu",
+    "tahun_ini": "Tahun Ini",
+    "tahun_lalu": "Tahun Lalu",
   };
 
   return (
@@ -290,10 +322,11 @@ export default function Reports() {
               onChange={(e) => setDateRange(e.target.value)}
               className="pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none cursor-pointer shadow-sm appearance-none"
             >
-              <option value="this_month">{t('reports.this_month')}</option>
-              <option value="last_month">{t('reports.last_month')}</option>
-              <option value="last_7_days">{t('reports.last_7_days')}</option>
-              <option value="this_year">{t('reports.this_year')}</option>
+              <option value="7_hari">7 Hari Terakhir</option>
+              <option value="bulan_ini">{t('reports.this_month')}</option>
+              <option value="bulan_lalu">{t('reports.last_month')}</option>
+              <option value="tahun_ini">{t('reports.this_year')}</option>
+              <option value="tahun_lalu">Tahun Lalu</option>
             </select>
             <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
           </div>
@@ -425,7 +458,7 @@ export default function Reports() {
                   tickLine={false}
                   tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
                   dy={10}
-                  interval={dateRange === "this_month" || dateRange === "last_month" ? 4 : 0}
+                  interval={["bulan_ini", "bulan_lalu", "7_hari"].includes(dateRange) ? 4 : 0}
                 />
                 <YAxis
                   axisLine={false}

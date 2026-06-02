@@ -6,13 +6,21 @@ const getAllUsers = async (req, res) => {
   try {
     const currentUserId = req.user.id;
 
-    // Gunakan supabaseAdmin untuk mengambil semua user dari auth.users
     if (!supabaseAdmin) {
       return res.status(500).json({
         status: "error",
         message: "Admin client tidak tersedia. Pastikan SUPABASE_SERVICE_ROLE_KEY sudah diset.",
       });
     }
+
+    // Ambil profil Owner untuk mendapatkan business_id
+    const { data: ownerProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("business_id")
+      .eq("id", currentUserId)
+      .maybeSingle();
+
+    const ownerBusinessId = ownerProfile?.business_id;
 
     // Ambil profil dari tabel profiles
     const { data: profiles, error: profileError } = await supabaseAdmin
@@ -23,16 +31,33 @@ const getAllUsers = async (req, res) => {
       console.error("Error fetching profiles:", profileError.message);
     }
 
+    // Auto-sync business_id ke karyawan yang belum memilikinya
+    if (ownerBusinessId && profiles) {
+      const employeesToFix = profiles.filter(
+        (p) =>
+          p.id !== currentUserId &&
+          ["ADMIN", "USER", "STAFF"].includes(p.role?.toUpperCase()) &&
+          !p.business_id
+      );
+      for (const emp of employeesToFix) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({ business_id: ownerBusinessId, updated_at: new Date().toISOString() })
+          .eq("id", emp.id);
+      }
+      if (employeesToFix.length > 0) {
+        console.log(`Auto-sync business_id ke ${employeesToFix.length} karyawan`);
+      }
+    }
+
     // Ambil semua user dari Supabase Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
 
     if (authError) throw authError;
 
     const users = (authData?.users || []).map((authUser) => {
-      // Cari profil yang cocok
       const profile = (profiles || []).find((p) => p.id === authUser.id || p.email === authUser.email);
 
-      // Tentukan nama: prioritas profile.name > user_metadata.nama_lengkap > user_metadata.name > email
       const name =
         profile?.name ||
         profile?.nama_lengkap ||
@@ -42,7 +67,6 @@ const getAllUsers = async (req, res) => {
         authUser.email?.split("@")[0] ||
         "Unknown";
 
-      // Tentukan role: prioritas profile.role > user_metadata.role > default
       const role =
         profile?.role ||
         authUser.user_metadata?.role ||
@@ -93,6 +117,19 @@ const createUser = async (req, res) => {
       ? (role || "").toUpperCase()
       : "USER";
 
+    // Ambil business_id dari Owner yang sedang login
+    let ownerBusinessId = null;
+    try {
+      const { data: ownerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("business_id")
+        .eq("id", req.user.id)
+        .maybeSingle();
+      ownerBusinessId = ownerProfile?.business_id || null;
+    } catch (err) {
+      console.warn("Gagal mengambil business_id Owner:", err.message);
+    }
+
     // 1. Buat user di Supabase Auth menggunakan Admin API (skip email confirmation)
     const { data: authData, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
@@ -112,17 +149,21 @@ const createUser = async (req, res) => {
 
     // 2. Update profil di tabel profiles (trigger mungkin sudah buat row-nya)
     //    Gunakan upsert agar aman dari duplikat
+    const profileData = {
+      id: newUserId,
+      email: email,
+      name: name,
+      role: finalRole,
+      user_type: "umkm_aktif",
+      onboarding_completed: true,
+      updated_at: new Date().toISOString(),
+    };
+    if (ownerBusinessId) {
+      profileData.business_id = ownerBusinessId;
+    }
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
-      .upsert({
-        id: newUserId,
-        email: email,
-        name: name,
-        role: finalRole,
-        user_type: "umkm_aktif",
-        onboarding_completed: true,
-        updated_at: new Date().toISOString(),
-      });
+      .upsert(profileData);
 
     if (profileError) {
       console.error("Profile upsert warning:", profileError.message);

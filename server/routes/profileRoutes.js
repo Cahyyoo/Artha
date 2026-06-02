@@ -14,4 +14,7 @@ router.put("/", profileController.updateProfile);
 // POST /api/profile/upgrade — Upgrade ke UMKM Aktif
 router.post("/upgrade", profileController.upgradeToUmkm);
 
+// POST /api/profile/sync-business — Sinkronisasi business_id dari Owner ke karyawan
+router.post("/sync-business", profileController.syncBusinessId);
+
 module.exports = router;

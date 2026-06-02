@@ -175,4 +175,45 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updateOnboarding, upgradeToUmkm, updateProfile };
+// --- SYNC BUSINESS ID (untuk karyawan yang belum memiliki business_id) ---
+const syncBusinessId = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const dbClient = supabaseAdmin || supabase.createAuthClient(req.token);
+
+    // Cari Owner untuk mendapatkan business_id
+    const { data: ownerProfile } = await dbClient
+      .from("profiles")
+      .select("business_id")
+      .eq("role", "OWNER")
+      .maybeSingle();
+
+    if (!ownerProfile?.business_id) {
+      return res.status(404).json({
+        status: "error",
+        message: "Owner belum memiliki business_id. Silakan Owner menyelesaikan onboarding terlebih dahulu.",
+      });
+    }
+
+    // Update business_id user saat ini
+    const { data, error } = await dbClient
+      .from("profiles")
+      .update({ business_id: ownerProfile.business_id, updated_at: new Date().toISOString() })
+      .eq("id", userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({
+      status: "success",
+      message: "Business ID berhasil disinkronkan!",
+      data: { profile: data },
+    });
+  } catch (error) {
+    console.error("❌ Sync Business ID Error:", error.message);
+    res.status(400).json({ status: "error", message: error.message });
+  }
+};
+
+module.exports = { getProfile, updateOnboarding, upgradeToUmkm, updateProfile, syncBusinessId };
