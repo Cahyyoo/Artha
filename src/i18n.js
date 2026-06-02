@@ -120,7 +120,10 @@ const resources = {
         "error_amount": "Nominal wajib diisi.",
         "error_date": "Tanggal wajib diisi.",
         "error_category": "Kategori wajib dipilih.",
-        "compressing_image": "Mengompresi gambar..."
+        "compressing_image": "Mengompresi gambar...",
+        "table_status_check": "Status Cek",
+        "status_checked": "Dicek",
+        "status_unchecked": "Belum"
       },
       "reports": {
         "title": "Laporan Keuangan",
@@ -151,6 +154,7 @@ const resources = {
         "daily_cashflow_7d": "Arus Kas 7 Hari Terakhir",
         "daily_cashflow_last": "Arus Kas Harian (Bulan Lalu)",
         "monthly_cashflow": "Arus Kas Bulanan",
+        "monthly_cashflow_last": "Arus Kas Bulanan (Tahun Lalu)",
         "expense_distribution": "Distribusi Pengeluaran",
         "income": "Pemasukan",
         "expense": "Pengeluaran",
@@ -274,8 +278,9 @@ const resources = {
         "edit_access": "Edit Akses",
         "delete_access": "Hapus Akses"
       },
-      "recommendations": {
-        "ai_analysis_result": "Hasil Analisis AI",
+       "recommendations": {
+         "back": "Kembali",
+         "ai_analysis_result": "Hasil Analisis AI",
         "top_match": "TOP MATCH",
         "eligibility": "KELAYAKAN",
         "low_risk": "Risiko Rendah",
@@ -475,7 +480,10 @@ const resources = {
         "error_amount": "Amount is required.",
         "error_date": "Date is required.",
         "error_category": "Category is required.",
-        "compressing_image": "Compressing image..."
+        "compressing_image": "Compressing image...",
+        "table_status_check": "Check Status",
+        "status_checked": "Checked",
+        "status_unchecked": "Unchecked"
       },
       "reports": {
         "title": "Financial Reports",
@@ -506,6 +514,7 @@ const resources = {
         "daily_cashflow_7d": "Cash Flow (Last 7 Days)",
         "daily_cashflow_last": "Daily Cash Flow (Last Month)",
         "monthly_cashflow": "Monthly Cash Flow",
+        "monthly_cashflow_last": "Monthly Cash Flow (Last Year)",
         "expense_distribution": "Expense Distribution",
         "income": "Income",
         "expense": "Expense",

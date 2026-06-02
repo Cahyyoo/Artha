@@ -179,12 +179,17 @@ const Settings = () => {
     e.preventDefault();
     setAddLoading(true);
     try {
+      // Ambil business_id dari profile Owner yang sedang login
+      const ownerProfile = JSON.parse(localStorage.getItem("profile") || "{}");
       const payload = {
         name: newUserData.name,
         email: newUserData.email,
         role: newUserData.role.toUpperCase(),
         password: newUserData.password
       };
+      if (ownerProfile.business_id) {
+        payload.business_id = ownerProfile.business_id;
+      }
       await api.post('/api/users', payload);
       alert("Akun berhasil dibuat! Karyawan dapat langsung login.");
       setIsAddModalOpen(false);

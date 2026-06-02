@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import imageCompression from 'browser-image-compression';
 import transactionService from "../services/transactionService";
+import { filterTransactionsByRange } from "../utils/cashflowHelper";
 import {
   FiPlus, FiSearch, FiFilter, FiDownload, FiMoreVertical,
   FiArrowUpRight, FiArrowDownRight, FiX, FiZap, FiLoader,
@@ -32,6 +33,10 @@ const incomeCategories = [
   "Penjualan Produk", "Penjualan Jasa", "Pendapatan Lainnya"
 ];
 
+const allFilterCategories = [
+  ...new Set([...incomeCategories, ...expenseCategories, "Penjualan", "Gaji"])
+];
+
 const categoryColors = {
   "Penjualan": "bg-emerald-100 text-emerald-700 border-emerald-200",
   "Penjualan Produk": "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -59,6 +64,7 @@ export default function Transactions({ isDashboard = false }) {
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [filterRange, setFilterRange] = useState("bulan_ini");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("Semua");
   const [filterDate, setFilterDate] = useState("");
@@ -83,11 +89,12 @@ export default function Transactions({ isDashboard = false }) {
     invoiceFile: null,
   });
 
-  const fetchTransactions = useCallback(async () => {
+  const fetchTransactions = useCallback(async (range) => {
     setIsLoading(true);
     setApiError("");
     try {
-      const res = await transactionService.getTransactions();
+      const params = range ? { range } : {};
+      const res = await transactionService.getTransactions(params);
       const data = res.data?.data || res.data || [];
       const normalized = (Array.isArray(data) ? data : []).map(trx => ({
         id: trx.id || trx._id,
@@ -108,7 +115,7 @@ export default function Transactions({ isDashboard = false }) {
     }
   }, []);
 
-  useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
+  useEffect(() => { fetchTransactions(filterRange); }, [fetchTransactions, filterRange]);
 
   // Auto-format currency helper
   const handleAmountChange = (e) => {
@@ -154,14 +161,15 @@ export default function Transactions({ isDashboard = false }) {
 
   // --- CALCULATION LOGIC ---
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((trx) => {
+    const ranged = filterTransactionsByRange(transactions, filterRange);
+    return ranged.filter((trx) => {
       const matchSearch = trx.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchCategory = filterCategory === "Semua" || trx.category === filterCategory;
       const matchType = filterType === "Semua" || trx.type === filterType;
-      const matchDate = filterDate ? trx.date === filterDate : true;
+      const matchDate = !filterDate || trx.date === filterDate;
       return matchSearch && matchCategory && matchType && matchDate;
     });
-  }, [searchTerm, filterCategory, filterType, filterDate, transactions]);
+  }, [searchTerm, filterCategory, filterType, filterDate, filterRange, transactions]);
 
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
   const paginatedTransactions = useMemo(() => {
@@ -180,12 +188,12 @@ export default function Transactions({ isDashboard = false }) {
   const metrics = useMemo(() => {
     let income = 0;
     let expense = 0;
-    transactions.forEach(trx => {
+    filteredTransactions.forEach(trx => {
       if (trx.type === "Pemasukan") income += trx.amount;
       else if (trx.type === "Pengeluaran") expense += trx.amount;
     });
     return { income, expense, balance: income - expense };
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(number);
@@ -424,23 +432,44 @@ export default function Transactions({ isDashboard = false }) {
       {/* 1. Header & Panel Metrik */}
       {!isLoading && !isDashboard && (
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">{t('transactions.title')}</h1>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <h1 className="text-2xl md:text-3xl font-black text-slate-800">{t('transactions.title')}</h1>
+            {/* Range Filter */}
+            <div className="relative flex items-center bg-white border border-slate-200 rounded-lg px-3 py-1.5 hover:border-slate-300 transition-colors shadow-sm">
+              <FiCalendar className="text-slate-400 mr-2" size={14} />
+              <select
+                value={filterRange}
+                onChange={(e) => setFilterRange(e.target.value)}
+                className="appearance-none bg-transparent text-slate-600 text-sm font-medium pr-6 focus:outline-none cursor-pointer"
+              >
+                <option value="7_hari">7 Hari Terakhir</option>
+                <option value="bulan_ini">Bulan Ini</option>
+                <option value="bulan_lalu">Bulan Lalu</option>
+                <option value="tahun_ini">Tahun Ini</option>
+                <option value="tahun_lalu">Tahun Lalu</option>
+              </select>
+              <FiChevronDown
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                size={14}
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-slate-500 mb-1">{t('transactions.income_this_month')}</p>
+                <p className="text-sm font-bold text-slate-500 mb-1">Total Pemasukan</p>
                 <h3 className="text-2xl font-black text-emerald-600">{formatRupiah(metrics.income)}</h3>
               </div>
             </div>
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-slate-500 mb-1">{t('transactions.expense_this_month')}</p>
+                <p className="text-sm font-bold text-slate-500 mb-1">Total Pengeluaran</p>
                 <h3 className="text-2xl font-black text-rose-600">{formatRupiah(metrics.expense)}</h3>
               </div>
             </div>
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-slate-500 mb-1">{t('transactions.net_cash_flow')}</p>
+                <p className="text-sm font-bold text-slate-500 mb-1">Arus Kas Bersih</p>
                 <h3 className={`text-2xl font-black ${metrics.balance >= 0 ? 'text-blue-600' : 'text-rose-600'}`}>
                   {metrics.balance >= 0 ? '+' : ''}{formatRupiah(metrics.balance)}
                 </h3>
@@ -454,11 +483,63 @@ export default function Transactions({ isDashboard = false }) {
       {!isLoading && (
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex flex-1 flex-col lg:flex-row gap-3 w-full">
-            <div className="relative w-full lg:flex-1">
+            <div className="relative w-full lg:w-56">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input type="text" placeholder={t('transactions.search_placeholder')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none" />
             </div>
-            {/* ... filter elements ... */}
+
+            <div className="relative w-full lg:w-44">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none appearance-none cursor-pointer"
+              >
+                <option value="Semua">Semua Tipe</option>
+                <option value="Pemasukan">Pemasukan</option>
+                <option value="Pengeluaran">Pengeluaran</option>
+              </select>
+              <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+              <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+            </div>
+
+            <div className="relative w-full lg:w-48">
+              <select
+                value={filterCategory}
+                onChange={(e) => {
+                  setFilterCategory(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none appearance-none cursor-pointer"
+              >
+                <option value="Semua">Semua Kategori</option>
+                {allFilterCategories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+              <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+            </div>
+
+            <div className="relative w-full lg:w-44">
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => {
+                  setFilterDate(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none"
+              />
+              <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+              {filterDate && (
+                <button
+                  onClick={() => setFilterDate("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full p-0.5"
+                >
+                  <FiX size={14} />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -492,7 +573,7 @@ export default function Transactions({ isDashboard = false }) {
                   <th className="px-6 py-4">{t('transactions.table_category')}</th>
                   <th className="px-6 py-4 text-right">{t('transactions.table_amount')}</th>
                   <th className="px-6 py-4 text-center">{t('transactions.table_proof')}</th>
-                  <th className="px-6 py-4 text-center">Status Cek</th>
+                  <th className="px-6 py-4 text-center">{t('transactions.table_status_check')}</th>
                   <th className="px-6 py-4 text-center">{t('transactions.table_action')}</th>
                 </tr>
               </thead>
@@ -511,15 +592,15 @@ export default function Transactions({ isDashboard = false }) {
                     <td className="px-6 py-4 text-center">{trx.invoice ? <button onClick={() => setViewingInvoice(trx)} className="text-indigo-600">Lihat</button> : "-"}</td>
                     <td className="px-6 py-4 text-center">
                       <button onClick={() => handleToggleCheck(trx.id)} className={`px-3 py-1.5 rounded-lg ${trx.is_checked ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400"}`}>
-                        {trx.is_checked ? "Dicek" : "Belum"}
+                        {trx.is_checked ? t('transactions.status_checked') : t('transactions.status_unchecked')}
                       </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
                          {canEditDelete ? (
                           <>
-                            <button onClick={() => handleEditClick(trx)} className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all"><FiEdit2 size={15} /></button>
-                            <button onClick={() => handleDeleteTransaction(trx.id)} className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all"><FiTrash2 size={15} /></button>
+                             <button onClick={() => handleEditClick(trx)} title="Edit" className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex items-center justify-center"><FiEdit2 size={15} /></button>
+                            <button onClick={() => handleDeleteTransaction(trx.id)} title="Hapus" className="w-9 h-9 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center"><FiTrash2 size={15} /></button>
                           </>
                         ) : (
                           <span className="text-xs text-slate-400 font-medium italic">Read-only</span>

@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
+import transactionService from "../services/transactionService";
+import { computeDailyCashflow, normalizeTransactions, filterTransactionsByRange } from "../utils/cashflowHelper";
 import {
   FiTrendingUp,
   FiArrowUpRight,
@@ -12,6 +14,8 @@ import {
   FiArrowRight,
   FiCpu,
   FiCheckCircle,
+  FiUserCheck,
+  FiBarChart2,
   FiX,
   FiUser,
   FiMapPin,
@@ -25,6 +29,7 @@ import {
   FiSearch,
   FiFilter,
   FiDownload,
+  FiCircle,
 } from "react-icons/fi";
 import {
   AreaChart,
@@ -57,9 +62,20 @@ const Dashboard = () => {
 
   const [filterWaktu, setFilterWaktu] = useState("bulan_ini");
 
+  const rangeLabels = {
+    "7_hari": "7 Hari Terakhir",
+    "bulan_ini": "Bulan Ini",
+    "bulan_lalu": "Bulan Lalu",
+    "tahun_ini": "Tahun Ini",
+    "tahun_lalu": "Tahun Lalu",
+  };
+
   // Data dari API
   const [dashboardData, setDashboardData] = useState(null);
   const [apiError, setApiError] = useState(null);
+
+  const [cashFlowChartData, setCashFlowChartData] = useState([]);
+  const [aiPredictionScore, setAiPredictionScore] = useState(null);
 
   // Fitur Tabel Data Transaksi Dashboard
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,23 +101,77 @@ const Dashboard = () => {
     }
 
     const isEmp = ["ADMIN", "STAFF", "USER"].includes(String(prof?.role || "").toUpperCase());
+
+    const rangeMap = {
+      "7_hari": "last_7_days",
+      "bulan_ini": "this_month",
+      "bulan_lalu": "last_month",
+      "tahun_ini": "this_year",
+      "tahun_lalu": "last_year",
+    };
+
     if (prof?.user_type === "umkm_aktif" || isEmp) {
       setLoading(true);
+
       api
-        .get(`/api/dashboard/overview?range=${filterWaktu}`)
+        .get(`/api/dashboard/overview?range=${rangeMap[filterWaktu] || filterWaktu}`)
             .then((res) => {
               setDashboardData(res.data.data || res.data);
               setApiError(null);
             })
         .catch((err) => {
           console.error("Gagal mengambil data dashboard:", err);
-          setApiError(
-            err.response?.data?.message ||
-              "Gagal mengambil data. Server mungkin sedang offline.",
-          );
+          const errorMsg = err.response?.data?.message || "Gagal mengambil data. Server mungkin sedang offline.";
+          setApiError(errorMsg);
+
+          // Auto-sync business_id untuk karyawan yang belum memiliki entitas bisnis
+          const isBusinessError = errorMsg.toLowerCase().includes("entitas bisnis") || errorMsg.toLowerCase().includes("business");
+          if (isBusinessError && isEmp) {
+            api.post("/api/profile/sync-business")
+              .then((syncRes) => {
+                const syncData = syncRes.data;
+                if (syncData.data?.profile) {
+                  localStorage.setItem("profile", JSON.stringify(syncData.data.profile));
+                }
+                // Coba muat ulang data dashboard setelah sync berhasil
+                return api.get(`/api/dashboard/overview?range=${rangeMap[filterWaktu] || filterWaktu}`);
+              })
+              .then((retryRes) => {
+                setDashboardData(retryRes.data.data || retryRes.data);
+                setApiError(null);
+              })
+              .catch((syncErr) => {
+                console.warn("Auto-sync business_id gagal, manual sync tersedia:", syncErr);
+              });
+          }
+        });
+
+      transactionService.getTransactions()
+        .then((res) => {
+          const txList = normalizeTransactions(res.data);
+          const filtered = filterTransactionsByRange(txList, filterWaktu);
+          const daily = computeDailyCashflow(filtered);
+          const chartData = daily.map((d) => ({
+            date: d.date,
+            Pemasukan: d.income,
+            Pengeluaran: d.expense,
+          }));
+          setCashFlowChartData(chartData);
+        })
+        .catch(() => {
+          // fallback: empty chart
         })
         .finally(() => {
           setLoading(false);
+        });
+
+      transactionService.getForecast()
+        .then((res) => {
+          const data = res.data?.data || res.data || {};
+          setAiPredictionScore(data.confidence_interval ?? null);
+        })
+        .catch(() => {
+          // fallback: keep showing default
         });
     } else {
       setLoading(false);
@@ -251,44 +321,55 @@ const Dashboard = () => {
   // TAMPILAN: CALON PENGUSAHA (PERINTIS)
   // ─────────────────────────────────────────────
   if (userType === "calon_pengusaha") {
-    // ... (kode perintis tetap sama sesuai aslinya agar aman)
     return (
-      <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-fade-in">
-        <div className="bg-[#0B1221] rounded-[2rem] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 opacity-20 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-500 opacity-20 rounded-full blur-[80px] -ml-20 -mb-20 pointer-events-none"></div>
-          <div className="relative z-10">
-            <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight leading-tight">
-              <Trans
-                i18nKey="dashboard.welcome_new"
-                values={{ name: firstName }}
+      <div className="max-w-5xl mx-auto space-y-10 pb-20 animate-fade-in px-4">
+        {/* HERO SECTION */}
+        <div className="relative overflow-hidden bg-white rounded-[2.5rem] p-8 md:p-16 shadow-sm border border-slate-100">
+          {/* Subtle Decorative Element */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-20 -mt-20 opacity-50"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-[1.1]">
+                <Trans
+                  i18nKey="dashboard.welcome_new"
+                  values={{ name: firstName }}
+                >
+                  Halo, {{ name: firstName }}! <br />
+                  Siap Memulai Bisnismu?
+                </Trans>
+              </h1>
+              <p className="text-slate-500 text-lg font-medium max-w-xl leading-relaxed mb-10 mx-auto md:mx-0">
+                {t("dashboard.welcome_new_desc")}
+              </p>
+              <button
+                onClick={() => navigate("/dashboard/recommendations")}
+                className="group inline-flex items-center gap-3 bg-slate-900 text-white hover:bg-black px-8 py-4 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-xl shadow-slate-200 active:scale-95"
               >
-                Halo, {{ name: firstName }}! <br />
-                Siap Memulai Bisnismu?
-              </Trans>
-            </h1>
-            <p className="text-slate-300 text-lg font-medium max-w-2xl leading-relaxed mb-8">
-              {t("dashboard.welcome_new_desc")}
-            </p>
-            <button
-              onClick={() => navigate("/dashboard/recommendations")}
-              className="inline-flex items-center gap-3 bg-indigo-600 text-white hover:bg-indigo-500 px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all shadow-xl shadow-indigo-600/30 active:scale-95 group"
-            >
-              {t("dashboard.start_business_questionnaire")}
-              <FiArrowRight
-                className="group-hover:translate-x-1 transition-transform"
-                size={18}
-              />
-            </button>
+                {t("dashboard.start_business_questionnaire")}
+                <FiArrowRight
+                  className="group-hover:translate-x-1 transition-transform"
+                  size={18}
+                />
+              </button>
+            </div>
+            
+            {/* Minimalist Visual Side */}
+               <div className="hidden md:flex w-1/3 h-64 bg-slate-50 rounded-3xl border border-slate-100 items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-transparent opacity-50"></div>
+                  <FiUserCheck size={80} className="text-slate-200 relative z-10" />
+               </div>
           </div>
         </div>
+ 
+        {/* FEATURE CARDS */}
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start">
-            <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
-              <FiCpu className="text-indigo-600" size={28} />
+          <div className="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex gap-6">
+            <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+              <FiUserCheck size={28} />
             </div>
             <div>
-              <h3 className="font-black text-slate-800 text-xl mb-2">
+              <h3 className="font-bold text-slate-900 text-xl mb-2">
                 {t("dashboard.accurate_ai_profiling")}
               </h3>
               <p className="text-slate-500 text-sm leading-relaxed">
@@ -296,12 +377,13 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-          <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start">
-            <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center shrink-0">
-              <FiPieChart className="text-teal-600" size={28} />
+ 
+          <div className="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex gap-6">
+            <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+              <FiBarChart2 size={28} />
             </div>
             <div>
-              <h3 className="font-black text-slate-800 text-xl mb-2">
+              <h3 className="font-bold text-slate-900 text-xl mb-2">
                 {t("dashboard.budget_simulation")}
               </h3>
               <p className="text-slate-500 text-sm leading-relaxed">
@@ -333,10 +415,11 @@ const Dashboard = () => {
                 onChange={(e) => setFilterWaktu(e.target.value)}
                 className="appearance-none bg-transparent text-slate-600 text-sm font-medium pr-6 focus:outline-none cursor-pointer"
               >
-                <option value="hari_ini">Hari Ini</option>
-                <option value="minggu_ini">Minggu Ini</option>
+                <option value="7_hari">7 Hari Terakhir</option>
                 <option value="bulan_ini">Bulan Ini</option>
+                <option value="bulan_lalu">Bulan Lalu</option>
                 <option value="tahun_ini">Tahun Ini</option>
+                <option value="tahun_lalu">Tahun Lalu</option>
               </select>
               <FiChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
@@ -369,38 +452,64 @@ const Dashboard = () => {
               </button>
             </div>
 
-            {/* Tombol Aktivasi Bisnis — muncul hanya jika error terkait business_id */}
+            {/* Tombol perbaikan business_id — muncul hanya jika error terkait business_id */}
             {(apiError.toLowerCase().includes("entitas bisnis") || apiError.toLowerCase().includes("business")) && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="text-left">
                   <p className="text-sm font-bold text-amber-800">Akun Anda belum memiliki entitas bisnis.</p>
-                  <p className="text-xs text-amber-600 mt-1">Klik tombol di samping untuk mencoba mengaktifkan bisnis secara otomatis.</p>
+                  <p className="text-xs text-amber-600 mt-1">
+                    {isEmployee
+                      ? "Klik tombol di samping untuk menyinkronkan data bisnis dari Owner."
+                      : "Klik tombol di samping untuk mengaktifkan bisnis Anda."}
+                  </p>
                 </div>
-                <button
-                  onClick={async () => {
-                    try {
-                      const response = await api.post("/api/profile/upgrade", {
-                        nama_usaha: "Usaha Saya",
-                        tipe_usaha: "Umum",
-                        lama_usaha: "< 1 Tahun"
-                      });
-                      
-                      const resData = response.data;
-
-                      alert("✅ Bisnis berhasil diaktifkan! Halaman akan dimuat ulang.");
-                      if (resData.data?.profile) {
-                        localStorage.setItem("profile", JSON.stringify(resData.data.profile));
+                {isEmployee ? (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await api.post("/api/profile/sync-business");
+                        const resData = response.data;
+                        alert("✅ Data bisnis berhasil disinkronkan! Halaman akan dimuat ulang.");
+                        if (resData.data?.profile) {
+                          localStorage.setItem("profile", JSON.stringify(resData.data.profile));
+                        }
+                        window.location.reload();
+                      } catch (err) {
+                        console.error("Gagal sync business_id:", err);
+                        alert("❌ Gagal menyinkronkan data bisnis: " + (err.response?.data?.message || err.message) + "\n\nPastikan server lokal berjalan (npm run server) dan Owner sudah memiliki business_id.");
                       }
-                      window.location.reload();
-                    } catch (err) {
-                      console.error("Gagal aktivasi bisnis:", err);
-                      alert("❌ Gagal mengaktifkan bisnis: " + (err.response?.data?.message || err.message) + "\n\nSilakan hubungi rekan backend Anda untuk membuatkan business_id di database.");
-                    }
-                  }}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-bold hover:bg-amber-600 transition-colors shrink-0 shadow-sm active:scale-95"
-                >
-                  <FiTrendingUp size={14} /> Aktivasi Bisnis
-                </button>
+                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-bold hover:bg-amber-600 transition-colors shrink-0 shadow-sm active:scale-95"
+                  >
+                    <FiTrendingUp size={14} /> Sync Data Bisnis
+                  </button>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await api.post("/api/profile/upgrade", {
+                          nama_usaha: "Usaha Saya",
+                          tipe_usaha: "Umum",
+                          lama_usaha: "< 1 Tahun"
+                        });
+
+                        const resData = response.data;
+
+                        alert("✅ Bisnis berhasil diaktifkan! Halaman akan dimuat ulang.");
+                        if (resData.data?.profile) {
+                          localStorage.setItem("profile", JSON.stringify(resData.data.profile));
+                        }
+                        window.location.reload();
+                      } catch (err) {
+                        console.error("Gagal aktivasi bisnis:", err);
+                        alert("❌ Gagal mengaktifkan bisnis: " + (err.response?.data?.message || err.message) + "\n\nSilakan hubungi rekan backend Anda untuk membuatkan business_id di database.");
+                      }
+                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-bold hover:bg-amber-600 transition-colors shrink-0 shadow-sm active:scale-95"
+                  >
+                    <FiTrendingUp size={14} /> Aktivasi Bisnis
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -478,9 +587,22 @@ const Dashboard = () => {
               <span className="text-xs sm:text-sm font-medium truncate">Status Kesehatan</span>
             </div>
             <div>
-              <h3 className="text-sm sm:text-lg font-bold text-slate-900 leading-tight mb-1 truncate">
-                {dashboardData?.summary?.health_status || "Belum ada status"}
-              </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                  (dashboardData?.summary?.health_status || "").toLowerCase().includes("very")
+                    ? "bg-emerald-500"
+                    : (dashboardData?.summary?.health_status || "").toLowerCase().includes("good") ||
+                      (dashboardData?.summary?.health_status || "").toLowerCase().includes("baik")
+                    ? "bg-emerald-400"
+                    : (dashboardData?.summary?.health_status || "").toLowerCase().includes("fair") ||
+                      (dashboardData?.summary?.health_status || "").toLowerCase().includes("cukup")
+                    ? "bg-amber-400"
+                    : "bg-slate-300"
+                }`} />
+                <h3 className="text-sm sm:text-lg font-bold text-slate-900 leading-tight truncate">
+                  {dashboardData?.summary?.health_status || "Belum ada status"}
+                </h3>
+              </div>
               <div className="flex items-center gap-1 mt-1 sm:mt-2">
                 <span className="text-[10px] sm:text-xs text-slate-400 truncate">
                   Evaluasi sistem AI
@@ -492,97 +614,100 @@ const Dashboard = () => {
 
         {/* MIDDLE SECTION: Charts & AI (Grid 2/3 dan 1/3) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Chart (Menggantikan posisi Sales Funnel) */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm lg:col-span-2 flex flex-col">
+          {/* Main Chart — identik dengan yang ada di menu Laporan */}
+          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-slate-900">
+              <div className="flex items-center gap-3">
+                <h3 className="text-lg font-black text-slate-900">
                   {t("dashboard.cash_flow_trend")}
                 </h3>
-                <FiActivity className="text-slate-400" size={14} />
               </div>
-              <div className="flex gap-2">
-                <div className="flex items-center gap-1 border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-500">
-                  <FiCalendar size={12} /> {filterWaktu.replace("_", " ")}
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:flex items-center gap-4 text-xs font-semibold text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>{" "}
+                    Pemasukan
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>{" "}
+                    Pengeluaran
+                  </span>
                 </div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider border border-slate-200 rounded-lg px-2.5 py-1.5">
+                  {rangeLabels[filterWaktu] || filterWaktu.replace("_", " ")}
+                </span>
               </div>
             </div>
-
-            <div className="h-[200px] sm:h-[280px] w-full flex-1 relative min-h-[200px]">
-              {(!dashboardData?.chart_data || dashboardData.chart_data.length === 0) ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+            <div className="h-72 w-full">
+              {cashFlowChartData.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400">
                   <FiActivity size={32} className="mb-2 text-slate-300" />
                   <span className="text-sm font-medium">Belum ada data tren arus kas.</span>
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={dashboardData?.chart_data || []}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    {/* Menggunakan warna ungu/biru menyerupai referensi chart bar */}
-                    <linearGradient id="colorP" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorE" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="date"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#94a3b8" }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#94a3b8" }}
-                    tickFormatter={(value) => `Rp${value / 1000}k`}
-                  />
-                  <CartesianGrid
-                    vertical={false}
-                    stroke="#f8fafc"
-                    strokeDasharray="3 3"
-                  />
-                  <RechartsTooltip
-                    formatter={(value) => formatRupiah(value)}
-                    contentStyle={{
-                      borderRadius: "12px",
-                      border: "1px solid #f1f5f9",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    }}
-                    itemStyle={{ fontWeight: "600", fontSize: "14px" }}
-                    labelStyle={{
-                      color: "#64748b",
-                      marginBottom: "4px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="income"
-                    stroke="#7c3aed"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorP)"
-                    dot={dashboardData?.chart_data?.length === 1 ? { r: 4, strokeWidth: 2 } : false}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="expense"
-                    stroke="#3b82f6"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorE)"
-                    dot={dashboardData?.chart_data?.length === 1 ? { r: 4, strokeWidth: 2 } : false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+                <ResponsiveContainer width="100%" height={288}>
+                  <AreaChart data={cashFlowChartData} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorPemasukan" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorPengeluaran" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="date"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
+                      dy={10}
+                      interval={["bulan_ini", "bulan_lalu", "7_hari"].includes(filterWaktu) ? 4 : 0}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
+                      tickFormatter={(v) => {
+                        if (v >= 1000000) return `${(v / 1000000).toFixed(1)}jt`;
+                        if (v >= 1000) return `${(v / 1000).toFixed(0)}k`;
+                        return v;
+                      }}
+                      width={50}
+                    />
+                    <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="4 4" />
+                    <RechartsTooltip
+                      formatter={(value, name) => [formatRupiah(value), name]}
+                      contentStyle={{
+                        borderRadius: '16px',
+                        border: 'none',
+                        boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.06)',
+                        padding: '12px 16px',
+                      }}
+                      itemStyle={{ fontWeight: '600', fontSize: '13px' }}
+                      labelStyle={{ color: '#1e293b', fontWeight: '700', marginBottom: '6px', fontSize: '13px' }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="Pemasukan"
+                      stroke="#10b981"
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill="url(#colorPemasukan)"
+                      activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: '#10b981' }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="Pengeluaran"
+                      stroke="#f43f5e"
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill="url(#colorPengeluaran)"
+                      activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: '#f43f5e' }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               )}
             </div>
           </div>
@@ -597,20 +722,30 @@ const Dashboard = () => {
             </div>
 
             <div className="flex-1 flex flex-col justify-center items-center text-center">
-              {/* Ornamen visual ala pie chart emails di gambar */}
-              <div className="relative w-40 h-40 sm:w-48 sm:h-48 mb-6 mx-auto scale-90 sm:scale-100 transform origin-center flex items-center justify-center">
-                <div className="absolute top-0 right-2 sm:right-4 w-20 h-20 sm:w-24 sm:h-24 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold opacity-80 mix-blend-multiply transition-all">
-                  <span className="text-xs sm:text-sm">Prediksi</span>
-                </div>
-                <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-24 h-24 sm:w-28 sm:h-28 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 font-bold opacity-80 mix-blend-multiply transition-all">
-                  <span className="text-xs sm:text-sm">AI Arta</span>
-                </div>
-                <div className="absolute bottom-8 right-0 sm:bottom-12 sm:right-0 w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 rounded-full flex items-center justify-center text-orange-400 font-bold opacity-80 mix-blend-multiply transition-all">
-                  <FiTrendingUp size={20} className="sm:w-6 sm:h-6" />
+              {/* Confidence gauge — menggantikan ornamen lingkaran tumpuk */}
+              <div className="relative w-36 h-36 sm:w-44 sm:h-44 mb-5">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="8"
+                    className="text-slate-300" />
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="url(#gaugeGrad)" strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 52}`}
+                    strokeDashoffset={`${2 * Math.PI * 52 * (1 - (aiPredictionScore ?? 72) / 100)}`}
+                    className="transition-all duration-1000 ease-out" />
+                  <defs>
+                    <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#818cf8" />
+                      <stop offset="100%" stopColor="#34d399" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl sm:text-3xl font-black text-slate-900 leading-none">{aiPredictionScore ?? 72}%</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-slate-400 mt-1">Skor Prediksi</span>
                 </div>
               </div>
 
-              <p className="text-sm text-slate-500 mb-6">
+              <p className="text-xs sm:text-sm leading-relaxed px-2 text-slate-500 mb-5">
                 <Trans i18nKey="dashboard.ai_prediction_desc">
                   Lihat potensi arus kas bisnis Anda di masa depan dengan model
                   AI prediktif kami.
@@ -619,7 +754,7 @@ const Dashboard = () => {
 
               <Link
                 to="/dashboard/forecasting"
-                className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-medium rounded-lg border border-slate-200 transition-colors flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 transition-colors flex items-center justify-center gap-2"
               >
                 {t("dashboard.view_detail")} <FiArrowRight size={14} />
               </Link>
@@ -683,13 +818,6 @@ const Dashboard = () => {
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className="pb-3 px-4 text-xs font-medium text-slate-400 w-10">
-                    <input
-                      type="checkbox"
-                      className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                      disabled
-                    />
-                  </th>
                   <th className="pb-3 px-4 text-xs font-medium text-slate-400">
                     Deskripsi / ID
                   </th>
@@ -701,6 +829,9 @@ const Dashboard = () => {
                   </th>
                   <th className="pb-3 px-4 text-xs font-medium text-slate-400 text-right">
                     Nominal
+                  </th>
+                  <th className="pb-3 px-4 text-xs font-medium text-slate-400 text-center">
+                    Status Cek
                   </th>
                 </tr>
               </thead>
@@ -721,13 +852,6 @@ const Dashboard = () => {
                       key={tx.id || idx}
                       className="hover:bg-slate-50/50 transition-colors"
                     >
-                      <td className="py-4 px-4 border-b border-slate-50">
-                        <input
-                          type="checkbox"
-                          className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                          disabled
-                        />
-                      </td>
                       <td className="py-4 px-4 border-b border-slate-50">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
@@ -764,6 +888,17 @@ const Dashboard = () => {
                             : "-"}
                           {formatRupiah(tx.amount)}
                         </span>
+                      </td>
+                      <td className="py-4 px-4 border-b border-slate-50 text-center">
+                        {JSON.parse(localStorage.getItem(`checked_trx_${tx.id || tx._id}`) || "false") ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full whitespace-nowrap">
+                            <FiCheckCircle size={12} /> Sudah Dicek
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full whitespace-nowrap">
+                            <FiCircle size={12} /> Belum Dicek
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))
