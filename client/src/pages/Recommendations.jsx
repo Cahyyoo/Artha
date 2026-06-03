@@ -1,366 +1,324 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 import api from "../services/api";
 import {
-  FiArrowRight,
   FiArrowLeft,
-  FiCpu,
-  FiStar,
-  FiBriefcase,
-  FiInfo,
-  FiDownload,
   FiRefreshCcw,
-  FiChevronDown,
-  FiAlertTriangle,
-  FiZap,
+  FiDownload,
   FiCheckCircle,
   FiXCircle,
+  FiTarget,
   FiTrendingUp,
+  FiTrendingDown,
+  FiBarChart2,
+  FiZap,
+  FiAlertTriangle,
 } from "react-icons/fi";
 
-const SEKTOR_OPTIONS = [
-  { id: "Jasa & Layanan Umum", label: "Jasa & Layanan Umum" },
-  { id: "Kuliner (F&B)", label: "Kuliner (F&B)" },
-  { id: "Ritel & Perdagangan", label: "Ritel & Perdagangan" },
-  { id: "Teknologi & Digital", label: "Teknologi & Digital" },
-  { id: "Manufaktur & Produksi", label: "Manufaktur & Produksi" },
-  { id: "Pertanian & Agribisnis", label: "Pertanian & Agribisnis" },
-  { id: "Kesehatan & Kecantikan", label: "Kesehatan & Kecantikan" },
-  { id: "Lainnya", label: "Lainnya" },
+const EDUCATION_OPTIONS = [
+  { value: "SD", labelKey: "recommendations.edu_sd" },
+  { value: "SMP", labelKey: "recommendations.edu_smp" },
+  { value: "SMA/SMK", labelKey: "recommendations.edu_sma" },
+  { value: "Diploma", labelKey: "recommendations.edu_diploma" },
+  { value: "Sarjana", labelKey: "recommendations.edu_sarjana" },
 ];
 
-const LOKASI_OPTIONS = [
-  { id: "Pinggir Jalan Raya Utama", label: "Pinggir Jalan Raya Utama" },
-  { id: "Pusat Perbelanjaan / Mall", label: "Pusat Perbelanjaan / Mall" },
-  { id: "Area Perkantoran", label: "Area Perkantoran" },
-  {
-    id: "Kawasan Pemukiman / Perumahan",
-    label: "Kawasan Pemukiman / Perumahan",
-  },
-  { id: "Lingkungan Kampus / Sekolah", label: "Lingkungan Kampus / Sekolah" },
-  { id: "Online / Dari Rumah", label: "Online / Dari Rumah" },
+const RADIO_YA_TIDAK = (t) => [
+  { value: "Ya", label: t("recommendations.q11_yes") },
+  { value: "Tidak", label: t("recommendations.q11_no") },
 ];
 
-const TARGET_PASAR_OPTIONS = [
-  { id: "Anak-anak", label: "Anak-anak" },
-  { id: "Remaja", label: "Remaja" },
-  { id: "Dewasa", label: "Dewasa" },
-  { id: "Lansia", label: "Lansia" },
-  { id: "Keluarga", label: "Keluarga" },
-  { id: "Perusahaan (B2B)", label: "Perusahaan (B2B)" },
-  { id: "Umum (Semua Usia)", label: "Umum (Semua Usia)" },
+const RADIO_PERNAH = (t) => [
+  { value: "Pernah", label: t("recommendations.q4_yes") },
+  { value: "Tidak Pernah", label: t("recommendations.q4_no") },
 ];
 
-const PENDIDIKAN_OPTIONS = [
-  { id: "SD", label: "SD" },
-  { id: "SMP", label: "SMP" },
-  { id: "SMA / Sederajat", label: "SMA / Sederajat" },
-  { id: "Diploma (D1-D4)", label: "Diploma (D1-D4)" },
-  { id: "Sarjana (S1+)", label: "Sarjana (S1+)" },
+const RADIO_MEMADAI = (t) => [
+  { value: "Memadai", label: t("recommendations.q5_yes") },
+  { value: "Tidak Memadai", label: t("recommendations.q5_no") },
 ];
 
-const KEAHLIAN_OPTIONS = [
-  { id: "Pemrograman / IT", label: "Pemrograman / IT" },
-  { id: "Desain / Kreatif", label: "Desain / Kreatif" },
-  { id: "Memasak / Tata Boga", label: "Memasak / Tata Boga" },
-  { id: "Penjualan / Marketing", label: "Penjualan / Marketing" },
-  { id: "Manajemen / Administrasi", label: "Manajemen / Administrasi" },
-  { id: "Teknik / Otomotif", label: "Teknik / Otomotif" },
-  { id: "Kecantikan / Salon", label: "Kecantikan / Salon" },
-  { id: "Pendidikan / Mengajar", label: "Pendidikan / Mengajar" },
-  { id: "Tidak Ada Keahlian Khusus", label: "Tidak Ada Keahlian Khusus" },
+const RADIO_BAIK = (t) => [
+  { value: "Baik", label: t("recommendations.q6_yes") },
+  { value: "Buruk", label: t("recommendations.q6_no") },
 ];
 
-const CurrencyInput = ({ label, value, onChange, description }) => {
-  const formatNumber = (num) => {
-    if (!num) return "";
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
+const RADIO_ADA = (t) => [
+  { value: "Ada", label: t("recommendations.q7_yes") },
+  { value: "Tidak Ada", label: t("recommendations.q7_no") },
+];
 
-  const handleInputChange = (e) => {
-    const rawValue = e.target.value.replace(/\./g, "");
-    if (/^\d*$/.test(rawValue)) {
-      onChange(rawValue);
-    }
-  };
+const RADIO_GENDER = (t) => [
+  { value: "Laki-laki", label: t("recommendations.q3_male") },
+  { value: "Perempuan", label: t("recommendations.q3_female") },
+];
 
-  return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col mb-4">
-      <label className="block text-base font-medium text-slate-800 mb-2">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      {description && (
-        <p className="text-sm text-slate-500 mb-4">{description}</p>
-      )}
-      <div className="flex items-center gap-3 sm:w-1/2">
-        <input
-          type="text"
-          value={formatNumber(value)}
-          onChange={handleInputChange}
-          className="w-full py-2 border-b border-slate-300 focus:border-indigo-600 outline-none text-slate-800 transition-colors bg-transparent"
-          placeholder="Jawaban Anda"
-        />
-        <span className="text-slate-500 shrink-0">Rp</span>
-      </div>
-    </div>
-  );
-};
+/* ─── Sub Components ─── */
 
-const NumberInput = ({
-  label,
-  value,
-  onChange,
-  min,
-  max,
-  unit,
-  description,
-}) => {
-  return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col mb-4">
-      <label className="block text-base font-medium text-slate-800 mb-2">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      {description && (
-        <p className="text-sm text-slate-500 mb-4">{description}</p>
-      )}
-      <div className="flex items-center gap-3 sm:w-1/2">
-        <input
-          type="number"
-          min={min}
-          max={max}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full py-2 border-b border-slate-300 focus:border-indigo-600 outline-none text-slate-800 transition-colors bg-transparent"
-          placeholder="Jawaban Anda"
-        />
-        {unit && <span className="text-slate-500 shrink-0">{unit}</span>}
-      </div>
-    </div>
-  );
-};
-
-const TextAreaInput = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  description,
-}) => {
-  return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col mb-4">
-      <label className="block text-base font-medium text-slate-800 mb-2">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      {description && (
-        <p className="text-sm text-slate-500 mb-4">{description}</p>
-      )}
-      <textarea
+const NumberField = ({ label, desc, value, onChange, min, max, unit }) => (
+  <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-4">
+    <label className="block text-base font-medium text-slate-800 mb-2">
+      {label} <span className="text-red-500">*</span>
+    </label>
+    {desc && <p className="text-sm text-slate-500 mb-4">{desc}</p>}
+    <div className="flex items-center gap-3 sm:w-1/2">
+      <input
+        type="number"
+        min={min}
+        max={max}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full p-4 border border-slate-300 rounded-lg focus:border-indigo-600 outline-none text-slate-800 transition-colors bg-transparent resize-y min-h-[120px]"
-        placeholder={placeholder}
+        className="w-full py-2 border-b border-slate-300 focus:border-indigo-600 outline-none text-slate-800 transition-colors bg-transparent"
+        placeholder="0"
       />
+      {unit && <span className="text-slate-500 shrink-0">{unit}</span>}
     </div>
-  );
-};
+  </div>
+);
 
-const ComboboxField = ({
-  label,
-  value,
-  onChange,
-  options,
-  placeholder,
-  description,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const currentLabel = options.find((o) => o.id === value)?.label || value;
-
-  return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col mb-4 relative">
-      <label className="block text-base font-medium text-slate-800 mb-2">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      {description && (
-        <p className="text-sm text-slate-500 mb-4">{description}</p>
-      )}
-      <div className="relative sm:w-1/2">
-        <input
-          type="text"
-          value={currentLabel}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsOpen(true)}
-          onBlur={() => setTimeout(() => setIsOpen(false), 200)}
-          placeholder={placeholder}
-          className="w-full py-2 pr-8 border-b border-slate-300 focus:border-indigo-600 outline-none text-slate-800 transition-colors bg-transparent cursor-pointer"
-          readOnly
-        />
-        <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none text-slate-400">
-          <FiChevronDown size={20} />
-        </div>
-        {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-56 overflow-y-auto p-1">
-            {options.map((opt) => (
-              <div
-                key={opt.id}
-                className="px-4 py-2 rounded-md cursor-pointer hover:bg-slate-100 text-slate-700"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  onChange(opt.id);
-                  setIsOpen(false);
-                }}
-              >
-                {opt.label}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const RadioGroup = ({ label, description, options, name, value, onChange }) => {
-  return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col mb-4">
-      <label className="block text-base font-medium text-slate-800 mb-2">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      {description && (
-        <p className="text-sm text-slate-500 mb-4">{description}</p>
-      )}
-      <div className="flex flex-col gap-4 mt-2">
-        {options.map((opt) => (
-          <label
-            key={opt.v}
-            className="flex items-center gap-3 cursor-pointer group w-fit"
-          >
-            <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
-              <input
-                type="radio"
-                name={name}
-                value={opt.v}
-                checked={value === opt.v}
-                onChange={() => onChange(opt.v)}
-                className="appearance-none w-5 h-5 border-2 border-slate-400 rounded-full checked:border-indigo-600 transition-colors cursor-pointer group-hover:border-indigo-400"
-              />
-              {value === opt.v && (
-                <div className="absolute w-2.5 h-2.5 bg-indigo-600 rounded-full pointer-events-none"></div>
-              )}
-            </div>
-            <span className="text-slate-700 font-normal leading-none">
-              {opt.l}
-            </span>
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const Recommendations = () => {
+const SelectField = ({ label, desc, value, onChange, options, placeholder }) => {
   const { t } = useTranslation();
+  return (
+    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-4">
+      <label className="block text-base font-medium text-slate-800 mb-2">
+        {label} <span className="text-red-500">*</span>
+      </label>
+      {desc && <p className="text-sm text-slate-500 mb-4">{desc}</p>}
+      <div className="relative sm:w-1/2">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full py-2.5 pr-8 border-b border-slate-300 focus:border-indigo-600 outline-none text-slate-800 transition-colors bg-transparent appearance-none cursor-pointer"
+        >
+          <option value="">{placeholder || "Pilih"}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {t(opt.labelKey) || opt.value}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none text-slate-400">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RadioField = ({ label, desc, name, value, onChange, options }) => (
+  <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-4">
+    <label className="block text-base font-medium text-slate-800 mb-2">
+      {label} <span className="text-red-500">*</span>
+    </label>
+    {desc && <p className="text-sm text-slate-500 mb-4">{desc}</p>}
+    <div className="flex flex-wrap gap-6 mt-2">
+      {options.map((opt) => (
+        <label
+          key={opt.value}
+          className="flex items-center gap-3 cursor-pointer group"
+        >
+          <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
+            <input
+              type="radio"
+              name={name}
+              value={opt.value}
+              checked={value === opt.value}
+              onChange={() => onChange(opt.value)}
+              className="appearance-none w-5 h-5 border-2 border-slate-400 rounded-full checked:border-indigo-600 transition-colors cursor-pointer group-hover:border-indigo-400"
+            />
+            {value === opt.value && (
+              <div className="absolute w-2.5 h-2.5 bg-indigo-600 rounded-full pointer-events-none" />
+            )}
+          </div>
+          <span className="text-slate-700 font-normal leading-none text-sm">
+            {opt.label}
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+);
+
+const SliderField = ({ label, desc, value, onChange, min, max, marks }) => (
+  <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-4">
+    <label className="block text-base font-medium text-slate-800 mb-2">
+      {label} <span className="text-red-500">*</span>
+    </label>
+    {desc && <p className="text-sm text-slate-500 mb-4">{desc}</p>}
+    <div className="sm:w-2/3">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-slate-400">{min}</span>
+        <span className="text-lg font-bold text-indigo-600">{value}</span>
+        <span className="text-xs text-slate-400">{max}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-indigo-600"
+      />
+      {marks && (
+        <div className="flex justify-between mt-1">
+          {marks.map((m) => (
+            <span key={m} className="text-[10px] text-slate-400">{m}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+/* ─── Main Component ─── */
+const Recommendations = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const [perintisPhase, setPerintisPhase] = useState(2);
+  const lang = i18n.language?.toLowerCase() || "id";
 
-  const [wizardData, setWizardData] = useState({
-    initial_capital: "",
-    tools_materials_percentage: "",
-    marketing_percentage: "",
-    roi_target_months: "",
-    business_sector: "",
-    strategic_location: "",
-    target_market: "",
-    last_education: "",
-    technical_expertise: "",
-    has_business_experience: "",
-    age: "",
-    business_plan: "",
+  const [phase, setPhase] = useState(2);
+  const [formData, setFormData] = useState({
+    usia: "",
+    pendidikan: "",
+    jenis_kelamin: "",
+    pengalaman_orang_tua: "",
+    modal_awal: "",
+    pencatatan_keuangan: "",
+    rencana_bisnis: "",
+    kemitraan: "",
+    pengalaman_industri: "",
+    upaya_pemasaran: 5,
+    penggunaan_internet: "",
+    konsultasi_profesional: 4,
   });
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
-  const [aiResults, setAiResults] = useState(null);
-  const [isUpgrading, setIsUpgrading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const updateField = (key, val) => {
+    setFormData((p) => ({ ...p, [key]: val }));
+    if (error) setError("");
+  };
 
-  const handleWizardInput = (key, val) => {
-    setWizardData((p) => ({ ...p, [key]: val }));
-    if (errorMsg) setErrorMsg("");
+  const isFormValid = () => {
+    const { usia, pendidikan, jenis_kelamin, pengalaman_orang_tua, modal_awal,
+      pencatatan_keuangan, rencana_bisnis, kemitraan, pengalaman_industri,
+      upaya_pemasaran, penggunaan_internet, konsultasi_profesional } = formData;
+    return (
+      usia !== "" && Number(usia) > 0 &&
+      pendidikan !== "" &&
+      jenis_kelamin !== "" &&
+      pengalaman_orang_tua !== "" &&
+      modal_awal !== "" &&
+      pencatatan_keuangan !== "" &&
+      rencana_bisnis !== "" &&
+      kemitraan !== "" &&
+      pengalaman_industri !== "" &&
+      upaya_pemasaran >= 1 &&
+      penggunaan_internet !== "" &&
+      konsultasi_profesional >= 1
+    );
+  };
+
+  const encodePayload = () => {
+    const educationMap = {
+      "SD": 1, "SMP": 2, "SMA/SMK": 3, "Diploma": 4, "Sarjana": 5,
+    };
+    const b = (val) => (val === "Ya" || val === "Pernah" || val === "Memadai" || val === "Baik" || val === "Ada" ? 1 : 0);
+
+    return {
+      Age: Number(formData.usia),
+      Education: educationMap[formData.pendidikan] || 3,
+      Initial_Capital: b(formData.modal_awal),
+      Financial_Record_Keeping: b(formData.pencatatan_keuangan),
+      Internet_Usage: b(formData.penggunaan_internet),
+      Business_Plan: b(formData.rencana_bisnis),
+      Marketing_Effort: Number(formData.upaya_pemasaran),
+      Partnership: b(formData.kemitraan),
+      Parent_Business_Experience: b(formData.pengalaman_orang_tua),
+      Industry_Experience: Number(formData.pengalaman_industri) || 0,
+      Owner_Gender: formData.jenis_kelamin === "Laki-laki" ? 1 : 0,
+      Professional_Advice: Number(formData.konsultasi_profesional) || 1,
+    };
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const {
-      initial_capital,
-      tools_materials_percentage,
-      marketing_percentage,
-      roi_target_months,
-      business_sector,
-      strategic_location,
-      target_market,
-      last_education,
-      technical_expertise,
-      has_business_experience,
-      age,
-      business_plan,
-    } = wizardData;
-
-    if (
-      !initial_capital ||
-      !tools_materials_percentage ||
-      !marketing_percentage ||
-      !roi_target_months ||
-      !business_sector ||
-      !strategic_location ||
-      !target_market ||
-      !last_education ||
-      !technical_expertise ||
-      !has_business_experience ||
-      !age ||
-      !business_plan
-    ) {
-      setErrorMsg(
-        t("recommendations.fill_all_warning") || "Harap isi semua kolom wajib.",
-      );
+    if (!isFormValid()) {
+      setError(t("recommendations.fill_all_warning"));
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-
-    setPerintisPhase(3);
+    setPhase(3);
+    setError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     try {
-      const payload = {
-        age: Number(age),
-        initial_capital: Number(initial_capital),
-        tools_materials_percentage: Number(tools_materials_percentage),
-        marketing_percentage: Number(marketing_percentage),
-        roi_target_months: Number(roi_target_months),
-        business_sector,
-        strategic_location,
-        target_market,
-        last_education,
-        technical_expertise,
-        has_business_experience: has_business_experience === "true",
-        business_plan,
-      };
-
+      const payload = encodePayload();
       const res = await api.post("/api/feasibility-tests", payload);
-      const resultData = res.data?.data || res.data;
-      setAiResults(resultData);
-      setPerintisPhase(4);
+
+      // Unwrap response at multiple possible nesting levels
+      const raw = res.data;
+      let data = raw?.data?.data || raw?.data || raw;
+      // If still wrapped, try common container keys
+      if (data && typeof data === "object" && !data.prediction) {
+        for (const k of ["result", "response", "feasibility", "ai_prediction"]) {
+          if (data[k] && typeof data[k] === "object") {
+            data = data[k];
+            break;
+          }
+        }
+      }
+      // If data has the expected fields inside a nested block, flatten it
+      if (data && data.prediction !== undefined && data.probability_success !== undefined) {
+        // Already correct shape
+      } else if (data && data.prediction === undefined && data.data) {
+        data = data.data;
+      }
+
+      setResult(data);
+      console.log("[Feasibility] Raw response:", raw);
+      console.log("[Feasibility] Saved data:", raw?.saved_data);
+      console.log("[Feasibility] ML input used:", raw?.ai_input_used);
+      console.log("[Feasibility] Data extracted:", data);
+      setPhase(4);
     } catch (err) {
-      console.error(err);
-      setErrorMsg(
-        err.response?.data?.message ||
-          "Gagal menghubungi server AI. Silakan coba lagi nanti.",
+      console.error("[Feasibility Error]", err.response?.data || err.message);
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || "";
+      setError(
+        serverMsg ||
+          (lang === "id"
+            ? "Gagal menghubungi server AI. Silakan coba lagi nanti."
+            : "Failed to reach AI server. Please try again later.")
       );
-      setPerintisPhase(2);
+      setPhase(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  /* ───── FASE 2: FORMULIR ───── */
-  if (perintisPhase === 2) {
+  const resetForm = () => {
+    setFormData({
+      usia: "", pendidikan: "", jenis_kelamin: "", pengalaman_orang_tua: "",
+      modal_awal: "", pencatatan_keuangan: "", rencana_bisnis: "", kemitraan: "",
+      pengalaman_industri: "", upaya_pemasaran: 5, penggunaan_internet: "",
+      konsultasi_profesional: 4,
+    });
+    setResult(null);
+    setError("");
+    setPhase(2);
+  };
+
+  const sectionHeader = (title, color) => (
+    <div className={`${color} text-white p-4 rounded-t-xl shadow-sm mt-8`}>
+      <h2 className="text-lg font-medium">{title}</h2>
+    </div>
+  );
+
+  /* ─── FORM ─── */
+  if (phase === 2) {
     return (
       <div className="max-w-3xl mx-auto pb-20 animate-fade-in mt-4 font-sans bg-slate-50/50 p-2 sm:p-0 min-h-screen">
         <div className="mb-6">
@@ -368,179 +326,151 @@ const Recommendations = () => {
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors"
           >
-            <FiArrowLeft /> {t("recommendations.back") || "Kembali"}
+            <FiArrowLeft /> {t("recommendations.back")}
           </button>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-4">
-          <div className="h-3 bg-indigo-600 w-full"></div>
+          <div className="h-3 bg-gradient-to-r from-indigo-600 to-purple-600 w-full" />
           <div className="p-8">
-            <h1 className="text-3xl font-normal text-slate-800 mb-2">
-              {t("recommendations.questionnaire_title") ||
-                "Uji Kelayakan Bisnis"}
+            <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">
+              {t("recommendations.questionnaire_title")}
             </h1>
             <p className="text-slate-600">
-              {t("recommendations.questionnaire_desc") ||
-                "Jawab pertanyaan berikut agar AI Arta dapat memprediksi kelayakan bisnis Anda secara akurat."}
+              {t("recommendations.questionnaire_desc")}
             </p>
             <hr className="my-6 border-slate-200" />
-            <p className="text-sm text-red-500">
-              * Menunjukkan pertanyaan yang wajib diisi
-            </p>
+            <p className="text-sm text-red-500">* {lang === "id" ? "Menunjukkan pertanyaan yang wajib diisi" : "Indicates required questions"}</p>
           </div>
         </div>
 
-        {errorMsg && (
+        {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-4 flex items-center gap-2 text-sm shadow-sm">
-            <FiInfo className="shrink-0" /> {errorMsg}
+            <FiAlertTriangle className="shrink-0" /> {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="bg-indigo-600 text-white p-4 rounded-t-xl shadow-sm mt-8">
-            <h2 className="text-lg font-medium">
-              A. Rencana Modal & Finansial
-            </h2>
-          </div>
-          <div className="bg-white p-1 rounded-b-xl border border-t-0 border-slate-200 shadow-sm mb-4"></div>
+          {/* Section A */}
+          {sectionHeader(t("recommendations.section_a"), "bg-gradient-to-r from-indigo-600 to-indigo-500")}
 
-          <CurrencyInput
-            label="Berapa total modal awal yang Anda persiapkan?"
-            value={wizardData.initial_capital}
-            onChange={(v) => handleWizardInput("initial_capital", v)}
-            description="Masukkan perkiraan total dana awal untuk merintis bisnis."
+          <NumberField
+            label={t("recommendations.q1_label")}
+            desc={t("recommendations.q1_desc")}
+            value={formData.usia}
+            onChange={(v) => updateField("usia", v)}
+            min={15} max={100} unit={lang === "id" ? "Tahun" : "Years"}
           />
-          <NumberInput
-            label="Berapa persen alokasi modal untuk alat & bahan baku?"
-            value={wizardData.tools_materials_percentage}
-            onChange={(v) => handleWizardInput("tools_materials_percentage", v)}
-            min={0}
-            max={100}
-            unit="%"
-            description="Persentase dari modal awal (0-100)."
+          <SelectField
+            label={t("recommendations.q2_label")}
+            desc={t("recommendations.q2_desc")}
+            value={formData.pendidikan}
+            onChange={(v) => updateField("pendidikan", v)}
+            options={EDUCATION_OPTIONS}
+            placeholder={t("recommendations.q2_placeholder")}
           />
-          <NumberInput
-            label="Berapa persen alokasi modal untuk promosi/marketing?"
-            value={wizardData.marketing_percentage}
-            onChange={(v) => handleWizardInput("marketing_percentage", v)}
-            min={0}
-            max={100}
-            unit="%"
-            description="Persentase dari modal awal (0-100)."
+          <RadioField
+            label={t("recommendations.q3_label")}
+            desc={t("recommendations.q3_desc")}
+            name="gender"
+            value={formData.jenis_kelamin}
+            onChange={(v) => updateField("jenis_kelamin", v)}
+            options={RADIO_GENDER(t)}
           />
-          <NumberInput
-            label="Dalam berapa bulan target balik modal (ROI) Anda?"
-            value={wizardData.roi_target_months}
-            onChange={(v) => handleWizardInput("roi_target_months", v)}
-            min={1}
-            max={120}
-            unit="Bulan"
-            description="Contoh: 12 untuk target satu tahun balik modal."
+          <RadioField
+            label={t("recommendations.q4_label")}
+            desc={t("recommendations.q4_desc")}
+            name="parent_exp"
+            value={formData.pengalaman_orang_tua}
+            onChange={(v) => updateField("pengalaman_orang_tua", v)}
+            options={RADIO_PERNAH(t)}
           />
 
-          <div className="bg-emerald-600 text-white p-4 rounded-t-xl shadow-sm mt-8">
-            <h2 className="text-lg font-medium">B. Detail & Konsep Bisnis</h2>
-          </div>
-          <div className="bg-white p-1 rounded-b-xl border border-t-0 border-slate-200 shadow-sm mb-4"></div>
+          {/* Section B */}
+          {sectionHeader(t("recommendations.section_b"), "bg-gradient-to-r from-emerald-600 to-emerald-500")}
 
-          <ComboboxField
-            label="Sektor / Jenis Bisnis"
-            value={wizardData.business_sector}
-            onChange={(v) => handleWizardInput("business_sector", v)}
-            options={SEKTOR_OPTIONS}
-            placeholder="Pilih sektor bisnis"
+          <RadioField
+            label={t("recommendations.q5_label")}
+            desc={t("recommendations.q5_desc")}
+            name="modal"
+            value={formData.modal_awal}
+            onChange={(v) => updateField("modal_awal", v)}
+            options={RADIO_MEMADAI(t)}
           />
-          <ComboboxField
-            label="Lokasi Strategis Bisnis Anda"
-            value={wizardData.strategic_location}
-            onChange={(v) => handleWizardInput("strategic_location", v)}
-            options={LOKASI_OPTIONS}
-            placeholder="Pilih lokasi target"
+          <RadioField
+            label={t("recommendations.q6_label")}
+            desc={t("recommendations.q6_desc")}
+            name="catatan"
+            value={formData.pencatatan_keuangan}
+            onChange={(v) => updateField("pencatatan_keuangan", v)}
+            options={RADIO_BAIK(t)}
           />
-          <ComboboxField
-            label="Target Pasar / Konsumen Utama"
-            value={wizardData.target_market}
-            onChange={(v) => handleWizardInput("target_market", v)}
-            options={TARGET_PASAR_OPTIONS}
-            placeholder="Pilih target pasar"
+          <RadioField
+            label={t("recommendations.q7_label")}
+            desc={t("recommendations.q7_desc")}
+            name="rencana"
+            value={formData.rencana_bisnis}
+            onChange={(v) => updateField("rencana_bisnis", v)}
+            options={RADIO_ADA(t)}
           />
-
-          <TextAreaInput
-            label="Jelaskan secara singkat rencana bisnis Anda (Business Plan)"
-            value={wizardData.business_plan}
-            onChange={(v) => handleWizardInput("business_plan", v)}
-            placeholder="Contoh: Saya ingin membuka kedai kopi berkonsep minimalis di area kampus dengan target mahasiswa..."
-            description="Penjelasan ini akan membantu AI memahami konteks dan keunikan ide bisnis Anda."
-          />
-
-          <div className="bg-amber-500 text-white p-4 rounded-t-xl shadow-sm mt-8">
-            <h2 className="text-lg font-medium">C. Latar Belakang Anda</h2>
-          </div>
-          <div className="bg-white p-1 rounded-b-xl border border-t-0 border-slate-200 shadow-sm mb-4"></div>
-
-          <NumberInput
-            label="Berapa usia Anda saat ini?"
-            value={wizardData.age}
-            onChange={(v) => handleWizardInput("age", v)}
-            min={15}
-            max={100}
-            unit="Tahun"
-            description="Usia digunakan AI untuk memetakan relevansi demografi pengusaha."
-          />
-          <ComboboxField
-            label="Pendidikan Terakhir"
-            value={wizardData.last_education}
-            onChange={(v) => handleWizardInput("last_education", v)}
-            options={PENDIDIKAN_OPTIONS}
-            placeholder="Pilih pendidikan terakhir"
-          />
-          <ComboboxField
-            label="Keahlian Khusus yang Dimiliki"
-            value={wizardData.technical_expertise}
-            onChange={(v) => handleWizardInput("technical_expertise", v)}
-            options={KEAHLIAN_OPTIONS}
-            placeholder="Pilih keahlian khusus utama"
-          />
-          <RadioGroup
-            label="Apakah Anda pernah menjalankan bisnis sebelumnya?"
-            name="has_business_experience"
-            value={wizardData.has_business_experience}
-            onChange={(v) => handleWizardInput("has_business_experience", v)}
-            options={[
-              { v: "true", l: "Ya, Pernah" },
-              { v: "false", l: "Belum Pernah (Pertama Kali)" },
-            ]}
+          <RadioField
+            label={t("recommendations.q8_label")}
+            desc={t("recommendations.q8_desc")}
+            name="kemitraan"
+            value={formData.kemitraan}
+            onChange={(v) => updateField("kemitraan", v)}
+            options={RADIO_YA_TIDAK(t)}
           />
 
-          <div className="flex justify-between items-center pt-6 pb-10">
+          {/* Section C */}
+          {sectionHeader(t("recommendations.section_c"), "bg-gradient-to-r from-amber-500 to-orange-500")}
+
+          <NumberField
+            label={t("recommendations.q9_label")}
+            desc={t("recommendations.q9_desc")}
+            value={formData.pengalaman_industri}
+            onChange={(v) => updateField("pengalaman_industri", v)}
+            min={0} max={50} unit={lang === "id" ? "Tahun" : "Years"}
+          />
+          <SliderField
+            label={t("recommendations.q10_label")}
+            desc={t("recommendations.q10_desc")}
+            value={formData.upaya_pemasaran}
+            onChange={(v) => updateField("upaya_pemasaran", v)}
+            min={1} max={10}
+            marks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+          />
+          <RadioField
+            label={t("recommendations.q11_label")}
+            desc={t("recommendations.q11_desc")}
+            name="internet"
+            value={formData.penggunaan_internet}
+            onChange={(v) => updateField("penggunaan_internet", v)}
+            options={RADIO_YA_TIDAK(t)}
+          />
+          <SliderField
+            label={t("recommendations.q12_label")}
+            desc={t("recommendations.q12_desc")}
+            value={formData.konsultasi_profesional}
+            onChange={(v) => updateField("konsultasi_profesional", v)}
+            min={1} max={7}
+            marks={[1, 2, 3, 4, 5, 6, 7]}
+          />
+
+          {/* Submit */}
+          <div className="flex items-center gap-4 pt-6 pb-10">
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2.5 rounded-md transition-colors shadow-sm"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
             >
-              Analisis Kelayakan Bisnis
+              {t("recommendations.predict_btn")}
             </button>
             <button
               type="button"
-              onClick={() => {
-                setWizardData({
-                  initial_capital: "",
-                  tools_materials_percentage: "",
-                  marketing_percentage: "",
-                  roi_target_months: "",
-                  business_sector: "",
-                  strategic_location: "",
-                  target_market: "",
-                  last_education: "",
-                  technical_expertise: "",
-                  has_business_experience: "",
-                  age: "",
-                  business_plan: "",
-                });
-                setErrorMsg("");
-              }}
-              className="text-slate-500 text-sm hover:text-slate-800 font-medium px-4 py-2 rounded hover:bg-slate-100 transition-colors"
+              onClick={resetForm}
+              className="text-slate-500 text-sm hover:text-slate-800 font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors"
             >
-              Kosongkan formulir
+              {lang === "id" ? "Kosongkan" : "Clear"}
             </button>
           </div>
         </form>
@@ -548,341 +478,472 @@ const Recommendations = () => {
     );
   }
 
-  /* ───── FASE 3: LOADING ───── */
-  if (perintisPhase === 3) {
+  /* ─── LOADING ─── */
+  if (phase === 3) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center animate-fade-in px-4">
         <div className="relative flex items-center justify-center mb-8">
-          {/* Professional Loading Ring */}
-          <div className="w-20 h-20 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+          <div className="w-20 h-20 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <FiTrendingUp size={28} className="text-indigo-600 animate-pulse" />
+            <FiBarChart2 size={28} className="text-indigo-600 animate-pulse" />
           </div>
         </div>
         <h2 className="text-2xl font-bold text-slate-800 mb-3 text-center tracking-tight">
-          Menganalisis Kelayakan Bisnis...
+          {t("recommendations.analyzing_title")}
         </h2>
         <p className="text-slate-500 text-center max-w-sm text-base leading-relaxed">
-          Model analisis kami sedang mengolah data Anda untuk memberikan
-          prediksi yang paling akurat.
+          {t("recommendations.analyzing_desc")}
         </p>
       </div>
     );
   }
 
-  /* ───── FASE 4: HASIL (REFACTOR TOTAL) ───── */
-  if (perintisPhase === 4 && aiResults) {
-    const { ai_prediction = {}, saved_data = {} } = aiResults;
+  /* ─── RESULTS ─── */
+  if (phase === 4 && result) {
+    const {
+      prediction,
+      label,
+      probability_success = 0,
+      probability_fail = 0,
+      confidence = "Rendah",
+      shap,
+      ai_analysis,
+    } = result;
 
-    // Fallback parser aman agar tidak menampilkan 0.0 jika AI offline
-    const feasibility_score =
-      ai_prediction.feasibility_score ?? ai_prediction.default_score ?? 50;
-    const status =
-      ai_prediction.status ??
-      (feasibility_score >= 60 ? "Layak" : "Butuh Penyesuaian");
-    const recommendation =
-      ai_prediction.recommendation ??
-      ai_prediction.message ??
-      "Analisis selesai diproses.";
+    const pct = probability_success * 100;
+    const failPct = probability_fail * 100;
+    const isHigh = pct >= 70;
+    const isMedium = pct >= 40;
+    const gaugeColor = isHigh ? "#10b981" : isMedium ? "#f59e0b" : "#ef4444";
+    const gaugeBg = isHigh ? "bg-emerald-500" : isMedium ? "bg-amber-500" : "bg-red-500";
+    const gaugeText = isHigh ? "text-emerald-600" : isMedium ? "text-amber-600" : "text-red-600";
+    const gaugeRing = isHigh ? "ring-emerald-200" : isMedium ? "ring-amber-200" : "ring-red-200";
+    const isConfHigh = confidence === "Tinggi" || confidence === "High";
+    const confBadge = isConfHigh
+      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+      : "bg-amber-100 text-amber-700 border-amber-200";
 
-    // Pemetaan Faktor Positif & Negatif dari respons Model AI
-    const positiveFactors = ai_prediction.positive_factors || [
-      {
-        feature: "Sektor Usaha",
-        detail: saved_data.business_sector,
-        impact: "Tinggi",
-      },
-      {
-        feature: "Alokasi Modal",
-        detail: `Bahan Baku ${saved_data.tools_materials_percentage}%`,
-        impact: "Optimal",
-      },
-      {
-        feature: "Target Pasar",
-        detail: saved_data.target_market,
-        impact: "Strategis",
-      },
-    ];
+    const topPositive = shap?.top_positive_factors || [];
+    const topNegative = shap?.top_negative_factors || [];
+    const allFactors = shap?.all_factors || [];
+    const analysis = ai_analysis || {};
+    const summary = analysis.summary || "";
+    const strengths = analysis.strengths || [];
+    const weaknesses = analysis.weaknesses || [];
+    const recommendations = analysis.recommendations || [];
+    const encouragement = analysis.encouragement || "";
 
-    const negativeFactors = ai_prediction.negative_factors || [
-      {
-        feature: "Pengalaman Bisnis",
-        detail: saved_data.has_business_experience ? "Pernah" : "Pertama Kali",
-        impact: "Risiko Sedang",
-      },
-      {
-        feature: "Target Garis ROI",
-        detail: `${saved_data.roi_target_months} Bulan`,
-        impact: "Agresif",
-      },
-    ];
-
-    const isLayak =
-      typeof status === "string" && status.toLowerCase() === "layak";
+    const statusLabel = label
+      ? label
+      : isHigh
+        ? (lang === "id" ? "LAYAK" : "FEASIBLE")
+        : (lang === "id" ? "BUTUH PENYESUAIAN" : "NEEDS ADJUSTMENT");
 
     return (
-      <div className="max-w-6xl mx-auto pb-20 animate-fade-in mt-4 font-sans px-4">
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8 pb-6 border-b border-slate-100">
+      <div className="max-w-6xl mx-auto pb-24 animate-fade-in mt-6 font-sans px-4">
+        {/* ── HEADER ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-100">
           <div>
-            <p className="text-xs font-bold text-indigo-600 tracking-widest uppercase mb-1">
-              Business Audit Results
+            <p className="text-xs font-semibold text-indigo-600 tracking-[0.2em] uppercase mb-1.5">
+              {t("recommendations.ai_analysis_result")}
             </p>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Laporan Analisis Kelayakan Bisnis
+              {t("recommendations.analysis_complete")}
             </h1>
             <p className="text-sm text-slate-500 mt-1">
-              Hasil evaluasi komprehensif berdasarkan parameter profil,
-              finansial, dan potensi pasar rintisan Anda.
+              {t("recommendations.recommendation_desc")}
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <button
-              onClick={() => {
-                setPerintisPhase(2);
-                setAiResults(null);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all bg-white shadow-sm"
+              onClick={resetForm}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all bg-white shadow-sm"
             >
-              <FiRefreshCcw size={16} /> Hitung Ulang
+              <FiRefreshCcw size={15} /> {t("recommendations.recalculate")}
             </button>
             <button
               onClick={() => window.print()}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-md"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all shadow-sm"
             >
-              <FiDownload size={16} /> Simpan Laporan
+              <FiDownload size={15} /> {t("recommendations.save_pdf")}
             </button>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-8">
-          {/* KOLOM KIRI: Ringkasan Skor, Strategist's Note & Action Path */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* SCORE CARD */}
-            <div
-              className={`rounded-3xl border overflow-hidden p-8 shadow-sm transition-all flex flex-col sm:flex-row items-center justify-between gap-8 ${isLayak ? "bg-emerald-50/40 border-emerald-100" : "bg-amber-50/40 border-amber-100"}`}
-            >
-              <div className="flex-1 text-center sm:text-left">
-                <div className="flex items-center justify-center sm:justify-start gap-2 mb-3">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isLayak ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
-                  >
-                    {isLayak ? <FiCheckCircle /> : <FiAlertTriangle />} Prediksi
-                    Akhir: {status}
-                  </span>
-                </div>
-                <h2 className="text-3xl font-extrabold text-slate-900 mb-1">
-                  {saved_data.business_sector || "Sektor Rintisan"}
-                </h2>
-                <p className="text-sm font-semibold text-slate-500 flex items-center justify-center sm:justify-start gap-1.5 mt-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>{" "}
-                  {saved_data.strategic_location}
-                </p>
-              </div>
-
-              <div
-                className={`w-32 h-32 rounded-2xl flex flex-col items-center justify-center p-4 shrink-0 shadow-sm border ${isLayak ? "bg-white border-emerald-200 text-emerald-600" : "bg-white border-amber-200 text-amber-600"}`}
-              >
-                <div className="text-4xl font-extrabold leading-none">
-                  {Number(feasibility_score).toFixed(0)}
-                  <span className="text-lg font-bold">%</span>
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 text-center">
-                  Skor Kelayakan
-                </div>
+        {/* ── SCORE CARD ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 md:p-10 shadow-xl mb-10"
+        >
+          <div className="flex flex-col lg:flex-row items-center gap-10">
+            {/* Gauge */}
+            <div className="relative shrink-0">
+              <svg width="160" height="160" viewBox="0 0 160 160" className="drop-shadow-lg">
+                <circle cx="80" cy="80" r="68" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                <circle
+                  cx="80" cy="80" r="68"
+                  fill="none"
+                  stroke={gaugeColor}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 68}
+                  strokeDashoffset={2 * Math.PI * 68 * (1 - pct / 100)}
+                  className="transition-all duration-1000 ease-out"
+                  transform="rotate(-90 80 80)"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className={`text-4xl font-extrabold tracking-tight`} style={{ color: gaugeColor }}>
+                  {pct.toFixed(1)}%
+                </span>
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
+                  {t("recommendations.eligibility")}
+                </span>
               </div>
             </div>
 
-            {/* STRATEGIST'S NOTE / EXPERT INSIGHT BOX */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <FiZap className="text-indigo-500" /> Catatan Strategis AI
-              </h3>
-              <div className="bg-indigo-50/30 border border-indigo-100 p-6 rounded-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100/20 rounded-full blur-2xl pointer-events-none"></div>
-                <p className="text-slate-700 text-base leading-relaxed font-medium relative z-10">
-                  {recommendation}
-                </p>
-              </div>
-            </div>
-
-            {/* ACTION FLOW: NEXT STEPS */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
-              <div className="flex items-start gap-4 pb-6 border-b border-slate-100">
-                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0">
-                  <FiInfo className="text-indigo-600" size={20} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-sm">
-                    Interpretasi Matriks Audit
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Evaluasi ini disusun menggunakan metodologi pemetaan
-                    kontribusi fitur kuantitatif. Indikator kekuatan
-                    meningkatkan keyakinan kelayakan bisnis, sementara faktor
-                    risiko menunjukkan aspek operasional atau modal yang
-                    memerlukan manajemen mitigasi tambahan.
-                  </p>
-                </div>
+            {/* Info */}
+            <div className="flex-1 text-center lg:text-left space-y-4">
+              <div className="flex flex-wrap items-center gap-3 justify-center lg:justify-start">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${confBadge}`}>
+                  <FiZap size={13} />
+                  {isConfHigh
+                    ? (lang === "id" ? "Keyakinan Tinggi" : "High Confidence")
+                    : (lang === "id" ? "Keyakinan Rendah" : "Low Confidence")}
+                </span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${isHigh ? "bg-emerald-900/40 text-emerald-300 border-emerald-700" : "bg-amber-900/40 text-amber-300 border-amber-700"}`}>
+                  {isHigh ? <FiCheckCircle size={13} /> : <FiAlertTriangle size={13} />}
+                  {statusLabel}
+                </span>
               </div>
 
               <div>
-                {isUpgrading ? (
-                  <form
-                    className="flex flex-col gap-4 animate-fade-in"
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const namaUsaha = e.target.nama_usaha.value;
-                      if (!namaUsaha) return;
-
-                      try {
-                        const res = await api.post("/api/profile/upgrade", {
-                          nama_usaha: namaUsaha,
-                          tipe_usaha: saved_data.business_sector || "Umum",
-                          lama_usaha: "< 1 Tahun",
-                        });
-
-                        if (res.data?.data?.profile) {
-                          localStorage.setItem(
-                            "profile",
-                            JSON.stringify(res.data.data.profile),
-                          );
-                        }
-                        window.location.href = "/dashboard";
-                      } catch (err) {
-                        console.error(err);
-                        alert(
-                          "Gagal membuat rencana bisnis. " +
-                            (err.response?.data?.message || err.message),
-                        );
-                      }
-                    }}
-                  >
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                        Nama Usaha Baru Anda{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="nama_usaha"
-                        required
-                        placeholder="Contoh: Toko Berkah, Jasa Fotografi..."
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-sm font-semibold"
-                      />
-                    </div>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsUpgrading(false)}
-                        className="px-5 py-3 rounded-xl text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors"
-                      >
-                        Batal
-                      </button>
-                      <button
-                        type="submit"
-                        className="flex-1 px-5 py-3 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
-                      >
-                        Simpan & Buka Dashboard UMKM
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="text-center sm:text-left">
-                      <p className="text-sm font-bold text-slate-800">
-                        Lanjutkan ke Implementasi
-                      </p>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Konversi analisis kelayakan ini menjadi entitas bisnis
-                        aktif di dashboard Anda.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setIsUpgrading(true)}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-md shadow-indigo-600/10"
-                    >
-                      Lanjut Buat Rencana Bisnis <FiArrowRight />
-                    </button>
+                <p className="text-2xl font-bold text-white">
+                  {lang === "id" ? "Probabilitas Keberhasilan" : "Success Probability"}
+                </p>
+                <div className="flex items-center gap-6 mt-3 justify-center lg:justify-start">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span className="text-sm text-slate-300">
+                      {lang === "id" ? "Berhasil" : "Success"} <span className="font-semibold text-white">{pct.toFixed(1)}%</span>
+                    </span>
                   </div>
-                )}
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-400" />
+                    <span className="text-sm text-slate-300">
+                      {lang === "id" ? "Gagal" : "Fail"} <span className="font-semibold text-white">{failPct.toFixed(1)}%</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mini bar */}
+              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden mt-2 max-w-md mx-auto lg:mx-0">
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${gaugeColor}, ${gaugeColor}dd)` }}
+                />
               </div>
             </div>
           </div>
+        </motion.div>
 
-          {/* KOLOM KANAN: Visualisasi Faktor Positif vs Negatif Terbesar (Audit Style) */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* PANEL POSITIF */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <FiCheckCircle className="text-emerald-500" /> Kekuatan Utama
-                  Bisnis
-                </h3>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Kontribusi Positif
-                </span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {positiveFactors.map((item, i) => (
-                  <div
-                    key={i}
-                    className="py-4 first:pt-0 last:pb-0 flex items-start justify-between gap-4"
-                  >
-                    <div>
-                      <p className="font-bold text-sm text-slate-800">
-                        {item.feature}
-                      </p>
-                      <p className="text-xs text-slate-500 font-medium mt-1">
-                        {item.detail}
-                      </p>
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 shrink-0">
-                      {item.impact}
-                    </span>
+        {/* ── CONTENT GRID ── */}
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* LEFT: Main Analysis */}
+          <div className="lg:col-span-3 space-y-8">
+
+            {/* AI Summary */}
+            {summary && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-white rounded-2xl border border-slate-200 p-7 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
+                    <FiZap size={17} className="text-white" />
                   </div>
-                ))}
-              </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">
+                      {lang === "id" ? "Ringkasan Analisis AI" : "AI Analysis Summary"}
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      {lang === "id" ? "Berdasarkan model prediksi Artha" : "Based on Artha's prediction model"}
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100/60 p-5 rounded-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-100/20 rounded-full blur-3xl pointer-events-none" />
+                  <p className="text-slate-700 text-sm leading-relaxed font-medium relative z-10">
+                    {summary}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Strengths & Weaknesses Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {strengths.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
+                >
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <FiCheckCircle size={16} className="text-emerald-600" />
+                    </div>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      {lang === "id" ? "Kekuatan" : "Strengths"}
+                    </h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {strengths.map((s, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-emerald-700">{i + 1}</span>
+                        </span>
+                        <span className="text-sm text-slate-600 leading-relaxed">{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+
+              {weaknesses.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.25 }}
+                  className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
+                >
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                      <FiAlertTriangle size={16} className="text-red-500" />
+                    </div>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      {lang === "id" ? "Kelemahan" : "Weaknesses"}
+                    </h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {weaknesses.map((w, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <span className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-red-600">{i + 1}</span>
+                        </span>
+                        <span className="text-sm text-slate-600 leading-relaxed">{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
             </div>
 
-            {/* PANEL NEGATIF */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <FiXCircle className="text-amber-500" /> Faktor Risiko &
-                  Tantangan
-                </h3>
-                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Butuh Perhatian
-                </span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {negativeFactors.map((item, i) => (
-                  <div
-                    key={i}
-                    className="py-4 first:pt-0 last:pb-0 flex items-start justify-between gap-4"
-                  >
-                    <div>
-                      <p className="font-bold text-sm text-slate-800">
-                        {item.feature}
-                      </p>
-                      <p className="text-xs text-slate-500 font-medium mt-1">
-                        {item.detail}
-                      </p>
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg border border-amber-100 shrink-0">
-                      {item.impact}
-                    </span>
+            {/* Recommendations */}
+            {recommendations.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-white rounded-2xl border border-slate-200 p-7 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center">
+                    <FiTarget size={17} className="text-indigo-600" />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">
+                      {lang === "id" ? "Rekomendasi Tindakan" : "Action Recommendations"}
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      {lang === "id" ? "Langkah prioritas untuk meningkatkan bisnis" : "Priority steps to improve your business"}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-0">
+                  {recommendations.map((r, i) => (
+                    <div key={i} className={`flex items-start gap-4 py-4 ${i < recommendations.length - 1 ? "border-b border-slate-100" : ""}`}>
+                      <div className="relative flex flex-col items-center">
+                        <span className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs font-bold flex items-center justify-center shadow-sm shrink-0">
+                          {i + 1}
+                        </span>
+                        {i < recommendations.length - 1 && (
+                          <div className="w-0.5 h-full bg-indigo-100 mt-1" />
+                        )}
+                      </div>
+                      <span className="text-sm text-slate-700 leading-relaxed pt-1">{r}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Encouragement */}
+            {encouragement && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.35 }}
+                className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 rounded-2xl p-7 shadow-lg"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl">&ldquo;</span>
+                  <p className="text-white/90 text-base font-medium leading-relaxed italic">
+                    {encouragement}
+                  </p>
+                  <span className="text-2xl self-end">&rdquo;</span>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* RIGHT: SHAP Factors */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* Top Positive */}
+            {topPositive.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <FiTrendingUp size={16} className="text-emerald-600" />
+                    </div>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      {lang === "id" ? "Faktor Positif" : "Positive Factors"}
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider border border-emerald-100">
+                    {lang === "id" ? "Pendorong" : "Drivers"}
+                  </span>
+                </div>
+                <div className="space-y-5">
+                  {topPositive.map((f, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-semibold text-slate-800 truncate">
+                          {f.display_name}
+                        </span>
+                        <span className="text-xs font-bold text-emerald-600 shrink-0 ml-3">
+                          +{f.impact_pct.toFixed(1)}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mb-2 truncate">{f.decoded_value}</p>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-700"
+                          style={{ width: `${Math.min(f.impact_pct, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Top Negative */}
+            {topNegative.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                      <FiTrendingDown size={16} className="text-red-500" />
+                    </div>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      {lang === "id" ? "Faktor Negatif" : "Negative Factors"}
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-2.5 py-1 rounded-full uppercase tracking-wider border border-red-100">
+                    {lang === "id" ? "Penghambat" : "Barriers"}
+                  </span>
+                </div>
+                <div className="space-y-5">
+                  {topNegative.map((f, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-semibold text-slate-800 truncate">
+                          {f.display_name}
+                        </span>
+                        <span className="text-xs font-bold text-red-500 shrink-0 ml-3">
+                          {f.impact_pct.toFixed(1)}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mb-2 truncate">{f.decoded_value}</p>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-red-300 to-red-400 transition-all duration-700"
+                          style={{ width: `${Math.min(f.impact_pct, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* All Factors */}
+            {allFactors.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
+              >
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <FiBarChart2 size={16} className="text-slate-600" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-sm">
+                    {lang === "id" ? "Semua Faktor" : "All Factors"}
+                  </h3>
+                </div>
+                <div className="space-y-1">
+                  {allFactors
+                    .slice()
+                    .sort((a, b) => Math.abs(b.shap_value) - Math.abs(a.shap_value))
+                    .map((f, i) => {
+                      const isPos = f.direction === "positive";
+                      return (
+                        <div key={i} className="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
+                          <div className={`w-1 h-8 rounded-full shrink-0 ${isPos ? "bg-emerald-400" : "bg-red-400"}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium text-slate-700 truncate">
+                                {f.display_name}
+                              </span>
+                              <span className={`text-xs font-bold shrink-0 ml-2 ${isPos ? "text-emerald-600" : "text-red-500"}`}>
+                                {isPos ? "+" : ""}{f.impact_pct.toFixed(1)}%
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-400 truncate mt-0.5">{f.decoded_value}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
     );
   }
+
+  return null;
 };
 
 export default Recommendations;
