@@ -374,7 +374,20 @@ const resources = {
         "growth_potential": "Potensi Pertumbuhan",
         "multi_score": "Skor Multidimensi AI",
         "success_tips": "Tips Sukses dari AI",
-        "hide_detail": "Sembunyikan Detail"
+        "hide_detail": "Sembunyikan Detail",
+        "upgrade_title": "Siap Memulai Usaha?",
+        "upgrade_desc": "Lengkapi data bisnis Anda untuk mengaktifkan dashboard UMKM dan mulai mengelola keuangan usaha secara profesional.",
+        "upgrade_nama_usaha": "Nama Usaha",
+        "upgrade_nama_usaha_placeholder": "Contoh: Warung Berkah",
+        "upgrade_tipe_usaha": "Kategori Usaha",
+        "upgrade_tipe_usaha_placeholder": "Pilih Kategori Usaha",
+        "upgrade_btn": "Mulai Sekarang",
+        "upgrade_loading": "Mengaktifkan...",
+        "upgrade_success": "Selamat! Dashboard UMKM Anda sudah aktif.",
+        "upgrade_error": "Gagal mengaktifkan usaha. Silakan coba lagi.",
+        "disclaimer_title": "Penyangkalan (Disclaimer)",
+        "disclaimer_text": "Laporan AI Artha ini bersifat indikatif dan ditujukan sebagai referensi, bukan jaminan keberhasilan bisnis atau saran keuangan yang mengikat. Segala keputusan akhir berada di tangan Anda.",
+        "pdf_upgrade_text": "Untuk mendaftarkan bisnis Anda dan mengakses dashboard UMKM, kunjungi arta.id/mulai."
       },
       "landing": {
         "nav_fitur": "Fitur",
@@ -931,7 +944,20 @@ const resources = {
         "growth_potential": "Growth Potential",
         "multi_score": "AI Multidimensional Score",
         "success_tips": "Success Tips from AI",
-        "hide_detail": "Hide Details"
+        "hide_detail": "Hide Details",
+        "upgrade_title": "Ready to Start Your Business?",
+        "upgrade_desc": "Complete your business data to activate the MSME dashboard and start managing your business finances professionally.",
+        "upgrade_nama_usaha": "Business Name",
+        "upgrade_nama_usaha_placeholder": "Example: Berkah Store",
+        "upgrade_tipe_usaha": "Business Category",
+        "upgrade_tipe_usaha_placeholder": "Select Business Category",
+        "upgrade_btn": "Start Now",
+        "upgrade_loading": "Activating...",
+        "upgrade_success": "Congratulations! Your MSME dashboard is now active.",
+        "upgrade_error": "Failed to activate business. Please try again.",
+        "disclaimer_title": "Disclaimer",
+        "disclaimer_text": "This Artha AI report is indicative and intended as a reference, not a guarantee of business success or binding financial advice. All final decisions rest with you.",
+        "pdf_upgrade_text": "To register your business and access the MSME dashboard, visit arta.id/mulai."
       },
       "landing": {
         "nav_fitur": "Features",
