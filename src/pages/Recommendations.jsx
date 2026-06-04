@@ -1294,7 +1294,7 @@ const Recommendations = () => {
                       {lang === "id" ? "Ringkasan Analisis AI" : "AI Analysis Summary"}
                     </h3>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      {lang === "id" ? "Berdasarkan model prediksi Artha" : "Based on Artha's prediction model"}
+                      {lang === "id" ? "Berdasarkan model prediksi Arta" : "Based on Arta's prediction model"}
                     </p>
                   </div>
                 </div>
