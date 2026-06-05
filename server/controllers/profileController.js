@@ -124,7 +124,7 @@ const upgradeToUmkm = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { nama_lengkap, telepon, bio } = req.body;
+    const { nama_lengkap, telepon, bio, business_id } = req.body;
 
     const authSupabase = supabase.createAuthClient(req.token);
     const dbClient = supabaseAdmin || authSupabase;
@@ -139,6 +139,7 @@ const updateProfile = async (req, res) => {
     }
     if (telepon !== undefined) updateData.telepon = telepon;
     if (bio !== undefined) updateData.bio = bio;
+    if (business_id !== undefined) updateData.business_id = business_id;
 
     const { data, error } = await dbClient
       .from("profiles")
