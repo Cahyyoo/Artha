@@ -804,7 +804,6 @@ export default function Transactions({ isDashboard = false }) {
                   <th className="px-6 py-4">{t('transactions.table_desc')}</th>
                   <th className="px-6 py-4">{t('transactions.table_category')}</th>
                   <th className="px-6 py-4 text-right">{t('transactions.table_amount')}</th>
-                  <th className="px-6 py-4 text-center">{t('transactions.table_proof')}</th>
                   <th className="px-6 py-4 text-center">{t('transactions.table_status_check')}</th>
                   <th className="px-6 py-4 text-center">{t('transactions.table_action')}</th>
                 </tr>
@@ -821,7 +820,6 @@ export default function Transactions({ isDashboard = false }) {
                         {trx.type === "Pemasukan" ? "+" : "-"}{formatRupiah(trx.amount)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">{trx.invoice ? <button onClick={() => setViewingInvoice(trx)} className="text-indigo-600">Lihat</button> : "-"}</td>
                     <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => handleToggleCheck(trx.id)}
