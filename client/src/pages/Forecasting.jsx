@@ -142,29 +142,37 @@ export default function Forecasting() {
                   <AreaChart data={forecastData} margin={{ top: 20, right: 30, left: 20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPrediksi" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0}/>
                       </linearGradient>
                       <linearGradient id="colorAktual" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#94a3b8" stopOpacity={0}/>
+                        <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b', fontWeight: 600 }} dy={15} />
+                    <CartesianGrid vertical={true} horizontal={true} stroke="#e2e8f0" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} dy={15} />
                     <YAxis 
                       axisLine={false} 
                       tickLine={false} 
-                      tick={{ fontSize: 12, fill: '#64748b', fontWeight: 600 }} 
+                      tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} 
                       tickFormatter={(value) => `Rp ${value/1000}k`}
                       dx={-10}
                     />
                     <RechartsTooltip 
                       formatter={(value) => formatRp(value)}
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      contentStyle={{ 
+                        borderRadius: '12px', 
+                        border: '1px solid #e2e8f0', 
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
+                        padding: '10px 14px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                      }}
+                      itemStyle={{ fontWeight: '600', fontSize: '13px' }}
+                      labelStyle={{ color: '#0f172a', fontWeight: '700', marginBottom: '4px', fontSize: '13px' }}
                     />
-                    <Area type="monotone" dataKey="Aktual" stroke="#94a3b8" strokeWidth={4} fill="url(#colorAktual)" activeDot={{ r: 6 }} />
-                    <Area type="monotone" dataKey="Prediksi" stroke="#6366f1" strokeWidth={4} strokeDasharray="8 6" fill="url(#colorPrediksi)" activeDot={{ r: 8 }} />
+                    <Area type="linear" dataKey="Aktual" stroke="#94a3b8" strokeWidth={2} fillOpacity={1} fill="url(#colorAktual)" activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff', fill: '#94a3b8' }} />
+                    <Area type="linear" dataKey="Prediksi" stroke="#6366f1" strokeWidth={2} strokeDasharray="5 5" fillOpacity={1} fill="url(#colorPrediksi)" activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff', fill: '#6366f1' }} />
                   </AreaChart>
                 </ResponsiveContainer>
              </div>

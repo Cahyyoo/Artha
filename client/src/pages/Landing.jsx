@@ -8,6 +8,10 @@ import {
 } from "framer-motion";
 import logoImg from "../assets/logo.png";
 import logo2Img from "../assets/logo-2.png";
+import DotField from "../components/DotField";
+import FloatingLines from "../components/FloatingLines";
+import ShinyText from "../components/ShinyText";
+import { PerintisMockup, PengusahaMockup } from "../components/MockupSlides";
 import iconDigitalCashbook from "../assets/icons/digital-cashbook.png";
 import iconAiRekomendasi from "../assets/icons/ai-rekomendasi.png";
 import iconGeneratedReport from "../assets/icons/generated-report.png";
@@ -40,6 +44,8 @@ import {
   FiCheck,
   FiEye,
   FiFileText,
+  FiArrowLeft,
+  FiChevronDown,
   FiAlertTriangle,
   FiBook,
   FiMonitor,
@@ -425,7 +431,7 @@ const Landing = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute top-20 left-4 right-4 bg-[#111827]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 flex flex-col gap-6 md:hidden shadow-2xl z-40"
+              className="absolute top-20 left-4 right-4 bg-[#111827]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 flex flex-col gap-6 md:hidden shadow-2xl z-40 pointer-events-auto"
             >
               <div className="flex flex-col gap-4">
                 {navItems.map((item) => {
@@ -494,7 +500,19 @@ const Landing = () => {
               </span>
             </span>
             <br className="hidden sm:block" />
-            {t("landing.hero_title_3")}
+            <ShinyText
+              text={t("landing.hero_title_3")}
+              disabled={false}
+              speed={3}
+              className=""
+              color="#b5b5b5"
+              shineColor="#ffffff"
+              spread={100}
+              yoyo={false}
+              pauseOnHover={false}
+              direction="left"
+              delay={0}
+            />
           </h1>
 
           <p className="text-base md:text-lg text-slate-400 max-w-lg lg:max-w-md xl:max-w-lg leading-relaxed font-medium mx-auto lg:mx-0">
@@ -763,6 +781,18 @@ const Landing = () => {
         id="layanan"
         className="relative py-32 overflow-hidden bg-[#020617]"
       >
+        <div className="absolute inset-0 z-0">
+          <DotField
+            dotRadius={2}
+            dotSpacing={13}
+            bulgeStrength={67}
+            glowRadius={160}
+            sparkle={false}
+            waveAmplitude={0}
+            cursorRadius={400}
+            cursorForce={0.34}
+          />
+        </div>
         {/* Section Glow Background */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
 
@@ -1141,6 +1171,46 @@ const Landing = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* MOBILE DEVICE MOCKUP A (Visible only on mobile) */}
+                <div className="flex md:hidden w-full justify-center mt-12 mb-8">
+                  <div className="relative w-full max-w-[280px] aspect-[9/18] rounded-[2.5rem] shadow-[0_0_60px_rgba(99,102,241,0.15)] overflow-hidden border-[7px] border-[#1a2333] bg-[#0b1120] ring-1 ring-indigo-500/30">
+                    {/* Notch */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1a2333] rounded-b-2xl z-50 flex justify-center items-end pb-1.5 gap-2">
+                      <div className="w-8 h-1 rounded-full bg-black/50"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
+                    </div>
+                    {/* Glow */}
+                    <div className="absolute -top-16 -right-16 w-56 h-56 blur-[80px] rounded-full bg-indigo-500/25"></div>
+                    <div className="absolute -bottom-16 -left-16 w-56 h-56 blur-[80px] rounded-full bg-blue-500/15"></div>
+                    {/* Content */}
+                    <div className="absolute inset-0">
+                      <AnimatePresence mode="popLayout">
+                        <motion.div
+                          key={perintisSlide}
+                          initial={{ x: "100%" }}
+                          animate={{ x: 0 }}
+                          exit={{ x: "-100%" }}
+                          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                          className="absolute inset-0"
+                        >
+                          <PerintisMockup slide={perintisSlide} />
+                        </motion.div>
+                      </AnimatePresence>
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                        {[0, 1, 2].map((i) => (
+                          <button
+                            key={i}
+                            onClick={() => setPerintisSlide(i)}
+                            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                              perintisSlide === i ? "bg-white w-4" : "bg-white/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
 
               {/* TEXT BLOCK B (PENGUSAHA) */}
@@ -1182,6 +1252,46 @@ const Landing = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* MOBILE DEVICE MOCKUP B (Visible only on mobile) */}
+                <div className="flex md:hidden w-full justify-center mt-12 mb-8">
+                  <div className="relative w-full max-w-[280px] aspect-[9/18] rounded-[2.5rem] shadow-[0_0_60px_rgba(16,185,129,0.15)] overflow-hidden border-[7px] border-[#1a2333] bg-[#081218] ring-1 ring-emerald-500/30">
+                    {/* Notch */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#1a2333] rounded-b-2xl z-50 flex justify-center items-end pb-1.5 gap-2">
+                      <div className="w-8 h-1 rounded-full bg-black/50"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-900/50"></div>
+                    </div>
+                    {/* Glow */}
+                    <div className="absolute -top-16 -right-16 w-56 h-56 blur-[80px] rounded-full bg-emerald-500/25"></div>
+                    <div className="absolute -bottom-16 -left-16 w-56 h-56 blur-[80px] rounded-full bg-teal-500/15"></div>
+                    {/* Content */}
+                    <div className="absolute inset-0">
+                      <AnimatePresence mode="popLayout">
+                        <motion.div
+                          key={pengusahaSlide}
+                          initial={{ x: "100%" }}
+                          animate={{ x: 0 }}
+                          exit={{ x: "-100%" }}
+                          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                          className="absolute inset-0"
+                        >
+                          <PengusahaMockup slide={pengusahaSlide} />
+                        </motion.div>
+                      </AnimatePresence>
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                        {[0, 1, 2].map((i) => (
+                          <button
+                            key={i}
+                            onClick={() => setPengusahaSlide(i)}
+                            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                              pengusahaSlide === i ? "bg-white w-4" : "bg-white/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </div>
 
@@ -1217,11 +1327,7 @@ const Landing = () => {
                       transition={{ type: "spring", stiffness: 120, damping: 20 }}
                       className="absolute inset-0"
                     >
-                      <img
-                        src={[kuesioner1Img, hasilAnalisis1Img, hasilAnalisis2Img][perintisSlide]}
-                        alt="Slide"
-                        className="w-full h-full object-contain"
-                      />
+                      <PerintisMockup slide={perintisSlide} />
                     </motion.div>
                   </AnimatePresence>
                   {/* Dots indicator */}
@@ -1253,11 +1359,7 @@ const Landing = () => {
                       transition={{ type: "spring", stiffness: 120, damping: 20 }}
                       className="absolute inset-0"
                     >
-                      <img
-                        src={[onboarding1Img, onboarding2Img, onboarding3Img][pengusahaSlide]}
-                        alt="Slide"
-                        className="w-full h-full object-contain"
-                      />
+                      <PengusahaMockup slide={pengusahaSlide} />
                     </motion.div>
                   </AnimatePresence>
                   {/* Dots indicator */}
@@ -2102,7 +2204,16 @@ const Landing = () => {
       </AnimatePresence>
 
       {/* Premium Big Text Footer Section */}
-      <footer className="relative bg-[#020617] pt-32 pb-8 overflow-hidden border-t border-white/5">
+      <footer className="relative bg-[#020617] text-white pt-24 pb-12 overflow-hidden z-0">
+        <div className="absolute inset-0 z-[-1] pointer-events-none opacity-40">
+          <FloatingLines
+            enabledWaves={['top', 'middle', 'bottom']}
+            lineCount={[10, 15, 20]}
+            lineDistance={[8, 6, 4]}
+            bendRadius={1}
+            color="#8b5cf6"
+          />
+        </div>
         {/* Subtle background glow for footer */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[400px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 

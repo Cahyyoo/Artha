@@ -394,6 +394,7 @@ const Settings = () => {
                   </div>
                 </div>
 
+                <phantom-ui loading={isLoadingUsers ? "true" : undefined}>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -406,11 +407,35 @@ const Settings = () => {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {isLoadingUsers ? (
-                        <tr>
-                          <td colSpan="4" className="px-6 py-8 text-center text-slate-500">
-                            <IconLoader2 className="animate-spin inline-block mr-2" /> Memuat data...
-                          </td>
-                        </tr>
+                        Array.from({ length: 3 }).map((_, idx) => (
+                          <tr key={`skeleton-${idx}`} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-slate-200"></div>
+                                <div>
+                                  <p className="font-bold text-slate-800 text-sm">Nama User</p>
+                                  <p className="text-xs text-slate-500">user@email.com</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="px-3 py-1 text-xs font-black rounded-lg uppercase tracking-wider inline-flex items-center justify-center bg-slate-100 text-slate-400">
+                                ROLE
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500"></div> Aktif
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button className="p-2 rounded-lg bg-slate-100" disabled>Edit</button>
+                                <button className="p-2 rounded-lg bg-slate-100" disabled>Del</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
                       ) : filteredUsers.length === 0 ? (
                         <tr>
                           <td colSpan="4" className="px-6 py-12 text-center text-slate-500">
@@ -489,6 +514,7 @@ const Settings = () => {
                     </tbody>
                   </table>
                 </div>
+                </phantom-ui>
               </div>
             </div>
           )}

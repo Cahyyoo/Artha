@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
 import transactionService from "../services/transactionService";
 import { computeDailyCashflow, normalizeTransactions, filterTransactionsByRange } from "../utils/cashflowHelper";
+import AIConsultantChat from "../components/AIConsultantChat";
 import {
   FiTrendingUp,
   FiTrendingDown,
@@ -39,6 +40,7 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 
 // Data fetch dari API Backend Arta
@@ -254,13 +256,7 @@ const Dashboard = () => {
     document.body.removeChild(link);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-slate-500 font-medium">
-        Memuat...
-      </div>
-    );
-  }
+
 
   const currentUserRole = profile?.role || user?.user_metadata?.role || "USER";
   const isEmployee = ["ADMIN", "STAFF", "USER"].includes(String(currentUserRole).toUpperCase());
@@ -438,7 +434,7 @@ const Dashboard = () => {
   return (
     <>
       {showProfilePrompt && <ProfilePromptModal />}
-
+      <phantom-ui loading={loading ? "true" : undefined}>
       <div className="max-w-[1400px] mx-auto space-y-4 sm:space-y-6 pb-8 sm:pb-12 animate-fade-in font-sans">
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8 z-20 relative">
@@ -684,36 +680,39 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="h-72 w-full">
-              {cashFlowChartData.length === 0 ? (
+              {loading ? (
+                <div className="h-full w-full bg-slate-100 rounded-xl"></div>
+              ) : cashFlowChartData.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400">
                   <FiActivity size={32} className="mb-2 text-slate-300" />
                   <span className="text-sm font-medium">Belum ada data tren arus kas.</span>
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={288}>
-                  <AreaChart data={cashFlowChartData} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+                  <AreaChart data={cashFlowChartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPemasukan" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                       </linearGradient>
                       <linearGradient id="colorPengeluaran" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
+                    <CartesianGrid vertical={true} horizontal={true} stroke="#e2e8f0" />
                     <XAxis
                       dataKey="date"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
+                      tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }}
                       dy={10}
                       interval={["bulan_ini", "bulan_lalu", "7_hari"].includes(filterWaktu) ? 4 : 0}
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
+                      tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }}
                       tickFormatter={(v) => {
                         if (v >= 1000000) return `${(v / 1000000).toFixed(1)}jt`;
                         if (v >= 1000) return `${(v / 1000).toFixed(0)}k`;
@@ -721,35 +720,67 @@ const Dashboard = () => {
                       }}
                       width={50}
                     />
-                    <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="4 4" />
                     <RechartsTooltip
                       formatter={(value, name) => [formatRupiah(value), name]}
                       contentStyle={{
-                        borderRadius: '16px',
-                        border: 'none',
-                        boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.06)',
-                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
+                        padding: '10px 14px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)'
                       }}
                       itemStyle={{ fontWeight: '600', fontSize: '13px' }}
-                      labelStyle={{ color: '#1e293b', fontWeight: '700', marginBottom: '6px', fontSize: '13px' }}
+                      labelStyle={{ color: '#0f172a', fontWeight: '700', marginBottom: '4px', fontSize: '13px' }}
                     />
+                    {cashFlowChartData.length > 0 && (
+                      <ReferenceLine 
+                        y={cashFlowChartData.reduce((acc, curr) => acc + curr.Pemasukan, 0) / cashFlowChartData.length} 
+                        stroke="#10b981" 
+                        strokeDasharray="4 4" 
+                        label={({ viewBox }) => (
+                          <g>
+                            <rect 
+                              x={viewBox.x + 2} 
+                              y={viewBox.y - 12} 
+                              width={110} 
+                              height={24} 
+                              fill="#fff" 
+                              stroke="#10b981" 
+                              strokeWidth={1}
+                              rx={6} 
+                              ry={6} 
+                            />
+                            <text 
+                              x={viewBox.x + 57} 
+                              y={viewBox.y + 4} 
+                              fill="#10b981" 
+                              fontSize={10} 
+                              fontWeight={600} 
+                              textAnchor="middle"
+                            >
+                              Avg. Pemasukan
+                            </text>
+                          </g>
+                        )} 
+                      />
+                    )}
                     <Area
-                      type="monotone"
+                      type="linear"
                       dataKey="Pemasukan"
                       stroke="#10b981"
-                      strokeWidth={2.5}
+                      strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorPemasukan)"
-                      activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: '#10b981' }}
+                      activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff', fill: '#10b981' }}
                     />
                     <Area
-                      type="monotone"
+                      type="linear"
                       dataKey="Pengeluaran"
                       stroke="#f43f5e"
-                      strokeWidth={2.5}
+                      strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorPengeluaran)"
-                      activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: '#f43f5e' }}
+                      activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff', fill: '#f43f5e' }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -831,8 +862,27 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {!filteredTransactions ||
-                filteredTransactions.length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 3 }).map((_, idx) => (
+                    <tr key={`skeleton-${idx}`}>
+                      <td className="py-4 px-4 border-b border-slate-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-100"></div>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">Loading...</p>
+                            <p className="text-xs text-slate-400">TRX000</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 border-b border-slate-50">
+                        <span className="text-xs font-medium bg-slate-100 text-slate-400 px-2.5 py-1 rounded-full">Kategori</span>
+                      </td>
+                      <td className="py-4 px-4 border-b border-slate-50 text-sm text-slate-500">01 Jan 2024</td>
+                      <td className="py-4 px-4 border-b border-slate-50 text-right text-sm">Rp 0</td>
+                      <td className="py-4 px-4 border-b border-slate-50 text-center text-sm">Status</td>
+                    </tr>
+                  ))
+                ) : !filteredTransactions || filteredTransactions.length === 0 ? (
                   <tr>
                     <td
                       colSpan="5"
@@ -1031,6 +1081,15 @@ const Dashboard = () => {
           }
         `}</style>
       </div>
+      </phantom-ui>
+
+      {/* AI Consultant Chatbot */}
+      {dashboardData && (
+        <AIConsultantChat
+          dashboardData={dashboardData}
+          businessName={profile?.nama_usaha || profile?.business_name || "Bisnis Saya"}
+        />
+      )}
     </>
   );
 };

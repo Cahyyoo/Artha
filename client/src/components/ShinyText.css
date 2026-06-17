@@ -1,0 +1,26 @@
+.shiny-text {
+  display: inline-block;
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.animate-shine {
+  animation-name: shine;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.pause-on-hover:hover {
+  animation-play-state: paused;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 150% center;
+  }
+  100% {
+    background-position: -50% center;
+  }
+}

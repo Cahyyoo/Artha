@@ -573,15 +573,8 @@ export default function Transactions({ isDashboard = false }) {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-20">
-          <div className="flex flex-col items-center gap-4">
-            <FiLoader size={32} className="text-blue-500 animate-spin" />
-            <p className="text-slate-500 font-medium">Memuat data transaksi...</p>
-          </div>
-        </div>
-      )}
+      {/* Main Content Wrapper for Skeleton Loader */}
+      <phantom-ui loading={isLoading ? "true" : undefined}>
 
       {/* Error Banner */}
       {apiError && !isLoading && (
@@ -631,7 +624,7 @@ export default function Transactions({ isDashboard = false }) {
       )}
 
       {/* 1. Header & Panel Metrik */}
-      {!isLoading && !isDashboard && (
+      {!isDashboard && (
         <div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <h1 className="text-2xl md:text-3xl font-black text-slate-800">{t('transactions.title')}</h1>
@@ -712,7 +705,7 @@ export default function Transactions({ isDashboard = false }) {
       )}
 
       {/* 2. Toolbar */}
-      {!isLoading && (
+      <div>
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex flex-1 flex-col lg:flex-row gap-3 w-full">
             <div className="relative w-full lg:w-56">
@@ -790,10 +783,10 @@ export default function Transactions({ isDashboard = false }) {
             )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* 3. Data Table */}
-      {!isLoading && (
+      <div>
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -809,40 +802,69 @@ export default function Transactions({ isDashboard = false }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {paginatedTransactions.map((trx) => (
-                  <tr key={trx.id} className="hover:bg-blue-50/40 transition-colors group">
-                    <td className="px-6 py-4"><input type="checkbox" checked={selectedIds.includes(trx.id)} onChange={() => handleSelectOne(trx.id)} /></td>
-                    <td className="px-6 py-4 text-sm font-medium text-slate-600">{formatDate(trx.date)}</td>
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">{trx.description}</td>
-                    <td className="px-6 py-4"><span className={`px-2.5 py-1 text-xs font-bold rounded-md border ${categoryColors[trx.category] || categoryColors["Lainnya"]}`}>{trx.category}</span></td>
-                    <td className="px-6 py-4 text-right">
-                      <span className={`text-[15px] font-black ${trx.type === "Pemasukan" ? "text-emerald-600" : "text-rose-600"}`}>
-                        {trx.type === "Pemasukan" ? "+" : "-"}{formatRupiah(trx.amount)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => handleToggleCheck(trx.id)}
-                        disabled={!canToggleCheck}
-                        className={`px-3 py-1.5 rounded-lg transition-all ${trx.is_checked ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400"} ${!canToggleCheck ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:brightness-95"}`}
-                      >
-                        {trx.is_checked ? t('transactions.status_checked') : t('transactions.status_unchecked')}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-2">
-                         {canEditDelete ? (
-                          <>
-                             <button onClick={() => handleEditClick(trx)} title="Edit" className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex items-center justify-center"><FiEdit2 size={15} /></button>
-                            <button onClick={() => handleDeleteTransaction(trx.id)} title="Hapus" className="w-9 h-9 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center"><FiTrash2 size={15} /></button>
-                          </>
-                        ) : (
-                          <span className="text-xs text-slate-400 font-medium italic">Read-only</span>
-                        )}
-                      </div>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <tr key={`skeleton-${idx}`} className="hover:bg-blue-50/40 transition-colors group">
+                      <td className="px-6 py-4"><input type="checkbox" disabled /></td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-600">01 Jan 2024</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-800">Loading Transaction Data...</td>
+                      <td className="px-6 py-4"><span className="px-2.5 py-1 text-xs font-bold rounded-md border text-transparent bg-slate-100">Kategori</span></td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-[15px] font-black text-slate-400">Rp 0</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button className="px-3 py-1.5 rounded-lg bg-slate-50 text-transparent" disabled>Status</button>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
+                          <button className="w-9 h-9 rounded-full bg-slate-50" disabled></button>
+                          <button className="w-9 h-9 rounded-full bg-slate-50" disabled></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : paginatedTransactions.length > 0 ? (
+                  paginatedTransactions.map((trx) => (
+                    <tr key={trx.id} className="hover:bg-blue-50/40 transition-colors group">
+                      <td className="px-6 py-4"><input type="checkbox" checked={selectedIds.includes(trx.id)} onChange={() => handleSelectOne(trx.id)} /></td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-600">{formatDate(trx.date)}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-800">{trx.description}</td>
+                      <td className="px-6 py-4"><span className={`px-2.5 py-1 text-xs font-bold rounded-md border ${categoryColors[trx.category] || categoryColors["Lainnya"]}`}>{trx.category}</span></td>
+                      <td className="px-6 py-4 text-right">
+                        <span className={`text-[15px] font-black ${trx.type === "Pemasukan" ? "text-emerald-600" : "text-rose-600"}`}>
+                          {trx.type === "Pemasukan" ? "+" : "-"}{formatRupiah(trx.amount)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => handleToggleCheck(trx.id)}
+                          disabled={!canToggleCheck}
+                          className={`px-3 py-1.5 rounded-lg transition-all ${trx.is_checked ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400"} ${!canToggleCheck ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:brightness-95"}`}
+                        >
+                          {trx.is_checked ? t('transactions.status_checked') : t('transactions.status_unchecked')}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
+                           {canEditDelete ? (
+                            <>
+                               <button onClick={() => handleEditClick(trx)} title="Edit" className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex items-center justify-center"><FiEdit2 size={15} /></button>
+                              <button onClick={() => handleDeleteTransaction(trx.id)} title="Hapus" className="w-9 h-9 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center"><FiTrash2 size={15} /></button>
+                            </>
+                          ) : (
+                            <span className="text-xs text-slate-400 font-medium italic">Read-only</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-10 text-center text-slate-500 font-medium">
+                      Tidak ada transaksi ditemukan.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -874,8 +896,8 @@ export default function Transactions({ isDashboard = false }) {
             </div>
           </div>
         </div>
-      )}
-
+      </div>
+      </phantom-ui>
       {/* 4. Form Input Modal (Full Screen Premium) */}
       <AnimatePresence>
         {isModalOpen && (

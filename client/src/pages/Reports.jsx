@@ -345,6 +345,7 @@ export default function Reports() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12">
+      <phantom-ui loading={isLoading ? "true" : undefined}>
     
       {/* Error Banner */}
       {apiError && !isLoading && (
@@ -516,29 +517,34 @@ export default function Reports() {
           </div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height={288}>
-              <AreaChart data={mergedChartData} margin={{ top: 10, right: 10, left: -5, bottom: 0 }}>
+              <AreaChart data={mergedChartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorPemasukan" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="colorPengeluaran" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
+                  </linearGradient>
+                  <linearGradient id="colorPrediksi" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
+                <CartesianGrid vertical={true} horizontal={true} stroke="#e2e8f0" />
                 <XAxis
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
+                  tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }}
                   dy={10}
                   interval={["bulan_ini", "bulan_lalu", "7_hari"].includes(dateRange) ? 4 : 0}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
+                  tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }}
                   tickFormatter={(v) => {
                     if (v >= 1000000) return `${(v / 1000000).toFixed(1)}jt`;
                     if (v >= 1000) return `${(v / 1000).toFixed(0)}k`;
@@ -546,45 +552,45 @@ export default function Reports() {
                   }}
                   width={50}
                 />
-                <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="4 4" />
                 <RechartsTooltip
                   formatter={(value, name) => [formatRupiah(value), name]}
                   contentStyle={{
-                    borderRadius: '16px',
-                    border: 'none',
-                    boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.06)',
-                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)'
                   }}
                   itemStyle={{ fontWeight: '600', fontSize: '13px' }}
-                  labelStyle={{ color: '#1e293b', fontWeight: '700', marginBottom: '6px', fontSize: '13px' }}
+                  labelStyle={{ color: '#0f172a', fontWeight: '700', marginBottom: '4px', fontSize: '13px' }}
                 />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="Pemasukan"
                   stroke="#10b981"
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorPemasukan)"
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: '#10b981' }}
+                  activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff', fill: '#10b981' }}
                 />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="Pengeluaran"
                   stroke="#f43f5e"
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorPengeluaran)"
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: '#f43f5e' }}
+                  activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff', fill: '#f43f5e' }}
                 />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="Prediksi"
                   stroke="#6366f1"
                   strokeWidth={2}
-                  strokeDasharray="6 4"
-                  fill="none"
-                  dot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
+                  strokeDasharray="5 5"
+                  fillOpacity={1}
+                  fill="url(#colorPrediksi)"
+                  activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff', fill: '#6366f1' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -644,6 +650,7 @@ export default function Reports() {
 
       </div>
 
+      </phantom-ui>
     </div>
   );
 }
